@@ -3512,7 +3512,21 @@ body {
   }
 
   .brand-tagline-container {
-    display: none !important; /* Conceal desktop tagline to avoid header cramping */
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .brand-tagline {
+    display: none !important; /* Conceal text tagline on mobile */
+  }
+
+  .brand-cert-badge {
+    display: inline-flex !important;
+    padding: 3px 8px !important;
+    font-size: 10px !important;
+    border-radius: 12px !important;
   }
 
   /* City Switcher Flutter Pill */
@@ -3583,7 +3597,7 @@ body {
   .dashboard-body {
     flex: 1;
     position: relative;
-    height: calc(100dvh - 54px - 58px - 26px);
+    height: calc(100dvh - 54px - 58px);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -3931,7 +3945,7 @@ body {
   .mobile-bottom-nav {
     display: flex !important;
     position: fixed;
-    bottom: 26px; /* Right above the thin flat security bar */
+    bottom: 0; /* Strictly fixed at bottom */
     left: 0;
     right: 0;
     height: 58px;
@@ -3942,6 +3956,7 @@ body {
     z-index: 1000;
     align-items: center;
     justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .mobile-nav-btn {
@@ -3996,57 +4011,6 @@ body {
     font-weight: 700;
   }
 
-  /* --- Sleek Flat Security Verification Line at Very Bottom --- */
-  .mobile-security-bar {
-    display: flex !important;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 26px;
-    background: rgba(10, 8, 6, 0.98);
-    border-top: 1px solid rgba(16, 185, 129, 0.3);
-    z-index: 1000;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    cursor: pointer;
-    user-select: none;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  .mobile-sec-left {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-
-  .mobile-sec-dot {
-    font-size: 10px;
-    flex-shrink: 0;
-  }
-
-  .mobile-sec-text {
-    font-size: 10px;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .mobile-sec-text strong {
-    color: #34d399;
-  }
-
-  .mobile-sec-badge {
-    font-size: 9.5px;
-    color: #ffc72c;
-    font-weight: 700;
-    letter-spacing: 0.2px;
-    flex-shrink: 0;
-  }
-
   /* --- First-Person Street & Pandal POV Modal on Mobile (Navigable Vertical Stacks) --- */
   .modal-window {
     width: 100% !important;
@@ -4057,6 +4021,40 @@ body {
     position: absolute !important;
     bottom: 0 !important;
     top: auto !important;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    touch-action: pan-y !important;
+  }
+
+  .sheet-drag-pill {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.28);
+    border-radius: 2px;
+    margin: 8px auto 4px;
+    display: block;
+    cursor: grab;
+    flex-shrink: 0;
+  }
+
+  .cred-back-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: var(--text-cream) !important;
+    border-radius: 20px !important;
+    padding: 5px 12px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+
+  .cred-back-btn:active {
+    background: rgba(255, 107, 0, 0.25) !important;
+    border-color: #ff6b00 !important;
   }
 
   .pov-modal-window {
@@ -4205,5 +4203,74 @@ body {
   }
 }
 
+/* ==========================================================================
+   STRICT DESKTOP LAYOUT ENFORCEMENT (@media min-width: 769px)
+   Prevents any mobile sheet, carousel, or toggled display from breaking desktop
+   ========================================================================== */
+@media (min-width: 769px) {
+  body {
+    overflow: hidden !important;
+    height: 100vh !important;
+  }
 
+  .app-container {
+    height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
 
+  .dashboard-body {
+    display: flex !important;
+    flex-direction: row !important;
+    flex: 1 !important;
+    height: calc(100vh - 58px - 32px) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .map-panel {
+    display: block !important;
+    flex: 0 0 65% !important;
+    width: 65% !important;
+    height: 100% !important;
+    position: relative !important;
+    border-right: 1px solid var(--border-color) !important;
+  }
+
+  .ranking-panel {
+    display: flex !important;
+    flex: 0 0 35% !important;
+    width: 35% !important;
+    height: 100% !important;
+    position: relative !important;
+    background-color: var(--bg-secondary) !important;
+    border-left: none !important;
+    z-index: 1 !important;
+    flex-direction: column !important;
+  }
+
+  .mobile-map-carousel-wrap,
+  .mobile-bottom-nav,
+  .mobile-security-bar,
+  .mobile-action-pill-row,
+  .chip-map-jump,
+  .sheet-drag-handle-bar {
+    display: none !important;
+  }
+
+  .map-city-stats {
+    display: flex !important;
+  }
+
+  .map-legend {
+    display: block !important;
+  }
+
+  .modal-window {
+    max-width: 940px !important;
+    max-height: 90vh !important;
+    position: relative !important;
+    bottom: auto !important;
+    border-radius: var(--radius-lg) !important;
+  }
+}

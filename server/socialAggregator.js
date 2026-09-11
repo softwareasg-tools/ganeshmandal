@@ -230,6 +230,25 @@ const LIVE_AARTI_POOLS = {
   ]
 };
 
+const DEVOTEE_CONTRIBUTORS = {
+  pune: [
+    { name: 'Aditya Joshi', handle: 'aditya_pune_clicks', city: 'Pune' },
+    { name: 'Prathamesh Shinde', handle: 'prathamesh_utsav', city: 'Pune' },
+    { name: 'Snehal Kulkarni', handle: 'snehal_puneri_bappa', city: 'Pune' },
+    { name: 'Tanvi Deshpande', handle: 'tanvi_heritage_pune', city: 'Pune' },
+    { name: 'Rohan Patwardhan', handle: 'rohan_dhol_tasha', city: 'Pune' },
+    { name: 'Gaurav Kadam', handle: 'gaurav_pune_darshan', city: 'Pune' }
+  ],
+  mumbai: [
+    { name: 'Siddhesh Parab', handle: 'siddhesh_mumbai_bappa', city: 'Mumbai' },
+    { name: 'Akshata Sawant', handle: 'akshata_girgaon_utsav', city: 'Mumbai' },
+    { name: 'Swapnil Rane', handle: 'swapnil_lalbaug_darshan', city: 'Mumbai' },
+    { name: 'Pooja Mhaske', handle: 'pooja_mumbai_festivals', city: 'Mumbai' },
+    { name: 'Chetan Salvi', handle: 'chetan_mumbaicha_utsav', city: 'Mumbai' },
+    { name: 'Neha Chogle', handle: 'neha_coastal_morya', city: 'Mumbai' }
+  ]
+};
+
 function getMandalHash(id) {
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
@@ -285,6 +304,10 @@ export class SocialAggregator {
     const handleBase = words.slice(0, 2).join('_').toLowerCase() || 'bappa';
     const locality = (mandal.address || '').split(',')[0].trim();
 
+    const contributors = DEVOTEE_CONTRIBUTORS[cityKey] || DEVOTEE_CONTRIBUTORS.pune;
+    const contributor1 = contributors[hash % contributors.length];
+    const contributor2 = contributors[(hash + 2) % contributors.length];
+
     const now = Date.now();
     const officialInfo = OFFICIAL_CHANNELS[mandal.id] || null;
     const hasLiveStream = Boolean(officialInfo && officialInfo.official_stream_embed);
@@ -314,7 +337,9 @@ export class SocialAggregator {
         id: `post_${mandal.id}_1`,
         platform: 'instagram',
         author_handle: `@${handleBase}_official`,
-        author_name: `${mandal.name} Trust (Official)`,
+        author_name: `${mandal.name} Trust`,
+        contributor_name: `${contributor1.name} (${contributor1.city})`,
+        contributor_handle: `@${contributor1.handle}`,
         verified: true,
         time_ago: '4 mins ago',
         timestamp: now - 4 * 60 * 1000,
@@ -323,8 +348,8 @@ export class SocialAggregator {
         platform_action: 'View Reel on Instagram',
         source_label: `Verified Sacred Murti — ${mandal.name}`,
         caption: verifiedAarti
-          ? `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Official Aarti Timings: 🪔 ${verifiedAarti}. Mangalmurti Morya! 🙏👑✨`
-          : `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Daily Sarvajanik Darshan Window: 06:00 AM – 11:30 PM continuous. Mangalmurti Morya! 🙏👑✨`,
+          ? `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Official Aarti Timings: 🪔 ${verifiedAarti}. Mangalmurti Morya! 🙏👑✨ (Captured by devotee ${contributor1.name})`
+          : `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Daily Sarvajanik Darshan Window: 06:00 AM – 11:30 PM continuous. Mangalmurti Morya! 🙏👑✨ (Captured by devotee ${contributor1.name})`,
         likes_count: '28.5k',
         comments_count: '640',
         tags: [`#${words[0] || 'Bappa'}`, '#SacredDarshan', '#Mangalmurti'],
@@ -337,7 +362,9 @@ export class SocialAggregator {
         id: `post_${mandal.id}_2`,
         platform: 'facebook',
         author_handle: `@seva_${handleBase}`,
-        author_name: `${mandal.organizer || mandal.name} (Public Seva)`,
+        author_name: `${mandal.organizer || mandal.name}`,
+        contributor_name: `${contributor2.name} (${contributor2.city})`,
+        contributor_handle: `@${contributor2.handle}`,
         verified: true,
         time_ago: '22 mins ago',
         timestamp: now - 22 * 60 * 1000,
@@ -345,7 +372,7 @@ export class SocialAggregator {
         post_url: `https://www.facebook.com/search/posts?q=${encodeURIComponent(mandal.name)}`,
         platform_action: 'Explore Pandal on Facebook',
         source_label: dekhavaLabel,
-        caption: `Spectacular pandal craftsmanship & lighting at ${mandal.name}, ${locality}: Approach road queue moving systematically along ${approachRoad}. Dedicated volunteer prasad counters active. Senior citizen and family assistance available. Ganpati Bappa Morya! 🥥🚩🙏`,
+        caption: `Spectacular pandal craftsmanship & lighting at ${mandal.name}, ${locality}: Approach road queue moving systematically along ${approachRoad}. Dedicated volunteer prasad counters active. Senior citizen and family assistance available. Ganpati Bappa Morya! 🥥🚩🙏 (Shared by ${contributor2.name})`,
         likes_count: '16.8k',
         comments_count: '342',
         tags: [`#${words[0] || 'Bappa'}Pandal`, '#MandalDecor', '#DarshanQueue'],
@@ -359,6 +386,8 @@ export class SocialAggregator {
         platform: 'youtube',
         author_handle: `@${handleBase}_live`,
         author_name: `${mandal.name} ${hasLiveStream ? 'Live Webcast' : 'Darshan & Seva'}`,
+        contributor_name: 'Official Temple Trust Stream',
+        contributor_handle: `@${handleBase}_broadcast`,
         verified: true,
         time_ago: '38 mins ago',
         timestamp: now - 38 * 60 * 1000,

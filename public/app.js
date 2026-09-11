@@ -623,7 +623,6 @@ class FestivalApp {
 
   bindMobileNavigation() {
     const navButtons = document.querySelectorAll('.mobile-nav-btn');
-    const secBar = document.getElementById('mobile-security-bar');
     const chipJumpMap = document.getElementById('chip-jump-to-map');
     const pillSuggest = document.getElementById('m-pill-suggest');
     const pillAdvertise = document.getElementById('m-pill-advertise');
@@ -638,13 +637,6 @@ class FestivalApp {
     if (chipJumpMap) {
       chipJumpMap.addEventListener('click', () => {
         this.switchToMobileTab('map');
-      });
-    }
-
-    if (secBar) {
-      secBar.addEventListener('click', () => {
-        const certModal = document.getElementById('modal-cert-details');
-        if (certModal) certModal.classList.add('open');
       });
     }
 
@@ -710,6 +702,38 @@ class FestivalApp {
         adminModal.classList.add('open');
       }
     }
+
+    // CRED-Style Browser / Phone Hardware Back Button Support (History API)
+    window.addEventListener('popstate', (event) => {
+      window._isPopStateHandling = true;
+
+      // Close open modals layer by layer
+      const povModal = document.getElementById('pov-street-modal');
+      const mandalModal = document.getElementById('mandal-modal');
+      const recModal = document.getElementById('recommendations-modal');
+      const guideModal = document.getElementById('modal-devotee-guide');
+      const certModal = document.getElementById('modal-cert-details');
+      const adminModal = document.getElementById('admin-modal');
+
+      if (povModal && povModal.classList.contains('open')) {
+        this.closePOVModal();
+      } else if (mandalModal && mandalModal.classList.contains('open')) {
+        mandalModal.classList.remove('open');
+      } else if (recModal && recModal.classList.contains('open')) {
+        recModal.classList.remove('open');
+      } else if (guideModal && guideModal.classList.contains('open')) {
+        guideModal.classList.remove('open');
+      } else if (certModal && certModal.classList.contains('open')) {
+        certModal.classList.remove('open');
+      } else if (adminModal && adminModal.classList.contains('open')) {
+        adminModal.classList.remove('open');
+      } else if (document.body.classList.contains('mobile-view-map')) {
+        // If on map view on mobile, back takes user back to mandals list
+        this.switchToMobileTab('rankings');
+      }
+
+      window._isPopStateHandling = false;
+    });
   }
 
   // -------------------------------------------------------------
@@ -765,7 +789,16 @@ class FestivalApp {
     // 5. Fetch and populate strictly the last 5 social media snaps
     this.loadSocialMediaAndStreams(mandal.id);
 
-    document.getElementById('pov-street-modal').classList.add('open');
+    const povModalEl = document.getElementById('pov-street-modal');
+    if (povModalEl) {
+      povModalEl.classList.add('open');
+      const winEl = povModalEl.querySelector('.modal-window');
+      if (winEl) winEl.style.transform = 'translateY(0)';
+    }
+
+    if (!window._isPopStateHandling) {
+      history.pushState({ modal: 'pov', mandalId: mandal.id }, '', `#mandal_${mandal.id}`);
+    }
   }
 
   setupMurtiDarshanPane(mandal) {
@@ -1110,15 +1143,86 @@ class FestivalApp {
       });
     });
 
-    // Close POV Modal
+    // Close POV Modal & Back Navigation
     const btnClosePov = document.getElementById('btn-close-pov-modal');
+    const btnBackPov = document.getElementById('btn-back-pov-modal');
+
     if (btnClosePov) {
       btnClosePov.addEventListener('click', () => {
-        const trafficIframe = document.getElementById('traffic-road-iframe');
-        if (trafficIframe) trafficIframe.src = '';
-        document.getElementById('pov-street-modal').classList.remove('open');
-        this.stopPOVAudio();
+        this.closePOVModal();
       });
+    }
+
+    if (btnBackPov) {
+      btnBackPov.addEventListener('click', () => {
+        this.closePOVModal();
+      });
+    }
+
+    // Touch swipe-down to dismiss modal (CRED gesture)
+    const povWin = document.querySelector('#pov-street-modal .modal-window');
+    const dragHandle = document.getElementById('pov-drag-handle');
+    if (povWin) {
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+
+      const onTouchStart = (e) => {
+        // Only allow drag if scrolled to top or touch is on header/handle
+        const target = e.target;
+        const isHeaderOrHandle = target.closest('.modal-header') || target.closest('#pov-drag-handle');
+        const isScrolledTop = povWin.scrollTop <= 0;
+
+        if (isHeaderOrHandle || isScrolledTop) {
+          startY = e.touches[0].clientY;
+          isDragging = true;
+          povWin.style.transition = 'none';
+        }
+      };
+
+      const onTouchMove = (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+        if (deltaY > 0) {
+          povWin.style.transform = `translateY(${deltaY}px)`;
+        }
+      };
+
+      const onTouchEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        povWin.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)';
+        const deltaY = currentY - startY;
+        if (deltaY > 120) {
+          povWin.style.transform = 'translateY(100%)';
+          setTimeout(() => this.closePOVModal(), 220);
+        } else {
+          povWin.style.transform = 'translateY(0)';
+        }
+        startY = 0;
+        currentY = 0;
+      };
+
+      povWin.addEventListener('touchstart', onTouchStart, { passive: true });
+      povWin.addEventListener('touchmove', onTouchMove, { passive: true });
+      povWin.addEventListener('touchend', onTouchEnd, { passive: true });
+    }
+  }
+
+  closePOVModal() {
+    const trafficIframe = document.getElementById('traffic-road-iframe');
+    if (trafficIframe) trafficIframe.src = '';
+    const modal = document.getElementById('pov-street-modal');
+    if (modal) {
+      modal.classList.remove('open');
+      const win = modal.querySelector('.modal-window');
+      if (win) win.style.transform = '';
+    }
+    this.stopPOVAudio();
+
+    if (window.location.hash.startsWith('#mandal_') && !window._isPopStateHandling) {
+      history.back();
     }
   }
 
@@ -1174,8 +1278,17 @@ class FestivalApp {
             </div>
             <div class="social-card-body">
               <div class="social-card-author">
-                <span style="color:var(--text-cream); font-weight:700;">${post.author_name}</span>
-                <span class="platform-tag platform-${post.platform}">${post.platform.toUpperCase()}</span>
+                <div style="display:flex; flex-direction:column; gap:2px; min-width:0;">
+                  <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="color:var(--text-cream); font-weight:700;">${post.author_name}</span>
+                    <span class="platform-tag platform-${post.platform}">${post.platform.toUpperCase()}</span>
+                  </div>
+                  ${post.contributor_name ? `
+                    <div style="font-size:11px; color:#ffc72c; display:flex; align-items:center; gap:4px;">
+                      <span>📸 Contributed by: <strong>${post.contributor_name}</strong></span>
+                    </div>
+                  ` : ''}
+                </div>
               </div>
               <div class="social-card-caption">${post.caption}</div>
               <div class="social-card-meta">

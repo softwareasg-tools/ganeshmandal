@@ -331,15 +331,6 @@
         <span class="mobile-nav-label">Guide</span>
       </button>
     </nav>
-
-    <!-- Sleek Flat Security Verification Line (Tappable for Audit Certificate) -->
-    <div class="mobile-security-bar" id="mobile-security-bar" role="button" aria-label="Security Certificate and Bandobast Telemetry" tabindex="0">
-      <div class="mobile-sec-left">
-        <span class="mobile-sec-dot">🟢</span>
-        <span class="mobile-sec-text"><strong>Security Certified 98/100</strong> • CCTV & Police Telemetry Active</span>
-      </div>
-      <span class="mobile-sec-badge">Audit ↗</span>
-    </div>
   </div>
 
   <!-- Mandal Detail & Authentic Darshan Intelligence Modal -->
@@ -472,7 +463,11 @@
   <!-- First-Person Street & Pandal POV Modal ("Stand in Front of Mandal") -->
   <div class="modal-backdrop" id="pov-street-modal">
     <div class="modal-window pov-modal-window">
+      <div class="sheet-drag-pill" id="pov-drag-handle" title="Swipe down to dismiss"></div>
       <div class="modal-header" style="border-color:var(--accent-saffron);">
+        <button class="cred-back-btn" id="btn-back-pov-modal" type="button" aria-label="Go Back">
+          <span>‹ Back</span>
+        </button>
         <div class="modal-title-wrap">
           <span class="diya-flame" style="font-size:18px;">🪔</span>
           <h2 class="modal-title" style="color:var(--accent-saffron);" id="pov-mandal-name">Shreemant Dagdusheth Halwai — Standing in Front of Bappa</h2>
@@ -556,6 +551,12 @@
                   </div>
                   <div class="rush-roads-mini-list" id="rush-roads-mini-list">
                     <!-- Dynamic Top 3 Roads list -->
+                  </div>
+                  <div style="margin-top:10px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:11px; color:var(--text-muted);">Approach inferences drawn from live traffic speed</span>
+                    <a id="btn-rush-maps-nav" href="#" target="_blank" rel="noopener noreferrer" style="display:inline-flex; align-items:center; gap:5px; background:linear-gradient(135deg,#2563eb,#1d4ed8); color:#fff; padding:5px 10px; border-radius:6px; font-size:11px; font-weight:700; text-decoration:none; box-shadow:0 2px 8px rgba(37,99,235,0.4);">
+                      <span>🚗 Live Google Maps ↗</span>
+                    </a>
                   </div>
                 </div>
 

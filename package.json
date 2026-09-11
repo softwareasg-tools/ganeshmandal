@@ -15,7 +15,7 @@
     "url": "https://github.com/bilawalsidhu/gods-eye-view/issues"
   },
   "engines": {
-    "node": ">=24.14.0 <25 || >=26 <27"
+    "node": ">=18.0.0"
   },
   "keywords": [
     "cesium",
@@ -32,6 +32,8 @@
     "visualization"
   ],
   "scripts": {
+    "start": "node server/index.js",
+    "festival": "node server/index.js",
     "doctor": "node scripts/setup-doctor.mjs",
     "dev": "vite",
     "dev:secure": "./scripts/dev-secure.sh",
@@ -39,13 +41,16 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node scripts/run-unit-tests.mjs",
+    "test:festival": "node --test tests/*.test.mjs",
     "test:track": "node scripts/track-regression.mjs",
     "qa:map-source-tray": "node scripts/qa-map-source-tray.mjs"
   },
   "dependencies": {
     "@mapbox/vector-tile": "^3.0.0",
     "cesium": "^1.124.0",
+    "cors": "^2.8.6",
     "egm96-universal": "^1.1.1",
+    "express": "^5.2.1",
     "mgrs": "^2.1.0",
     "pbf": "^5.1.2",
     "satellite.js": "^6.0.2"

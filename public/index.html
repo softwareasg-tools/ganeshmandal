@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Ganpati Festival Intelligence & Discovery Platform — Pune & Mumbai</title>
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <!-- Custom Devotional Stylesheet -->
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header Navigation -->
+    <header class="top-header">
+      <div class="brand-section">
+        <span class="diya-flame" title="Mangalmurti Morya">🪔</span>
+        <h1 class="brand-title">Ganpati Bappa Live Darshan & Rush Tracker</h1>
+        <span class="brand-tag">UTSAV LIVE</span>
+      </div>
+
+      <!-- City Switcher -->
+      <div class="city-switcher">
+        <button class="city-btn active" id="btn-city-pune" data-city="pune">PUNE</button>
+        <button class="city-btn" id="btn-city-mumbai" data-city="mumbai">MUMBAI</button>
+      </div>
+
+      <!-- Header Actions, Sync & Weather -->
+      <div class="header-actions">
+        <!-- Live Sync Button -->
+        <button class="btn-header accent-sync" id="btn-sync-feeds" title="Refresh content with latest live feeds & crowd telemetry">
+          <span class="sync-icon">🔄</span>
+          <span class="sync-label">Refresh Feeds</span>
+        </button>
+
+        <div class="weather-widget" id="weather-widget">
+          <span>🌦️</span>
+          <span class="weather-temp" id="weather-temp">26°C</span>
+          <span id="weather-cond">Partly Cloudy</span>
+        </div>
+        <button class="btn-header accent" id="btn-open-recommendations">
+          <span>✨ Best Mandals to Visit</span>
+        </button>
+        <button class="btn-header accent-suggest" id="btn-open-suggest">
+          <span>📍 Suggest Mandal (सुचवा)</span>
+        </button>
+        <button class="btn-header accent-advertise" id="btn-open-advertise">
+          <span>📢 Advertise With Us</span>
+        </button>
+        <button class="btn-header" id="btn-open-admin">
+          <span>⚙️ Admin</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Devotional Top Sponsor Ribbon (Ad-Friendly) -->
+    <div class="ad-banner-top" id="ad-banner-top">
+      <div class="ad-banner-content">
+        <span class="ad-badge">SEVA PARTNER</span>
+        <span class="ad-text">🙏 Saraswat Bank & PMC Devotee Seva — Digital UPI Offerings & Doorstep Mahaprasad Delivery</span>
+        <a href="https://www.saraswatbank.com" target="_blank" rel="noopener noreferrer" class="ad-cta">Prasad & Seva ↗</a>
+      </div>
+    </div>
+
+    <!-- Main Two-Panel Dashboard -->
+    <div class="dashboard-body">
+      <!-- Left Panel: Interactive Map (65%) -->
+      <div class="map-panel" id="map-panel">
+        <div id="festival-map"></div>
+
+        <!-- Map Overlay Floating Controls -->
+        <div class="map-overlay-controls">
+          <div class="map-control-row">
+            <button class="map-chip-btn accent-saffron" id="btn-map-stand-front">
+              <span>👁️ Stand in Front of Bappa</span>
+            </button>
+            <button class="map-chip-btn active" id="btn-toggle-heatmap">
+              <span>🔥 Rush Heatmap</span>
+            </button>
+            <button class="map-chip-btn" id="btn-toggle-tiles">
+              <span>🗺️ Satellite View</span>
+            </button>
+            <button class="map-chip-btn" id="btn-filter-quick">
+              <span>⚡ Quick Darshan</span>
+            </button>
+            <button class="map-chip-btn" id="btn-filter-famous">
+              <span>⭐ Famous Mandals</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- City Stats Floating Pill -->
+        <div class="map-city-stats" id="map-city-stats">
+          <div class="stat-item">City: <strong id="stat-city-name">Pune</strong></div>
+          <div class="stat-item">Mandals: <strong id="stat-total-mandals">13</strong></div>
+          <div class="stat-item">Average Rush: <strong id="stat-avg-density">72%</strong></div>
+          <div class="stat-item">Status: <strong style="color:var(--accent-gold);">Live Darshan Open</strong></div>
+        </div>
+
+        <!-- Map Heatmap Legend -->
+        <div class="map-legend">
+          <span class="legend-title">Queue & Road Rush</span>
+          <div class="legend-bar">
+            <span class="legend-color legend-green"></span> <span>Khali (&lt;45%)</span>
+            <span class="legend-color legend-orange" style="margin-left:6px;"></span> <span>Thoda Rush</span>
+            <span class="legend-color legend-red" style="margin-left:6px;"></span> <span>Full Rush</span>
+            <span class="legend-color legend-purple" style="margin-left:6px;"></span> <span>Jam-Packed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Live Popularity/Ranking Leaderboard (35%) -->
+      <div class="ranking-panel" id="ranking-panel">
+        <div class="ranking-header">
+          <div class="ranking-title-row">
+            <div class="ranking-title">
+              <span class="live-dot"></span>
+              <span>MOST POPULAR GANPATI MANDALS</span>
+            </div>
+            <div class="updated-time" id="leaderboard-updated">Updated: Just now</div>
+          </div>
+          <input type="text" class="search-filter-input" id="search-input" placeholder="Search mandal by name, galli, or area...">
+        </div>
+
+        <!-- Leaderboard List with Native Devotional Sponsor Card -->
+        <div class="leaderboard-list" id="leaderboard-container">
+          <!-- Dynamic Ranking Cards Rendered Here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile-First Sticky Bottom Navigation -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+      <button class="mobile-nav-btn active" data-tab="map">
+        <span class="mobile-nav-icon">🗺️</span>
+        <span class="mobile-nav-label">Map</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="rankings">
+        <span class="mobile-nav-icon">🏆</span>
+        <span class="mobile-nav-label">Top Mandals</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="darshan">
+        <span class="mobile-nav-icon">🪔</span>
+        <span class="mobile-nav-label">Darshan</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="traffic">
+        <span class="mobile-nav-icon">🚦</span>
+        <span class="mobile-nav-label">Road Traffic</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="suggest" id="mobile-nav-btn-suggest">
+        <span class="mobile-nav-icon">📍</span>
+        <span class="mobile-nav-label">Suggest</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Mandal Detail & Authentic Darshan Intelligence Modal -->
+  <div class="modal-backdrop" id="mandal-modal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title" id="modal-mandal-name">Shreemant Dagdusheth Halwai Ganpati</h2>
+          <span class="quality-badge quality-LIVE" id="modal-quality-badge">LIVE DARSHAN</span>
+          <span class="brand-tag" id="modal-rank-badge">RANK #1</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="btn-card-action btn-stand-front" id="btn-modal-stand-front" style="padding:6px 14px;font-size:12px;">
+            👁️ Stand in Front of Bappa
+          </button>
+          <button class="modal-close-btn" id="btn-close-mandal-modal">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-content">
+        <!-- Authentic High-Resolution Darshan Showcase (No Geometric Boxes) -->
+        <div class="darshan-photo-hero" id="modal-darshan-hero">
+          <div class="darshan-media-wrap">
+            <img id="modal-darshan-img" class="darshan-main-img" src="/images/mandals/dagdusheth_idol.jpg" alt="Ganpati Idol Darshan" />
+            <div class="stream-overlay-hud">
+              <div class="feed-status-pill">
+                <span class="diya-beacon">🪔</span>
+                <span id="hud-feed-status">SACRED MURTI DARSHAN</span>
+              </div>
+              <div class="hud-telemetry-badge" id="hud-attribution">
+                Verified Sacred Murti Darshan
+              </div>
+            </div>
+          </div>
+          <!-- View Switcher -->
+          <div class="darshan-angle-bar">
+            <button class="darshan-angle-tab active" data-view="idol">🪔 Bappa's Murti</button>
+            <button class="darshan-angle-tab" data-view="temple">🏛️ Mandir & Entrance</button>
+            <button class="darshan-angle-tab" data-view="pandal">🌸 Pandal & Sabhamandap</button>
+            <button class="darshan-angle-tab accent-road" data-view="traffic">🚦 Road Traffic to Mandal</button>
+          </div>
+        </div>
+
+        <!-- Stage Intelligence & Crowd Analytics Grid -->
+        <div class="modal-grid-two">
+          <!-- Stage Intelligence Card -->
+          <div class="info-card">
+            <div class="info-card-title">
+              <span>What's Happening at the Pandal Right Now</span>
+              <span class="feed-indicator">LIVE</span>
+            </div>
+            <div class="cv-checklist" id="cv-checklist">
+              <div class="cv-check-item"><span>Bappa's Murti</span> <strong class="check-icon">✓ Fully decorated with flowers & mukut</strong></div>
+              <div class="cv-check-item"><span>People on Stage</span> <strong class="check-icon">Panditji & seva volunteers active</strong></div>
+              <div class="cv-check-item"><span>Floral & Gold Shringar</span> <strong class="check-icon">✓ Pure Golden Mukut</strong></div>
+              <div class="cv-check-item"><span>Lighting & Ambiance</span> <strong class="check-icon">✓ Bright warm temple glow</strong></div>
+              <div class="cv-check-item"><span>Aarti & Chanting</span> <span>Sukhkarta Dukhharta Aarti underway</span></div>
+            </div>
+            <div class="ai-summary-box" id="ai-scene-summary">
+              Checking current pandal scene...
+            </div>
+          </div>
+
+          <!-- Crowd Analytics & Queue Card -->
+          <div class="info-card">
+            <div class="info-card-title">
+              <span>Current Rush & Waiting Time</span>
+              <span style="color:var(--accent-saffron)" id="metric-density-label">88% RUSH</span>
+            </div>
+            <div class="cv-checklist">
+              <div class="cv-check-item">
+                <span>People in Line & Surroundings:</span>
+                <strong id="metric-people-count">Around 340 devotees</strong>
+              </div>
+              <div class="cv-check-item">
+                <span>How Long to Reach Bappa (Wait):</span>
+                <strong style="color:var(--accent-gold);" id="metric-wait-time">About 45 minutes</strong>
+              </div>
+              <div class="cv-check-item">
+                <span>Line Movement:</span>
+                <span id="metric-movement">Moving smoothly towards the stage</span>
+              </div>
+              <div class="cv-check-item">
+                <span>Popularity Ranking:</span>
+                <strong style="color:var(--accent-saffron);" id="metric-popularity-score">97 / 100</strong>
+              </div>
+              <div class="cv-check-item">
+                <span>Devotee Experience:</span>
+                <strong style="color:var(--accent-gold);" id="metric-experience-score">84 / 100 (Very peaceful darshan)</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 24-Hour Historical Analytics -->
+        <div class="info-card">
+          <div class="info-card-title">
+            <span>Rush Forecast (When is the Big Rush?)</span>
+            <span style="color:var(--accent-gold);" id="peak-hour-label">Peak Rush: 8:00 PM (Full crowd)</span>
+          </div>
+          <div class="history-chart-wrap">
+            <canvas id="history-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Mandal Historical & Festival Info -->
+        <div class="info-card">
+          <div class="info-card-title">
+            <span>Mandal Lore, Address & Guidelines</span>
+            <span id="mandal-timings-badge">06:00 AM - 12:00 AM</span>
+          </div>
+          <p id="mandal-description" style="color:var(--text-main); font-size:12px; line-height:1.6;"></p>
+          <p id="mandal-history" style="color:var(--text-muted); font-size:12px; margin-top:8px;"></p>
+          <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">
+            <span>📍 Address: </span><span id="mandal-address" style="color:var(--text-main);"></span>
+          </div>
+          <div style="margin-top:4px; font-size:11px; color:var(--text-dim);">
+            <span>🏛️ Organizer: </span><span id="mandal-organizer" style="color:var(--text-main);"></span>
+          </div>
+        </div>
+
+        <!-- Modal Devotional Sponsor Footer (Ad-Friendly) -->
+        <div class="modal-sponsor-footer">
+          <span>🙏 Sponsored Devotional Partner: Bank of Maharashtra Festival Seva & Devotee Helpline 1800-233-4526</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- First-Person Street & Pandal POV Modal ("Stand in Front of Mandal") -->
+  <div class="modal-backdrop" id="pov-street-modal">
+    <div class="modal-window pov-modal-window">
+      <div class="modal-header" style="border-color:var(--accent-saffron);">
+        <div class="modal-title-wrap">
+          <span class="diya-flame" style="font-size:18px;">🪔</span>
+          <h2 class="modal-title" style="color:var(--accent-saffron);" id="pov-mandal-name">Shreemant Dagdusheth Halwai — Standing in Front of Bappa</h2>
+          <span class="quality-badge quality-LIVE" id="pov-mandal-status-badge">🟢 DARSHAN OPEN</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button class="btn-card-action" id="btn-pov-audio" style="border-color:var(--accent-gold);color:var(--accent-gold);">
+            <span>🔔 Sound: Temple Aarti & Bells</span>
+          </button>
+          <button class="modal-close-btn" id="btn-close-pov-modal">&times;</button>
+        </div>
+      </div>
+
+      <!-- Crystal-Clear Devotee Tabs (Genuine Wait Time, Real Murti, Top 3 Roads, Social) -->
+      <div class="pov-mode-bar">
+        <button class="map-chip-btn active pov-tab-btn" data-pane="crowd">⏱️ Live Wait & Rush</button>
+        <button class="map-chip-btn pov-tab-btn" data-pane="darshan">🪔 Bappa's Murti</button>
+        <button class="map-chip-btn pov-tab-btn" data-pane="traffic">🚦 Road Traffic to Mandal</button>
+        <button class="map-chip-btn pov-tab-btn" data-pane="social">📱 Public Snaps &amp; Reels</button>
+      </div>
+
+      <div class="pov-viewport" id="pov-viewport-container">
+        <!-- PANE 1: Genuine Live Darshan Wait Time & Crowd Rush Status -->
+        <div class="pov-view-pane active" id="pane-pov-crowd">
+          <div class="rush-intel-container">
+            <!-- Hero Rush & Wait Banner -->
+            <div class="rush-hero-card">
+              <div class="rush-hero-top">
+                <div class="rush-wait-badge-group">
+                  <span class="rush-live-beacon" id="rush-live-beacon"></span>
+                  <span class="rush-status-pill" id="rush-status-pill">🟠 MODERATE EVENING RUSH</span>
+                </div>
+                <div class="rush-traffic-link-wrap">
+                  <span class="rush-basis-text">⏱️ Estimated basis current approach traffic & pandal crowd flow</span>
+                </div>
+              </div>
+
+              <div class="rush-metrics-main">
+                <div class="rush-metric-box">
+                  <div class="rush-metric-label">Estimated Wait for Darshan</div>
+                  <div class="rush-metric-value" id="rush-wait-time">~20 - 30 mins</div>
+                  <div class="rush-metric-sub" id="rush-wait-desc">Steady queue movement inside pandal barricades</div>
+                </div>
+                <div class="rush-metric-box">
+                  <div class="rush-metric-label">Fastest Approach Route (&lt;1km)</div>
+                  <div class="rush-metric-value" id="rush-fastest-road">Bajirao Road (450m)</div>
+                  <div class="rush-metric-sub" id="rush-fastest-status">⚡ Moving at 14 km/h (~18 min delay)</div>
+                </div>
+                <div class="rush-metric-box">
+                  <div class="rush-metric-label">Best Time to Visit Today</div>
+                  <div class="rush-metric-value" id="rush-best-time">6:00 AM – 9:30 AM</div>
+                  <div class="rush-metric-sub">Direct quick darshan with lowest rush</div>
+                </div>
+              </div>
+
+              <!-- Street & Devotee Layman Advice Banner -->
+              <div class="rush-advice-strip" id="rush-advice-strip">
+                <span class="rush-advice-icon">📢</span>
+                <span class="rush-advice-text" id="rush-advice-text">Devotee lines are moving steadily along the barricaded corridor. Dedicated queues for senior citizens & families with children are functioning smoothly.</span>
+              </div>
+            </div>
+
+            <!-- Sacred Murti Preview & Pandal Overview -->
+            <div class="rush-center-split">
+              <!-- Left: Bappa's Sanctum Murti Preview -->
+              <div class="rush-murti-preview-card">
+                <div class="rush-card-header">
+                  <span class="rush-card-title">🪔 Sacred Murti Darshan</span>
+                  <button class="btn-goto-tab" data-target-pane="darshan">Full View ↗</button>
+                </div>
+                <div class="rush-murti-frame">
+                  <img id="rush-murti-img" class="rush-murti-img" src="/images/mandals/dagdusheth_idol.jpg" alt="Bappa's Sacred Murti" />
+                  <div class="rush-murti-caption" id="rush-murti-caption">
+                    🙏 Shreemant Dagdusheth Halwai Ganpati — Sacred Murti
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Approach Corridors & Pandal Schedule -->
+              <div class="rush-details-col">
+                <!-- 3 Approach Roads Quick Glance -->
+                <div class="rush-roads-glance-card">
+                  <div class="rush-card-header">
+                    <span class="rush-card-title">🚦 Approach Roads (Within 1km)</span>
+                    <button class="btn-goto-tab" data-target-pane="traffic">Full Traffic View ↗</button>
+                  </div>
+                  <div class="rush-roads-mini-list" id="rush-roads-mini-list">
+                    <!-- Dynamic Top 3 Roads list -->
+                  </div>
+                </div>
+
+                <!-- Pandal Schedule & Timings -->
+                <div class="rush-schedule-card">
+                  <div class="rush-card-header">
+                    <span class="rush-card-title">🕉️ Pandal Hours & Aarti Schedule</span>
+                  </div>
+                  <div class="rush-schedule-grid">
+                    <div class="sched-item">
+                      <span class="sched-label">🌅 Pandal Timings</span>
+                      <strong class="sched-val" id="rush-pandal-timings">05:00 AM - 11:30 PM</strong>
+                    </div>
+                    <div class="sched-item">
+                      <span class="sched-label">🔔 Morning Aarti</span>
+                      <strong class="sched-val">07:30 AM</strong>
+                    </div>
+                    <div class="sched-item">
+                      <span class="sched-label">🪔 Maha Aarti (Evening)</span>
+                      <strong class="sched-val">08:00 PM</strong>
+                    </div>
+                    <div class="sched-item">
+                      <span class="sched-label">✨ Shej Aarti</span>
+                      <strong class="sched-val">10:30 PM</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Action Navigation Bar -->
+            <div class="rush-action-bar">
+              <button class="rush-action-btn primary" id="btn-rush-view-murti">
+                <span>🪔 View Bappa's Sacred Murti</span>
+              </button>
+              <button class="rush-action-btn" id="btn-rush-check-traffic">
+                <span>🚦 View 3 Approach Roads</span>
+              </button>
+              <button class="rush-action-btn" id="btn-rush-check-social">
+                <span>📱 Devotee Snaps & Reels</span>
+              </button>
+              <a class="rush-action-btn accent" id="btn-rush-maps-nav" href="#" target="_blank" rel="noopener noreferrer">
+                <span>🗺️ Open Google Maps Route ↗</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 2: Direct Temple Darshan & Idol View (Authentic Bappa Murti) -->
+        <div class="pov-view-pane" id="pane-pov-darshan">
+          <div class="pov-darshan-container">
+            <div class="pov-top-bar">
+              <div class="pov-angle-selector" id="pov-angle-selector">
+                <button class="pov-angle-btn active" data-angle="sanctum">🪔 Bappa's Sacred Murti</button>
+                <button class="pov-angle-btn" data-angle="entrance" id="btn-angle-entrance">🏛️ Temple Pravesh Dwar</button>
+              </div>
+              <div class="pov-zoom-controls">
+                <button class="zoom-btn" id="btn-darshan-zoom-out">🔍 -</button>
+                <span class="zoom-level" id="darshan-zoom-level">1.0x</span>
+                <button class="zoom-btn" id="btn-darshan-zoom-in">🔍 +</button>
+              </div>
+            </div>
+
+            <div class="pov-image-stage" id="pov-image-stage">
+              <img id="pov-hero-photo" class="pov-hero-photo zoom-1x" src="/images/mandals/dagdusheth_idol.jpg" alt="Ganpati Darshan" />
+              <div class="darshan-glow-overlay"></div>
+              <div class="pov-photo-attribution" id="pov-photo-attribution">
+                📍 Source: Verified Sacred Murti Darshan
+              </div>
+            </div>
+
+            <!-- Devotee Eye-Level Telemetry Strip -->
+            <div class="pov-telemetry-strip">
+              <div class="pov-metric-item">
+                <span>Distance to Idol: </span><strong id="pov-distance">About 12 meters</strong>
+              </div>
+              <div class="pov-metric-item">
+                <span>Estimated Wait: </span><strong id="pov-wait-estimate">~35 mins</strong>
+              </div>
+              <div class="pov-metric-item">
+                <span>Current Pandal Status: </span><strong id="pov-stage-state" style="color:var(--accent-gold);">Maha Aarti & Vedic Chanting</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 2: Live Road Traffic & Approach (Top 3 Roads within 1km) -->
+        <div class="pov-view-pane" id="pane-pov-traffic">
+          <div class="traffic-view-container">
+            <div class="traffic-header-strip">
+              <div class="traffic-road-info">
+                <span class="traffic-pin">🚦</span>
+                <div>
+                  <strong class="traffic-road-name" id="traffic-road-name">Top 3 Approach Roads Leading to Mandal (Within 1km)</strong>
+                  <div class="traffic-status-text" id="traffic-road-status">Select a road below to inspect live traffic rush, delay & route view</div>
+                </div>
+              </div>
+              <a id="traffic-maps-link" href="https://maps.google.com" target="_blank" rel="noopener noreferrer" class="btn-traffic-maps">
+                🚗 Open Live Navigation ↗
+              </a>
+            </div>
+
+            <!-- Top 3 Roads Within 1km Selector Cards -->
+            <div class="traffic-roads-grid" id="traffic-roads-selector">
+              <!-- Dynamically populated 3 road cards -->
+            </div>
+
+            <div class="traffic-iframe-wrap">
+              <iframe id="traffic-road-iframe" class="traffic-road-iframe" src="" title="Live Road Traffic" loading="lazy"></iframe>
+            </div>
+
+            <div class="traffic-legend-strip">
+              <div class="traffic-legend-item"><span class="traffic-dot blue"></span> 🔵 Blue: Clear / Normal Flow (&lt;10 min delay)</div>
+              <div class="traffic-legend-item"><span class="traffic-dot orange"></span> 🟠 Orange: Moderate Rush (10-25 min delay)</div>
+              <div class="traffic-legend-item"><span class="traffic-dot red"></span> 🔴 Red: Heavy Jam / Stoppage (25-60 min delay)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANE 4: Devotee Social Snaps & Reels (Strictly Last 5 in Latest Order) -->
+        <div class="pov-view-pane" id="pane-pov-social">
+          <div class="social-feed-wrapper">
+            <div class="hashtag-bar" id="pov-hashtag-bar">
+              <!-- Dynamic Hashtag Pills -->
+            </div>
+            <div class="social-grid" id="pov-social-grid">
+              <!-- Dynamic Social Cards -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommendations Modal -->
+  <div class="modal-backdrop" id="recommendations-modal">
+    <div class="modal-window" style="max-width:720px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title">Where Should You Go for Darshan?</h2>
+          <span class="brand-tag">RECOMMENDED</span>
+        </div>
+        <button class="modal-close-btn" id="btn-close-rec-modal">&times;</button>
+      </div>
+      <div class="modal-content">
+        <div class="map-control-row" style="flex-wrap:wrap;">
+          <button class="map-chip-btn active rec-filter-btn" data-criterion="best_experience">Best Overall</button>
+          <button class="map-chip-btn rec-filter-btn" data-criterion="least_crowded">Least Rush Right Now</button>
+          <button class="map-chip-btn rec-filter-btn" data-criterion="most_popular">Most Famous Mandals</button>
+          <button class="map-chip-btn rec-filter-btn" data-criterion="best_decorations">Most Beautiful Dekhava</button>
+          <button class="map-chip-btn rec-filter-btn" data-criterion="most_active">Happening Right Now</button>
+          <button class="map-chip-btn rec-filter-btn" data-criterion="shortest_wait">Quickest Darshan (Shortest Line)</button>
+          <button class="map-chip-btn rec-filter-btn" data-criterion="family_friendly">Easy with Family & Kids</button>
+        </div>
+
+        <div class="rec-list" id="recommendations-container">
+          <!-- Dynamic Recommendation Cards -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Visitor Mandal Suggestion & Advertiser Contact Modal (softwareasg@gmail.com) -->
+  <div class="modal-backdrop" id="suggest-modal">
+    <div class="modal-window" style="max-width:560px;">
+      <div class="modal-header" style="border-color:var(--accent-gold);">
+        <div class="modal-title-wrap">
+          <span class="diya-flame" style="font-size:18px;">📍</span>
+          <h2 class="modal-title" style="color:var(--accent-gold);" id="community-modal-title">Community & Partnerships</h2>
+          <span class="brand-tag" id="community-modal-tag">PARTNERS</span>
+        </div>
+        <button class="modal-close-btn" id="btn-close-suggest-modal">&times;</button>
+      </div>
+      <div class="modal-content">
+        <!-- Community Modal Tab Navigation -->
+        <div class="community-tabs-nav" style="display:flex; gap:8px; margin-bottom:14px; border-bottom:1px solid var(--border-subtle); padding-bottom:10px;">
+          <button type="button" class="community-tab-btn active" id="tab-btn-suggest" data-tab="suggest">
+            <span>📍 Suggest a Mandal (सुचवा)</span>
+          </button>
+          <button type="button" class="community-tab-btn" id="tab-btn-advertise" data-tab="advertise">
+            <span>📢 Advertise / Sponsor (जाहिरात करा)</span>
+          </button>
+        </div>
+
+        <!-- PANE 1: Visitor Mandal Suggestion Form -->
+        <div class="community-tab-pane" id="pane-suggest-mandal" style="display:block;">
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
+            Know a revered Ganpati Mandal that should be on our live tracker? Paste its Google Maps link and your email. Submissions are curated and forwarded to <strong>softwareasg@gmail.com</strong>.
+          </p>
+          <form id="form-suggest-mandal" class="admin-grid" style="grid-template-columns: 1fr;">
+            <div class="form-group">
+              <label class="form-label">📍 Google Maps Link <strong style="color:var(--accent-vermillion); font-size:13px;">*</strong></label>
+              <input type="url" class="form-input" id="suggest-maps-url" required placeholder="https://maps.app.goo.gl/... or google.com/maps?q=...">
+              <span style="font-size:10px; color:var(--text-dim); margin-top:2px;">Paste the location link from Google Maps on your phone or browser</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">✉️ Your Email ID <strong style="color:var(--accent-vermillion); font-size:13px;">*</strong></label>
+              <input type="email" class="form-input" id="suggest-email" required placeholder="yourname@gmail.com">
+              <span style="font-size:10px; color:var(--text-dim); margin-top:2px;">We will notify you once Bappa's pandal goes live on the platform</span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">🕉️ Mandal Name (Optional / If Known)</label>
+              <input type="text" class="form-input" id="suggest-mandal-name" placeholder="e.g. Balgopal Mitra Mandal, Shivajinagar">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">City</label>
+              <select class="form-input" id="suggest-city">
+                <option value="pune">Pune</option>
+                <option value="mumbai">Mumbai</option>
+                <option value="other">Other Maharashtra City</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Special Notes / Dekhava Significance (Optional)</label>
+              <textarea class="form-input" id="suggest-notes" rows="2" placeholder="Tell us about the idol, decoration theme, or queue tips..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btn-submit-suggestion" style="margin-top:6px; background:linear-gradient(135deg, #ea580c, #f59e0b); font-weight:700; color:#000;">
+              <span>🙏 Submit Mandal for Curation ↗</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- PANE 2: Advertiser Contact Form -->
+        <div class="community-tab-pane" id="pane-advertise-contact" style="display:none;">
+          <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">
+            Partner with Maharashtra's #1 Real-Time Ganesh Festival Platform. Showcase your brand, sweets, jewelry, bank, or festive services to lakhs of devotees in Pune & Mumbai. Dispatched directly to <strong>softwareasg@gmail.com</strong>.
+          </p>
+          <form id="form-advertise-contact" class="admin-grid" style="grid-template-columns: 1fr;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">🏢 Brand / Business Name <strong style="color:var(--accent-vermillion); font-size:13px;">*</strong></label>
+                <input type="text" class="form-input" id="adv-brand-name" required placeholder="e.g. Chitale Bandhu, PNG Jewellers">
+              </div>
+              <div class="form-group">
+                <label class="form-label">👤 Contact Person Name <strong style="color:var(--accent-vermillion); font-size:13px;">*</strong></label>
+                <input type="text" class="form-input" id="adv-contact-name" required placeholder="e.g. Rahul Deshmukh">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">✉️ Business / Work Email <strong style="color:var(--accent-vermillion); font-size:13px;">*</strong></label>
+                <input type="email" class="form-input" id="adv-email" required placeholder="brand@company.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">📱 Phone / WhatsApp Number <strong style="color:var(--accent-vermillion); font-size:13px;">*</strong></label>
+                <input type="tel" class="form-input" id="adv-phone" required placeholder="+91 98765 43210">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">📍 Target City / Audience</label>
+                <select class="form-input" id="adv-city">
+                  <option value="both">Both Pune & Mumbai (Maximum Reach)</option>
+                  <option value="pune">Pune Only (Peths & Suburbs)</option>
+                  <option value="mumbai">Mumbai Only (Lalbaug & Suburbs)</option>
+                  <option value="maharashtra">Pan-Maharashtra</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">📢 Preferred Ad Slot</label>
+                <select class="form-input" id="adv-placement">
+                  <option value="leaderboard">Leaderboard In-Feed (Between Ranks #1-#2, #5-#6)</option>
+                  <option value="top_banner">Top Sticky Festive Banner</option>
+                  <option value="darshan_sponsor">Darshan POV / Live Stream Sponsor</option>
+                  <option value="all_inclusive">Full Festival Sponsorship Package</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">💰 Approximate Festival Budget Range</label>
+              <select class="form-input" id="adv-budget">
+                <option value="flexible">Flexible / Open to Proposal</option>
+                <option value="10k-25k">₹10,000 – ₹25,000 (Targeted Slot)</option>
+                <option value="25k-50k">₹25,000 – ₹50,000 (Citywide Campaign)</option>
+                <option value="50k-1L">₹50,000 – ₹1,00,000 (Multi-Slot High Reach)</option>
+                <option value="1L+">₹1,00,000+ (Title / Category Sponsor)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">📝 Campaign Goals / Message (Optional)</label>
+              <textarea class="form-input" id="adv-message" rows="2" placeholder="Tell us about your festival offers, launch dates, creative assets, or requirements..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary" id="btn-submit-advertiser" style="margin-top:6px; background:linear-gradient(135deg, #ea580c, #f59e0b); font-weight:700; color:#000;">
+              <span>📢 Submit Advertising Inquiry ↗</span>
+            </button>
+            <span style="font-size:10px; color:var(--text-dim); text-align:center; display:block; margin-top:6px;">
+              ⚡ Dispatched to <strong>softwareasg@gmail.com</strong> • Response within 24 hours
+            </span>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Modal with Password Protection (asg12345$) -->
+  <div class="modal-backdrop" id="admin-modal">
+    <div class="modal-window" style="max-width:820px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h2 class="modal-title">Festival Operations Admin Console</h2>
+          <span class="brand-tag" id="admin-auth-badge">AUTHENTICATION REQUIRED</span>
+        </div>
+        <button class="modal-close-btn" id="btn-close-admin-modal">&times;</button>
+      </div>
+      <div class="modal-content">
+        <!-- 1. Password Login View -->
+        <div id="admin-login-view" style="display:block; padding: 20px 0;">
+          <div class="info-card" style="max-width:440px; margin: 0 auto; text-align:center;">
+            <div style="font-size:32px; margin-bottom:10px;">🔐</div>
+            <h3 style="color:var(--text-cream); margin-bottom:6px; font-size:15px;">Enter Admin Password</h3>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
+              Admin access is restricted to authorized festival curators. Enter password to manage mandals and sponsor ads.
+            </p>
+            <form id="admin-login-form">
+              <div class="form-group" style="margin-bottom:14px;">
+                <input type="password" class="form-input" id="admin-password-input" placeholder="Enter password..." required style="text-align:center; font-size:15px; letter-spacing:2px;">
+              </div>
+              <button type="submit" id="btn-admin-login" class="btn-primary" style="width:100%; background:linear-gradient(135deg,#c2410c,#ea580c); font-weight:700;">
+                Unlock Console 🔓
+              </button>
+            </form>
+            <div id="admin-login-error" style="color:#ef4444; font-size:12px; margin-top:10px; display:none;"></div>
+          </div>
+        </div>
+
+        <!-- 2. Authenticated Admin Dashboard -->
+        <div id="admin-dashboard-view" style="display:none;">
+          <!-- Admin Navigation Tabs -->
+          <div class="map-control-row" style="margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:10px;">
+            <button class="map-chip-btn active admin-tab-btn" data-tab="mandals">🕉️ Mandals (Add / Delete)</button>
+            <button class="map-chip-btn admin-tab-btn" data-tab="ads">📢 Sponsor Ads (Add / Delete)</button>
+            <button class="map-chip-btn admin-tab-btn" data-tab="suggestions">📥 Visitor Suggestions (<span id="admin-sug-count">0</span>)</button>
+            <button class="map-chip-btn admin-tab-btn" data-tab="advertisers">💼 Advertiser Leads (<span id="admin-adv-count">0</span>)</button>
+            <button class="map-chip-btn" id="btn-admin-logout" style="margin-left:auto; border-color:#ef4444; color:#ef4444;">🚪 Logout</button>
+          </div>
+
+          <!-- TAB 1: Mandals (Add / Delete) -->
+          <div class="admin-tab-pane" id="admin-pane-mandals">
+            <div class="info-card" style="margin-bottom:16px;">
+              <div class="info-card-title">Add / Register New Mandal</div>
+              <form id="admin-add-mandal-form" class="admin-grid">
+                <div class="form-group">
+                  <label class="form-label">Mandal Name *</label>
+                  <input type="text" class="form-input" id="admin-mandal-name" required placeholder="e.g. Someshwar Ganpati">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">City *</label>
+                  <select class="form-input" id="admin-mandal-city">
+                    <option value="city_pune">Pune</option>
+                    <option value="city_mumbai">Mumbai</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Latitude *</label>
+                  <input type="number" step="any" class="form-input" id="admin-mandal-lat" required placeholder="18.5163">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Longitude *</label>
+                  <input type="number" step="any" class="form-input" id="admin-mandal-lng" required placeholder="73.8562">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                  <label class="form-label">Address</label>
+                  <input type="text" class="form-input" id="admin-mandal-address" placeholder="Street, Locality, Area">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Bappa's Murti Image URL</label>
+                  <input type="text" class="form-input" id="admin-mandal-image" placeholder="/images/mandals/dagdusheth_idol.jpg">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Temple Pravesh Dwar Image (Optional)</label>
+                  <input type="text" class="form-input" id="admin-mandal-temple-image" placeholder="Leave blank if street pandal">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                  <label class="form-label">Description & Devotional Significance</label>
+                  <input type="text" class="form-input" id="admin-mandal-desc" placeholder="History, floral shringar, or unique idol characteristics...">
+                </div>
+                <div style="grid-column: span 2;">
+                  <button type="submit" class="btn-primary" style="background:linear-gradient(135deg,#c2410c,#ea580c); font-weight:700;">+ Register Mandal to Live Database</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Existing Mandals List with Delete Action -->
+            <div class="info-card">
+              <div class="info-card-title">
+                <span>Existing Registered Mandals</span>
+                <span style="color:var(--accent-gold); font-size:11px;" id="admin-mandals-count">25 Mandals</span>
+              </div>
+              <div class="admin-mandals-table-wrap" style="max-height: 280px; overflow-y:auto;">
+                <table style="width:100%; font-size:12px; border-collapse:collapse;" id="admin-mandals-table">
+                  <thead>
+                    <tr style="border-bottom:1px solid var(--border-color); color:var(--accent-gold); text-align:left;">
+                      <th style="padding:6px;">Mandal</th>
+                      <th style="padding:6px;">City</th>
+                      <th style="padding:6px;">Area / Address</th>
+                      <th style="padding:6px; text-align:right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-mandals-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: Sponsor Ads (Add / Edit / Delete) -->
+          <div class="admin-tab-pane" id="admin-pane-ads" style="display:none;">
+            <div class="info-card" style="margin-bottom:16px;">
+              <div class="info-card-title" id="admin-ad-form-title">Add / Edit Sponsor Ad</div>
+              <form id="admin-add-ad-form" class="admin-grid">
+                <input type="hidden" id="admin-ad-edit-id" value="">
+                <div class="form-group">
+                  <label class="form-label">Sponsor Brand / Organizer *</label>
+                  <input type="text" class="form-input" id="admin-ad-sponsor" required placeholder="e.g. Chitale Bandhu Mithaiwale">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ad Placement *</label>
+                  <select class="form-input" id="admin-ad-placement">
+                    <option value="leaderboard" selected>Leaderboard Native Card (Custom Rank Slot)</option>
+                    <option value="top_banner">Top Header Banner Ribbon</option>
+                    <option value="modal_footer">Mandal Detail Partner Footer</option>
+                    <option value="pov_rush">POV Live Rush Partner Banner</option>
+                    <option value="map_float">Map Tactical Sponsor Chip</option>
+                  </select>
+                </div>
+                <div class="form-group" id="group-ad-rank" style="display:block;">
+                  <label class="form-label">📊 Insert After Rank # (Leaderboard Slot)</label>
+                  <input type="number" min="1" max="25" class="form-input" id="admin-ad-rank" value="2" placeholder="e.g. 1 (between 1 & 2), 5 (between 5 & 6)">
+                  <span style="font-size:10px; color:var(--text-dim);">Allows multiple sponsors at different queue rankings (e.g. Rank 1, 3, 5, 10)</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Badge Label</label>
+                  <input type="text" class="form-input" id="admin-ad-badge" placeholder="e.g. SPONSORED PARTNER / SEVA PARTNER">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CTA Button Label</label>
+                  <input type="text" class="form-input" id="admin-ad-cta-text" placeholder="e.g. Order Fresh Prasad 🪔">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Destination URL</label>
+                  <input type="url" class="form-input" id="admin-ad-cta-url" placeholder="https://brand-website.com">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                  <label class="form-label">Tagline / Ad Copy *</label>
+                  <input type="text" class="form-input" id="admin-ad-desc" required placeholder="Authentic Pure Ghee Modaks, Pedhas & Mahaprasad offerings for Ganpati Bappa across Pune & Mumbai.">
+                </div>
+                <div style="grid-column: span 2; display:flex; gap:10px; align-items:center;">
+                  <button type="submit" id="btn-submit-ad" class="btn-primary" style="background:linear-gradient(135deg,#c2410c,#ea580c); font-weight:700;">+ Publish Sponsor Ad</button>
+                  <button type="button" id="btn-cancel-edit-ad" class="btn-card-action" style="display:none; color:var(--text-dim); border-color:var(--border-subtle);">Cancel Edit</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Active Sponsor Ads List with Delete Action -->
+            <div class="info-card">
+              <div class="info-card-title">Active Sponsor Ads</div>
+              <div id="admin-ads-list" style="display:flex; flex-direction:column; gap:10px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: Visitor Suggestions Inbox -->
+          <div class="admin-tab-pane" id="admin-pane-suggestions" style="display:none;">
+            <div class="info-card">
+              <div class="info-card-title">
+                <span>Visitor Submitted Suggestions</span>
+                <span style="font-size:11px; color:var(--text-muted);">Flowing to softwareasg@gmail.com</span>
+              </div>
+              <div id="admin-suggestions-list" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: Advertiser Leads Inbox -->
+          <div class="admin-tab-pane" id="admin-pane-advertisers" style="display:none;">
+            <div class="info-card">
+              <div class="info-card-title">
+                <span>Advertiser Sponsorship Inquiries</span>
+                <span style="font-size:11px; color:var(--text-muted);">Dispatched to softwareasg@gmail.com</span>
+              </div>
+              <div id="admin-advertisers-list" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Leaflet Heatmap Plugin -->
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  
+  <!-- Frontend Logic Module -->
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

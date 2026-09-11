@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>50 Mandals Murti Audit</title>
+  <style>
+    body { background: #0f172a; color: #f8fafc; font-family: system-ui, sans-serif; padding: 24px; margin: 0; }
+    h1 { color: #f59e0b; font-size: 24px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .card { background: #1e293b; border-radius: 8px; overflow: hidden; border: 1px solid #334155; display: flex; flex-direction: column; }
+    .img-wrap { width: 100%; height: 200px; background: #000; overflow: hidden; position: relative; }
+    .img-wrap img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .meta { padding: 10px; font-size: 11px; flex: 1; display: flex; flex-direction: column; }
+    .num-city { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 10px; }
+    .badge-pune { background: #ea580c; color: #fff; padding: 1px 5px; border-radius: 3px; }
+    .badge-mumbai { background: #2563eb; color: #fff; padding: 1px 5px; border-radius: 3px; }
+    .name { font-weight: 700; color: #fbbf24; font-size: 12px; margin-bottom: 4px; line-height: 1.3; }
+    .file { color: #94a3b8; font-family: monospace; font-size: 10px; word-break: break-all; margin-top: auto; }
+  </style>
+</head>
+<body>
+  <h1>🕉️ 50 Mandals Murti Visual Audit (Checking Bappa's Idol)</h1>
+  <div class="grid" id="mandal-grid"></div>
+
+  <script type="module">
+    const [pune, mumbai] = await Promise.all([
+      fetch('/api/mandals?city=pune').then(r => r.json()),
+      fetch('/api/mandals?city=mumbai').then(r => r.json())
+    ]);
+    const SEED_MANDALS = [...pune.data, ...mumbai.data];
+    const grid = document.getElementById('mandal-grid');
+
+    SEED_MANDALS.forEach((m, idx) => {
+      const isPune = m.city_id === 'city_pune';
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="img-wrap">
+          <img src="${m.image_url}" alt="${m.name}" loading="lazy" />
+        </div>
+        <div class="meta">
+          <div class="num-city">
+            <span style="font-weight:bold; color:#fff;">#${idx+1} ${m.id}</span>
+            <span class="${isPune ? 'badge-pune' : 'badge-mumbai'}">${isPune ? 'PUNE' : 'MUMBAI'}</span>
+          </div>
+          <div class="name">${m.name}</div>
+          <div class="file">${m.image_url}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  </script>
+</body>
+</html>

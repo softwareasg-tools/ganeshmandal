@@ -12,3 +12,6 @@ output/
 3d-models/
 pinokio/ENVIRONMENT
 pinokio/.installed
+scratch/
+scratch_wiki_results.json
+test_verify.mjs

@@ -1,0 +1,19 @@
+services:
+  festival-platform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ganpati-festival-intelligence
+    restart: unless-stopped
+    ports:
+      - "30000:30000"
+    environment:
+      - PORT=30000
+      - HOST=0.0.0.0
+      - ADMIN_API_KEY=ganpati-admin-secret-2026
+      - NODE_ENV=production
+    volumes:
+      - festival-data:/app/data
+
+volumes:
+  festival-data:

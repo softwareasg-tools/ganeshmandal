@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" width="280" height="64" fill="none">
+  <defs>
+    <!-- Saffron & Gold Radiance Gradients -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2A3"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="saffronGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A00"/>
+      <stop offset="50%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+    <linearGradient id="bgCircle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D1500"/>
+      <stop offset="100%" stop-color="#140A00"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Circular Emblem Background -->
+  <circle cx="32" cy="32" r="28" fill="url(#bgCircle)" stroke="url(#goldGrad)" stroke-width="2"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="url(#saffronGrad)" stroke-width="1" stroke-dasharray="2 3"/>
+
+  <!-- Sacred Tilak / Trishul Crown -->
+  <path d="M32 12 L34 18 L30 18 Z" fill="url(#saffronGrad)" filter="url(#glow)"/>
+  <circle cx="32" cy="19" r="1.5" fill="#EF4444"/>
+
+  <!-- Lord Ganesha Silhouette (Graceful Vedic Lines) -->
+  <!-- Mukut / Crown -->
+  <path d="M26 21 C28 17, 36 17, 38 21 L36 24 C34 23, 30 23, 28 24 Z" fill="url(#goldGrad)"/>
+  
+  <!-- Forehead & Head -->
+  <path d="M24 24 C28 22, 36 22, 40 24 C42 27, 42 30, 40 33 C37 32, 27 32, 24 33 C22 30, 22 27, 24 24 Z" fill="url(#goldGrad)"/>
+
+  <!-- Trunk Curves Right (Siddhi Vinayak Dakshinabhimukhi / Purvabhimukhi grace) -->
+  <path d="M30 32 C30 38, 32 44, 37 44 C41 44, 43 40, 41 38 C39 37, 37 39, 36 41 C33 41, 32 37, 32 32 Z" fill="url(#goldGrad)"/>
+  
+  <!-- Auspicious Modak / Sacred Pearl on Trunk Tip -->
+  <circle cx="41" cy="38" r="2" fill="#FDE047" filter="url(#glow)"/>
+
+  <!-- Left Ear -->
+  <path d="M24 25 C17 26, 17 33, 23 35 C24 33, 24 28, 24 25 Z" fill="url(#goldGrad)" opacity="0.9"/>
+  <!-- Right Ear -->
+  <path d="M40 25 C47 26, 47 33, 41 35 C40 33, 40 28, 40 25 Z" fill="url(#goldGrad)" opacity="0.9"/>
+
+  <!-- Sacred Eye / Trishul Mark -->
+  <path d="M31 26 Q32 25 33 26 Q32 29 31 26 Z" fill="#DC2626"/>
+
+  <!-- Brand Typography -->
+  <!-- GaneshMandal text -->
+  <text x="70" y="33" font-family="'Cinzel Decorative', 'Cinzel', 'Georgia', serif" font-size="20" font-weight="800" letter-spacing="0.5" fill="url(#goldGrad)">
+    GaneshMandal
+  </text>
+  
+  <!-- .in domain accent with glowing pill -->
+  <rect x="228" y="16" width="38" height="20" rx="6" fill="#EA580C" fill-opacity="0.2" stroke="#F59E0B" stroke-width="1.2"/>
+  <text x="247" y="30" font-family="'Outfit', 'Inter', sans-serif" font-size="12" font-weight="800" text-anchor="middle" fill="#FFC72C" letter-spacing="0.5">
+    .IN
+  </text>
+
+  <!-- Sub-label in Logo -->
+  <text x="71" y="47" font-family="'Outfit', 'Inter', sans-serif" font-size="9.5" font-weight="600" letter-spacing="2.2" fill="#FBBF24" opacity="0.9">
+    MAHARASHTRA FESTIVAL PORTAL
+  </text>
+</svg>

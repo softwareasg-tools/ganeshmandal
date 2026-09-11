@@ -84,42 +84,79 @@ body {
 .brand-section {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   flex-shrink: 0;
 }
 
-.diya-flame {
-  font-size: 20px;
-  display: inline-block;
-  animation: diya-flicker 2.5s infinite ease-in-out;
-  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+.brand-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  transition: transform 0.2s ease;
 }
 
-@keyframes diya-flicker {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.95; }
-  25% { transform: scale(1.08) rotate(-1deg); opacity: 1; filter: drop-shadow(0 0 12px rgba(255, 107, 0, 0.8)); }
-  50% { transform: scale(0.98) rotate(1deg); opacity: 0.9; }
-  75% { transform: scale(1.05) rotate(0deg); opacity: 1; filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7)); }
+.brand-logo-link:hover {
+  transform: scale(1.02);
 }
 
-.brand-title {
-  font-size: 15px;
+.brand-logo-img {
+  height: 42px;
+  width: auto;
+  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.4));
+}
+
+.brand-tagline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand-tagline {
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  color: var(--text-cream);
-  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--accent-gold);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+  transition: all 0.3s ease;
 }
 
-.brand-tag {
-  background: rgba(255, 107, 0, 0.15);
-  color: var(--accent-saffron);
-  border: 1px solid rgba(255, 107, 0, 0.4);
-  padding: 2px 8px;
+.brand-cert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
   border-radius: 4px;
+  cursor: pointer;
+  width: fit-content;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.brand-cert-badge:hover {
+  background: rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+}
+
+.brand-cert-badge .cert-shield {
   font-size: 10px;
-  font-family: var(--font-mono);
-  font-weight: bold;
-  letter-spacing: 0.5px;
+}
+
+.btn-header.accent-guide {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3));
+  border-color: rgba(16, 185, 129, 0.6);
+  color: #6ee7b7;
+  font-weight: 700;
+}
+
+.btn-header.accent-guide:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.5));
+  border-color: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 
 /* City Switcher */
@@ -2707,5 +2744,339 @@ body {
 
 .ad-native-inquire-link:hover {
   opacity: 1;
+}
+
+/* ==========================================================================
+   Devotee Guide & AnswerThePublic Festive Resource Hub Styles
+   ========================================================================== */
+.modal-dialog-wide {
+  max-width: 960px;
+  width: 95%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-search-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.guide-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.guide-search-input {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px 10px 38px;
+  color: var(--text-cream);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.guide-search-input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+}
+
+.guide-nav-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.guide-tab-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.guide-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-cream);
+}
+
+.guide-tab-btn.active {
+  background: linear-gradient(135deg, rgba(234, 88, 12, 0.25), rgba(245, 158, 11, 0.25));
+  border-color: var(--accent-saffron);
+  color: #fbbf24;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.2);
+}
+
+.guide-content-area {
+  overflow-y: auto;
+  max-height: calc(90vh - 230px);
+  padding-right: 4px;
+}
+
+.guide-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.guide-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.guide-badge.positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.guide-badge.local {
+  background: rgba(234, 88, 12, 0.15);
+  color: #fb923c;
+  border: 1px solid rgba(234, 88, 12, 0.4);
+}
+
+.guide-badge.divine {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fde047;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.guide-badge.order {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.guide-badge.trending, .guide-badge.apartment, .guide-badge.digital, .guide-badge.apps {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.4);
+}
+
+.guide-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-cream);
+  margin-bottom: 8px;
+}
+
+.guide-card-p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-list-item {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.store-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fef08a;
+}
+
+.store-desc {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.guide-link {
+  font-size: 11.5px;
+  color: var(--accent-gold);
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 4px;
+  align-self: flex-start;
+  transition: text-decoration 0.2s;
+}
+
+.guide-link:hover {
+  text-decoration: underline;
+}
+
+/* Step-by-Step Puja Vidhi */
+.vidhi-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.vidhi-step {
+  display: flex;
+  gap: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.step-num {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--accent-saffron);
+  font-family: var(--font-mono);
+  background: rgba(234, 88, 12, 0.15);
+  border: 1px solid rgba(234, 88, 12, 0.4);
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.step-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-cream);
+}
+
+.step-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* FAQs */
+.guide-faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.faq-item {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.faq-q {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fef08a;
+  margin-bottom: 6px;
+}
+
+.faq-a {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* Security Certification Modal */
+.cert-status-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2));
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.cert-decision-badge {
+  display: inline-block;
+  background: #10b981;
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.cert-score-display {
+  font-size: 16px;
+  color: #e6fcf5;
+  margin-bottom: 4px;
+}
+
+.cert-score-display strong {
+  color: #34d399;
+  font-size: 20px;
+}
+
+.cert-verdict {
+  font-size: 12px;
+  color: #a7f3d0;
+}
+
+.cert-audit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.cert-item {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--text-cream);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cert-check {
+  color: #10b981;
+  font-weight: 800;
 }
 

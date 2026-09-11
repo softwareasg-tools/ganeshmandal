@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /images/
+Allow: /api/cities
+Allow: /api/mandals
+
+Sitemap: https://ganeshmandal.in/sitemap.xml

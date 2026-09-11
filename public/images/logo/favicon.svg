@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2A3"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="saffronGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF8A00"/>
+      <stop offset="50%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+    <linearGradient id="bgCircle" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2D1500"/>
+      <stop offset="100%" stop-color="#140A00"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#bgCircle)" stroke="url(#goldGrad)" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="url(#saffronGrad)" stroke-width="1.2" stroke-dasharray="2 3"/>
+  <path d="M32 11 L34 17 L30 17 Z" fill="url(#saffronGrad)"/>
+  <circle cx="32" cy="18" r="1.5" fill="#EF4444"/>
+  <path d="M25 21 C27 16, 37 16, 39 21 L37 24 C35 23, 29 23, 27 24 Z" fill="url(#goldGrad)"/>
+  <path d="M23 24 C27 22, 37 22, 41 24 C43 27, 43 30, 41 33 C38 32, 26 32, 23 33 C21 30, 21 27, 23 24 Z" fill="url(#goldGrad)"/>
+  <path d="M30 32 C30 39, 32 46, 38 46 C42 46, 44 42, 42 39 C40 38, 38 40, 37 42 C33 42, 32 38, 32 32 Z" fill="url(#goldGrad)"/>
+  <circle cx="42" cy="39" r="2.2" fill="#FDE047"/>
+  <path d="M23 25 C16 26, 16 33, 22 35 C23 33, 23 28, 23 25 Z" fill="url(#goldGrad)" opacity="0.9"/>
+  <path d="M41 25 C48 26, 48 33, 42 35 C41 33, 41 28, 41 25 Z" fill="url(#goldGrad)" opacity="0.9"/>
+  <path d="M31 26 Q32 25 33 26 Q32 29 31 26 Z" fill="#DC2626"/>
+</svg>

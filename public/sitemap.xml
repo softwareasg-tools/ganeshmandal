@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:geo="http://www.google.com/geo/schemas/sitemap/1.0"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Home & Core Portals -->
+  <url>
+    <loc>https://ganeshmandal.in/</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Pune Portal -->
+  <url>
+    <loc>https://ganeshmandal.in/?city=pune</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Mumbai Portal -->
+  <url>
+    <loc>https://ganeshmandal.in/?city=mumbai</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Devotee Resource Hub & Eco-Idols -->
+  <url>
+    <loc>https://ganeshmandal.in/?guide=eco-idols</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Major Mandals Deep Links -->
+  <url>
+    <loc>https://ganeshmandal.in/?mandal=mandal_pune_dagdusheth</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://ganeshmandal.in/images/mandals/dagdusheth_idol.jpg</image:loc>
+      <image:title>Shreemant Dagdusheth Halwai Ganpati Sacred Murti</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://ganeshmandal.in/?mandal=mandal_mumbai_lalbaug</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://ganeshmandal.in/images/mandals/lalbaug_idol.jpg</image:loc>
+      <image:title>Lalbaugcha Raja Sacred Murti Darshan</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://ganeshmandal.in/?mandal=mandal_mumbai_ganesh_galli</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://ganeshmandal.in/images/mandals/ganeshgalli_idol.jpg</image:loc>
+      <image:title>Mumbaicha Raja Ganesh Galli Sacred Murti</image:title>
+    </image:image>
+  </url>
+
+  <url>
+    <loc>https://ganeshmandal.in/?mandal=mandal_pune_kasba</loc>
+    <lastmod>2026-09-11</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://ganeshmandal.in/images/mandals/kasba_idol.jpg</image:loc>
+      <image:title>Kasba Ganpati Gramdaivat Sacred Murti</image:title>
+    </image:image>
+  </url>
+</urlset>

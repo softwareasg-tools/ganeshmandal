@@ -132,7 +132,9 @@ class FestivalApp {
       if (mapEl && mapEl.offsetWidth > 0 && mapEl.offsetHeight > 0) {
         this.map.flyTo([lat, lng], zoom, { duration });
       } else {
-        this.map.setView([lat, lng], zoom);
+        // Map container is hidden on mobile rankings scroll.
+        // Store target coords safely without calling Leaflet methods on hidden DOM.
+        this._pendingMapCenter = { lat, lng, zoom };
       }
     } catch (err) {
       console.warn('[Map] safeMapFlyTo bypassed map error:', err);
@@ -411,26 +413,34 @@ class FestivalApp {
         </div>
 
         <div class="card-action-row">
-          <button class="btn-card-action btn-stand-front card-pov-btn" title="Stand in front of Bappa">
+          <button class="btn-card-action btn-stand-front card-pov-btn" type="button" title="Stand in front of Bappa">
             <span>👁️ Stand in Front of Bappa</span>
           </button>
-          <button class="btn-card-action card-map-btn" title="View mandal on live map">
+          <button class="btn-card-action card-map-btn" type="button" title="View mandal on live map">
             <span>🗺️ Map</span>
           </button>
         </div>
       `;
 
-      // Stand in Front Button Handler
-      card.querySelector('.card-pov-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.openPOVModal(mandal.id, 'crowd');
-      });
+      // Stand in Front Button Handler (Touch & Click Safe)
+      const povBtn = card.querySelector('.card-pov-btn');
+      if (povBtn) {
+        povBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          this.openPOVModal(mandal.id, 'crowd');
+        });
+      }
 
       // View on Map Button Handler
-      card.querySelector('.card-map-btn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.switchToMobileTab('map', mandal);
-      });
+      const mapBtn = card.querySelector('.card-map-btn');
+      if (mapBtn) {
+        mapBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          this.switchToMobileTab('map', mandal);
+        });
+      }
 
       // Card Body Click Handler
       card.addEventListener('click', () => {
@@ -839,7 +849,7 @@ class FestivalApp {
   // First-Person Street & Pandal POV ("Stand in Front of Mandal")
   // -------------------------------------------------------------
   async openPOVModal(mandalId, initialPane = 'crowd') {
-    let mandal = this.mandals.find((m) => m.id === mandalId);
+    let mandal = (this.mandals || []).find((m) => m.id === mandalId);
     if (!mandal) {
       try {
         const res = await fetch(`/api/mandals/${mandalId}`);
@@ -852,7 +862,7 @@ class FestivalApp {
       }
     }
     if (!mandal) {
-      mandal = this.mandals[0];
+      mandal = (this.mandals && this.mandals.length > 0) ? this.mandals[0] : null;
     }
     if (!mandal) return;
 
@@ -860,9 +870,19 @@ class FestivalApp {
     this.povAngle = 'sanctum';
     this.darshanZoomIndex = 0;
 
-    // Fly map down to street coordinates
-    this.safeMapFlyTo(mandal.latitude, mandal.longitude, 17, 1.0);
+    // 1. Immediately open modal so devotee gets instant 60fps feedback
+    const povModalEl = document.getElementById('pov-street-modal');
+    if (povModalEl) {
+      povModalEl.classList.add('open');
+      const winEl = povModalEl.querySelector('.modal-window');
+      if (winEl) winEl.style.transform = 'translateY(0)';
+    }
 
+    if (!window._isPopStateHandling) {
+      history.pushState({ modal: 'pov', mandalId: mandal.id }, '', `#mandal_${mandal.id}`);
+    }
+
+    // 2. Set Header details
     const modalNameEl = document.getElementById('pov-mandal-name');
     if (modalNameEl) {
       modalNameEl.textContent = `${mandal.name} — Street & Pandal POV`;
@@ -873,30 +893,38 @@ class FestivalApp {
       badgeEl.textContent = '🟢 DARSHAN OPEN';
     }
 
-    // 1. Setup Pane 1: Genuine Live Wait Time & Crowd Rush Dashboard
-    this.setupRushIntelPane(mandal);
+    // 3. Safe Map FlyTo (no-ops safely if map is hidden)
+    this.safeMapFlyTo(mandal.latitude, mandal.longitude, 17, 1.0);
 
-    // 2. Setup Pane 2: Live Road Traffic (Top 3 Roads within 1km)
-    this.setupTrafficPane(mandal);
-
-    // 3. Setup Pane 3: Authentic Sacred Murti Darshan
-    this.setupMurtiDarshanPane(mandal);
-
-    // 4. Switch to initial pane tab
-    this.switchPOVTab(initialPane);
-
-    // 5. Fetch and populate strictly the last 5 social media snaps
-    this.loadSocialMediaAndStreams(mandal.id);
-
-    const povModalEl = document.getElementById('pov-street-modal');
-    if (povModalEl) {
-      povModalEl.classList.add('open');
-      const winEl = povModalEl.querySelector('.modal-window');
-      if (winEl) winEl.style.transform = 'translateY(0)';
+    // 4. Safely initialize panes in isolation
+    try {
+      this.setupRushIntelPane(mandal);
+    } catch (err) {
+      console.error('[POV] setupRushIntelPane failed:', err);
     }
 
-    if (!window._isPopStateHandling) {
-      history.pushState({ modal: 'pov', mandalId: mandal.id }, '', `#mandal_${mandal.id}`);
+    try {
+      this.setupMurtiDarshanPane(mandal);
+    } catch (err) {
+      console.error('[POV] setupMurtiDarshanPane failed:', err);
+    }
+
+    try {
+      this.switchPOVTab(initialPane);
+    } catch (err) {
+      console.error('[POV] switchPOVTab failed:', err);
+    }
+
+    try {
+      this.setupTrafficPane(mandal);
+    } catch (err) {
+      console.error('[POV] setupTrafficPane failed:', err);
+    }
+
+    try {
+      this.loadSocialMediaAndStreams(mandal.id);
+    } catch (err) {
+      console.error('[POV] loadSocialMediaAndStreams failed:', err);
     }
   }
 
@@ -1082,19 +1110,23 @@ class FestivalApp {
     if (!selectorEl) return;
     selectorEl.innerHTML = '';
 
-    // Initialize Leaflet mini-map once if container exists
-    if (!this.trafficMiniMap && window.L && trafficMiniMapEl) {
-      this.trafficMiniMap = L.map('traffic-road-mini-map', {
-        center: [mandal.latitude, mandal.longitude],
-        zoom: 16,
-        zoomControl: false,
-        attributionControl: false,
-      });
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        className: 'dark-tactical-tile',
-        maxZoom: 19,
-      }).addTo(this.trafficMiniMap);
-      this.trafficMiniMarkerGroup = L.layerGroup().addTo(this.trafficMiniMap);
+    // Initialize Leaflet mini-map safely if container is visible and ready
+    if (!this.trafficMiniMap && window.L && trafficMiniMapEl && trafficMiniMapEl.offsetWidth > 0 && !trafficMiniMapEl._leaflet_id) {
+      try {
+        this.trafficMiniMap = L.map('traffic-road-mini-map', {
+          center: [mandal.latitude, mandal.longitude],
+          zoom: 16,
+          zoomControl: false,
+          attributionControl: false,
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          className: 'dark-tactical-tile',
+          maxZoom: 19,
+        }).addTo(this.trafficMiniMap);
+        this.trafficMiniMarkerGroup = L.layerGroup().addTo(this.trafficMiniMap);
+      } catch (err) {
+        console.warn('[POV] Mini-map init deferred:', err);
+      }
     }
 
     const selectRoad = (road, cardEl) => {
@@ -1110,46 +1142,50 @@ class FestivalApp {
       }
 
       // Update interactive mini-map if available
-      if (this.trafficMiniMap && this.trafficMiniMarkerGroup) {
-        this.trafficMiniMarkerGroup.clearLayers();
-        const mandalPin = L.circleMarker([mandal.latitude, mandal.longitude], {
-          radius: 8,
-          color: '#ff9933',
-          fillColor: '#ff6b00',
-          fillOpacity: 1.0,
-          weight: 2,
-        }).addTo(this.trafficMiniMarkerGroup);
-        mandalPin.bindTooltip(`📍 ${mandal.name}`, { permanent: true, direction: 'top', className: 'tactical-tooltip' });
+      try {
+        if (this.trafficMiniMap && this.trafficMiniMarkerGroup) {
+          this.trafficMiniMarkerGroup.clearLayers();
+          const mandalPin = L.circleMarker([mandal.latitude, mandal.longitude], {
+            radius: 8,
+            color: '#ff9933',
+            fillColor: '#ff6b00',
+            fillOpacity: 1.0,
+            weight: 2,
+          }).addTo(this.trafficMiniMarkerGroup);
+          mandalPin.bindTooltip(`📍 ${mandal.name}`, { permanent: true, direction: 'top', className: 'tactical-tooltip' });
 
-        const distM = road.distance_meters || 250;
-        const offsetLat = mandal.latitude + (distM / 111000);
-        const roadColorHex = road.color === 'blue' ? '#3b82f6' : (road.color === 'red' ? '#ef4444' : '#f59e0b');
+          const distM = road.distance_meters || 250;
+          const offsetLat = mandal.latitude + (distM / 111000);
+          const roadColorHex = road.color === 'blue' ? '#3b82f6' : (road.color === 'red' ? '#ef4444' : '#f59e0b');
 
-        const roadPin = L.circleMarker([offsetLat, mandal.longitude], {
-          radius: 7,
-          color: roadColorHex,
-          fillColor: roadColorHex,
-          fillOpacity: 0.9,
-          weight: 2,
-        }).addTo(this.trafficMiniMarkerGroup);
-        roadPin.bindTooltip(`🚦 ${road.name} (${road.avg_speed})`, { permanent: false, direction: 'bottom' });
+          const roadPin = L.circleMarker([offsetLat, mandal.longitude], {
+            radius: 7,
+            color: roadColorHex,
+            fillColor: roadColorHex,
+            fillOpacity: 0.9,
+            weight: 2,
+          }).addTo(this.trafficMiniMarkerGroup);
+          roadPin.bindTooltip(`🚦 ${road.name} (${road.avg_speed})`, { permanent: false, direction: 'bottom' });
 
-        L.polyline([[mandal.latitude, mandal.longitude], [offsetLat, mandal.longitude]], {
-          color: roadColorHex,
-          weight: 3,
-          dashArray: '4, 6',
-          opacity: 0.85,
-        }).addTo(this.trafficMiniMarkerGroup);
+          L.polyline([[mandal.latitude, mandal.longitude], [offsetLat, mandal.longitude]], {
+            color: roadColorHex,
+            weight: 3,
+            dashArray: '4, 6',
+            opacity: 0.85,
+          }).addTo(this.trafficMiniMarkerGroup);
 
-        setTimeout(() => {
-          if (this.trafficMiniMap) {
-            this.trafficMiniMap.invalidateSize();
-            this.trafficMiniMap.setView([mandal.latitude, mandal.longitude], 16);
-          }
-        }, 120);
-      } else if (trafficIframe) {
-        const query = encodeURIComponent(road.maps_query || `${road.name}, ${mandal.address || mandal.name}`);
-        trafficIframe.src = `https://maps.google.com/maps?q=${query}&t=m&z=16&output=embed`;
+          setTimeout(() => {
+            if (this.trafficMiniMap && trafficMiniMapEl && trafficMiniMapEl.offsetWidth > 0) {
+              this.trafficMiniMap.invalidateSize();
+              this.trafficMiniMap.setView([mandal.latitude, mandal.longitude], 16);
+            }
+          }, 120);
+        } else if (trafficIframe) {
+          const query = encodeURIComponent(road.maps_query || `${road.name}, ${mandal.address || mandal.name}`);
+          trafficIframe.src = `https://maps.google.com/maps?q=${query}&t=m&z=16&output=embed`;
+        }
+      } catch (err) {
+        console.warn('[POV] selectRoad mini-map error:', err);
       }
 
       if (trafficMapsLink) {
@@ -1195,6 +1231,40 @@ class FestivalApp {
     document.querySelectorAll('.pov-view-pane').forEach((p) => {
       p.classList.toggle('active', p.id === `pane-pov-${paneName}`);
     });
+
+    if (paneName === 'traffic') {
+      const trafficMiniMapEl = document.getElementById('traffic-road-mini-map');
+      if (!this.trafficMiniMap && window.L && trafficMiniMapEl && !trafficMiniMapEl._leaflet_id && this.povMandal) {
+        try {
+          this.trafficMiniMap = L.map('traffic-road-mini-map', {
+            center: [this.povMandal.latitude, this.povMandal.longitude],
+            zoom: 16,
+            zoomControl: false,
+            attributionControl: false,
+          });
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            className: 'dark-tactical-tile',
+            maxZoom: 19,
+          }).addTo(this.trafficMiniMap);
+          this.trafficMiniMarkerGroup = L.layerGroup().addTo(this.trafficMiniMap);
+          this.setupTrafficPane(this.povMandal);
+        } catch (e) {
+          console.warn('[POV] Mini-map init in switchPOVTab failed:', e);
+        }
+      }
+      setTimeout(() => {
+        try {
+          if (this.trafficMiniMap) {
+            this.trafficMiniMap.invalidateSize();
+            if (this.povMandal) {
+              this.trafficMiniMap.setView([this.povMandal.latitude, this.povMandal.longitude], 16);
+            }
+          }
+        } catch (e) {
+          console.warn('[POV] Invalidate mini-map failed:', e);
+        }
+      }, 150);
+    }
   }
 
   updatePOVTelemetry() {

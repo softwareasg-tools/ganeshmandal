@@ -11,7 +11,6 @@ RUN npm ci --omit=dev
 COPY server/ ./server/
 COPY public/ ./public/
 COPY src/ ./src/
-COPY data/ ./data/
 
 # Set production environment
 ENV NODE_ENV=production

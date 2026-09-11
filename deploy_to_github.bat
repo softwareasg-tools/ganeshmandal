@@ -12,13 +12,7 @@ echo.
 
 set REPO_URL=%1
 if "%REPO_URL%"=="" (
-    set /p REPO_URL="Enter your GitHub Repository URL (e.g., https://github.com/softwareasg/ganeshmandal.git): "
-)
-
-if "%REPO_URL%"=="" (
-    echo [ERROR] No GitHub repository URL provided. Aborting.
-    pause
-    exit /b 1
+    set REPO_URL=https://github.com/softwareasg-tools/ganeshmandal.git
 )
 
 echo.

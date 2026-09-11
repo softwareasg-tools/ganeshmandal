@@ -265,13 +265,31 @@ class FestivalApp {
     const cityNameEl = document.getElementById('stat-city-name');
     const totalEl = document.getElementById('stat-total-mandals');
     const avgDensityEl = document.getElementById('stat-avg-density');
+    const peekCountEl = document.getElementById('sheet-peek-count');
 
     if (cityNameEl) cityNameEl.textContent = this.currentCity === 'pune' ? 'Pune' : 'Mumbai';
     if (totalEl) totalEl.textContent = this.mandals.length;
+    if (peekCountEl) peekCountEl.textContent = `${this.mandals.length} Mandals`;
 
     if (this.mandals.length && avgDensityEl) {
       const avg = Math.round(this.mandals.reduce((sum, m) => sum + (m.crowd_density || 0), 0) / this.mandals.length);
-      avgDensityEl.textContent = `${avg}%`;
+      const rushLabel = avg < 20 ? 'Khali' : avg < 50 ? 'Thoda Rush' : 'Full Rush';
+      avgDensityEl.textContent = `${avg}% (${rushLabel})`;
+      avgDensityEl.style.color = avg < 20 ? '#10b981' : avg < 50 ? '#f59e0b' : '#ef4444';
+
+      const statusEl = document.querySelector('#map-city-stats strong[style*="color"]');
+      if (statusEl) {
+        if (avg < 20) {
+          statusEl.textContent = 'Khali • Night Lull (Aarti Closed)';
+          statusEl.style.color = '#10b981';
+        } else if (avg < 50) {
+          statusEl.textContent = 'Thoda Rush • Darshan Open';
+          statusEl.style.color = '#f59e0b';
+        } else {
+          statusEl.textContent = 'Full Rush • Peak Hours';
+          statusEl.style.color = '#ef4444';
+        }
+      }
     }
   }
 
@@ -313,7 +331,12 @@ class FestivalApp {
         trendClass = 'trend-down';
       }
 
-      const density = mandal.crowd_density || 50;
+      const density = mandal.crowd_density ?? 10;
+      const waitMins = mandal.estimated_wait_minutes ?? 2;
+      const rushText = mandal.rush_category || (density < 20 ? 'Khali' : density < 50 ? 'Thoda Rush' : 'Full Rush');
+      const rushColor = mandal.rush_color || (density < 20 ? '#10b981' : density < 50 ? '#f59e0b' : '#ef4444');
+      const periodLabel = mandal.period_label || (density < 20 ? 'Aarti Closed for Night' : 'Active Queue');
+
       let fillClass = 'crowd-bar-green';
       if (density > 85) fillClass = 'crowd-bar-purple';
       else if (density > 65) fillClass = 'crowd-bar-red';
@@ -354,7 +377,8 @@ class FestivalApp {
           <div class="crowd-bar-mini" title="Rush level: ${density}%">
             <div class="crowd-bar-fill ${fillClass}" style="width: ${density}%;"></div>
           </div>
-          <span style="font-size:11px; color:var(--text-muted);">${density}% rush • ~${mandal.estimated_wait_minutes || 15}m wait</span>
+          <span style="font-size:11px; font-weight:700; color:${rushColor};">${rushText} (${density}%) • ~${waitMins}m wait</span>
+          <span style="font-size:10px; color:var(--text-dim); margin-left:4px;">• ${periodLabel}</span>
         </div>
       `;
 
@@ -461,31 +485,99 @@ class FestivalApp {
   // Mobile-First Navigation Bindings
   // -------------------------------------------------------------
   bindMobileNavigation() {
+    const sheet = document.getElementById('ranking-panel');
+    const handle = document.getElementById('sheet-drag-handle');
     const navButtons = document.querySelectorAll('.mobile-nav-btn');
-    const mapPanel = document.getElementById('map-panel');
-    const rankingPanel = document.getElementById('ranking-panel');
+
+    if (!sheet) return;
+
+    // Set initial snap state on mobile: Peek mode (120px) so map is prominent
+    if (window.innerWidth <= 768) {
+      sheet.classList.add('sheet-peek');
+      sheet.classList.remove('sheet-half', 'sheet-full');
+    }
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth <= 768 && !sheet.classList.contains('sheet-peek') && !sheet.classList.contains('sheet-half') && !sheet.classList.contains('sheet-full')) {
+        sheet.classList.add('sheet-peek');
+      } else if (window.innerWidth > 768) {
+        sheet.classList.remove('sheet-peek', 'sheet-half', 'sheet-full');
+      }
+    });
+
+    const setSheetState = (state) => {
+      sheet.classList.remove('sheet-peek', 'sheet-half', 'sheet-full');
+      sheet.classList.add(`sheet-${state}`);
+      const hint = document.getElementById('sheet-peek-hint');
+      if (hint) {
+        hint.textContent = state === 'full' ? 'Swipe down to map ⬇' : state === 'half' ? 'Swipe up for all ⬆' : 'Swipe up for list ⬆';
+      }
+
+      // Update mobile bottom nav active indicator
+      const navMap = document.getElementById('mob-nav-map');
+      const navMandals = document.getElementById('mob-nav-mandals');
+      if (state === 'peek') {
+        navButtons.forEach(b => b.classList.remove('active'));
+        navMap?.classList.add('active');
+      } else {
+        navButtons.forEach(b => b.classList.remove('active'));
+        navMandals?.classList.add('active');
+      }
+    };
+
+    if (handle) {
+      handle.addEventListener('click', () => {
+        if (sheet.classList.contains('sheet-peek')) {
+          setSheetState('half');
+        } else if (sheet.classList.contains('sheet-half')) {
+          setSheetState('full');
+        } else {
+          setSheetState('peek');
+        }
+      });
+
+      // Flutter swipe gestures (touch drag)
+      let touchStartY = 0;
+      handle.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+
+      handle.addEventListener('touchend', (e) => {
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+        if (deltaY < -30) {
+          // Swiped up
+          if (sheet.classList.contains('sheet-peek')) setSheetState('half');
+          else if (sheet.classList.contains('sheet-half')) setSheetState('full');
+        } else if (deltaY > 30) {
+          // Swiped down
+          if (sheet.classList.contains('sheet-full')) setSheetState('half');
+          else if (sheet.classList.contains('sheet-half')) setSheetState('peek');
+        }
+      }, { passive: true });
+    }
 
     navButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
-        navButtons.forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-
         const tab = btn.dataset.tab;
         if (tab === 'map') {
-          if (mapPanel) mapPanel.classList.remove('mobile-hidden');
-          if (rankingPanel) rankingPanel.classList.add('mobile-hidden');
-          setTimeout(() => this.map.invalidateSize(), 150);
+          setSheetState('peek');
+          if (this.map) {
+            this.map.invalidateSize();
+            const coords = CITY_COORDS[this.currentCity];
+            if (coords) this.map.setView([coords.lat, coords.lng], coords.zoom);
+          }
         } else if (tab === 'rankings') {
-          if (mapPanel) mapPanel.classList.add('mobile-hidden');
-          if (rankingPanel) rankingPanel.classList.remove('mobile-hidden');
-        } else if (tab === 'darshan') {
-          const targetId = this.selectedMandal?.id || this.mandals[0]?.id;
-          if (targetId) this.openPOVModal(targetId, 'crowd');
-        } else if (tab === 'traffic') {
-          const targetId = this.selectedMandal?.id || this.mandals[0]?.id;
-          if (targetId) this.openPOVModal(targetId, 'traffic');
-        } else if (tab === 'suggest') {
-          this.openCommunityModal('suggest');
+          if (sheet.classList.contains('sheet-full')) {
+            setSheetState('half');
+          } else {
+            setSheetState('full');
+          }
+        } else if (tab === 'guide') {
+          const guideModal = document.getElementById('modal-devotee-guide');
+          if (guideModal) guideModal.classList.add('open');
+        } else if (tab === 'cert') {
+          const certModal = document.getElementById('modal-cert-details');
+          if (certModal) certModal.classList.add('open');
         }
       });
     });

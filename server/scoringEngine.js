@@ -10,6 +10,8 @@
  * - Real-time leaderboard ranking with trend calculation (↑, ↓, =)
  */
 
+import { calculateDynamicCrowd } from './crowdModel.js';
+
 export class ScoringEngine {
   constructor(weights = {}) {
     this.weights = {
@@ -202,13 +204,13 @@ export class ScoringEngine {
     if (!mandals.length) return [];
 
     const scored = mandals.map((mandal) => {
-      const latestCrowd = db.getLatestCrowdObservation(mandal.id);
+      const dynamicCrowd = calculateDynamicCrowd(mandal);
       const latestStage = db.getLatestStageObservation(mandal.id);
       const existingScore = db.getPopularityScore(mandal.id);
 
-      const crowdScore = this.calculateCrowdScore(latestCrowd);
-      const { popularityScore, signals } = this.calculatePopularityScore(mandal, latestCrowd, latestStage);
-      const waitMins = latestCrowd?.estimated_wait_minutes || 15;
+      const crowdScore = this.calculateCrowdScore(dynamicCrowd);
+      const { popularityScore, signals } = this.calculatePopularityScore(mandal, dynamicCrowd, latestStage);
+      const waitMins = dynamicCrowd.estimated_wait_minutes;
       const experienceScore = this.calculateExperienceScore(popularityScore, crowdScore, latestStage, waitMins);
 
       return {
@@ -217,11 +219,11 @@ export class ScoringEngine {
         popularityScore,
         experienceScore,
         estimatedWaitMins: waitMins,
-        latestCrowd,
+        latestCrowd: dynamicCrowd,
         latestStage,
         previousRank: existingScore?.current_rank || 0,
         signals,
-        dataQuality: latestCrowd?.data_quality || 'VERIFIED',
+        dataQuality: dynamicCrowd.data_quality,
       };
     });
 

@@ -15,6 +15,7 @@ import { cvEngine } from './cvEngine.js';
 import { recommendationEngine } from './recommendationEngine.js';
 import { weatherService } from './weatherService.js';
 import { socialAggregator } from './socialAggregator.js';
+import { calculateDynamicCrowd } from './crowdModel.js';
 
 export const apiRouter = express.Router();
 
@@ -100,7 +101,7 @@ apiRouter.get('/mandals', (req, res) => {
 
   const enriched = mandals.map((mandal) => {
     const score = db.getPopularityScore(mandal.id);
-    const crowd = db.getLatestCrowdObservation(mandal.id);
+    const dynamicCrowd = calculateDynamicCrowd(mandal);
     const feeds = db.getFeedsByMandal(mandal.id);
     const media = socialAggregator.getMediaForMandal(mandal.id);
     const hasActiveStream = (media?.stream_status === 'BROADCASTING' || media?.stream_status === 'LIVE') && Boolean(media?.official_stream_embed);
@@ -114,12 +115,17 @@ apiRouter.get('/mandals', (req, res) => {
       popularity_score: score?.popularity_score || 50,
       crowd_score: score?.crowd_score || 50,
       experience_score: score?.experience_score || 50,
-      estimated_wait_minutes: crowd?.estimated_wait_minutes || 15,
-      crowd_density: crowd?.density_score || 50,
+      estimated_wait_minutes: dynamicCrowd.estimated_wait_minutes,
+      crowd_density: dynamicCrowd.density_score,
+      rush_category: dynamicCrowd.rush_category,
+      rush_color: dynamicCrowd.rush_color,
+      period_label: dynamicCrowd.period_label,
+      road_status: dynamicCrowd.road_status,
+      avg_speed_kmh: dynamicCrowd.avg_speed_kmh,
       has_live_camera: hasActiveStream,
       feed_count: feeds.length,
-      data_quality: crowd?.data_quality || 'VERIFIED',
-      last_updated: score?.last_updated || crowd?.timestamp || new Date().toISOString(),
+      data_quality: dynamicCrowd.data_quality,
+      last_updated: score?.last_updated || dynamicCrowd.timestamp || new Date().toISOString(),
     };
   });
 
@@ -148,7 +154,7 @@ apiRouter.get('/cities/:city/mandals', (req, res) => {
   const mandals = db.getMandalsByCity(city.id);
   const enriched = mandals.map((mandal) => {
     const score = db.getPopularityScore(mandal.id);
-    const crowd = db.getLatestCrowdObservation(mandal.id);
+    const dynamicCrowd = calculateDynamicCrowd(mandal);
     const feeds = db.getFeedsByMandal(mandal.id);
     const media = socialAggregator.getMediaForMandal(mandal.id);
     // Real live stream active check
@@ -164,12 +170,17 @@ apiRouter.get('/cities/:city/mandals', (req, res) => {
       popularity_score: score?.popularity_score || 50,
       crowd_score: score?.crowd_score || 50,
       experience_score: score?.experience_score || 50,
-      estimated_wait_minutes: crowd?.estimated_wait_minutes || 15,
-      crowd_density: crowd?.density_score || 50,
+      estimated_wait_minutes: dynamicCrowd.estimated_wait_minutes,
+      crowd_density: dynamicCrowd.density_score,
+      rush_category: dynamicCrowd.rush_category,
+      rush_color: dynamicCrowd.rush_color,
+      period_label: dynamicCrowd.period_label,
+      road_status: dynamicCrowd.road_status,
+      avg_speed_kmh: dynamicCrowd.avg_speed_kmh,
       has_live_camera: hasLiveCamera,
       feed_count: feeds.length,
-      data_quality: crowd?.data_quality || 'VERIFIED',
-      last_updated: score?.last_updated || crowd?.timestamp || new Date().toISOString(),
+      data_quality: dynamicCrowd.data_quality,
+      last_updated: score?.last_updated || dynamicCrowd.timestamp || new Date().toISOString(),
     };
   });
 
@@ -367,14 +378,14 @@ apiRouter.get('/heatmap/:city', (req, res) => {
 
   const mandals = db.getMandalsByCity(city.id);
   const heatmapPoints = mandals.map((mandal) => {
-    const crowd = db.getLatestCrowdObservation(mandal.id);
+    const dynamicCrowd = calculateDynamicCrowd(mandal);
     const score = db.getPopularityScore(mandal.id);
 
-    const crowdDensity = crowd?.density_score || 50;
+    const crowdDensity = dynamicCrowd.density_score;
     const popularity = score?.popularity_score || 50;
 
     // Heatmap intensity normalized to 0.0 - 1.0
-    const intensity = Math.min(1.0, Math.max(0.1, crowdDensity / 100));
+    const intensity = Math.min(1.0, Math.max(0.05, crowdDensity / 100));
 
     return {
       mandal_id: mandal.id,
@@ -382,6 +393,9 @@ apiRouter.get('/heatmap/:city', (req, res) => {
       lat: mandal.latitude,
       lng: mandal.longitude,
       crowd_density: crowdDensity,
+      rush_category: dynamicCrowd.rush_category,
+      rush_color: dynamicCrowd.rush_color,
+      road_status: dynamicCrowd.road_status,
       popularity_score: popularity,
       intensity,
       color_category:

@@ -259,8 +259,23 @@
         </div>
       </div>
 
-      <!-- Right Panel: Live Popularity/Ranking Leaderboard (35%) -->
+      <!-- Right Panel: Live Popularity/Ranking Leaderboard (Transforms to Flutter Draggable Bottom Sheet on Mobile) -->
       <div class="ranking-panel" id="ranking-panel">
+        <!-- Flutter-style Drag Handle Bar (Visible on Mobile) -->
+        <div class="sheet-drag-handle-bar" id="sheet-drag-handle" role="button" aria-label="Toggle mandals list" tabindex="0">
+          <div class="sheet-drag-pill"></div>
+          <div class="sheet-peek-row">
+            <div class="sheet-peek-left">
+              <span class="sheet-peek-icon">🏆</span>
+              <span class="sheet-peek-title">Mandals & Queues</span>
+              <span class="sheet-peek-tag" id="sheet-peek-count">25 Mandals</span>
+            </div>
+            <div class="sheet-peek-right">
+              <span class="sheet-peek-hint" id="sheet-peek-hint">Swipe up for list ⬆</span>
+            </div>
+          </div>
+        </div>
+
         <div class="ranking-header">
           <div class="ranking-title-row">
             <div class="ranking-title">
@@ -279,27 +294,31 @@
       </div>
     </div>
 
-    <!-- Mobile-First Sticky Bottom Navigation -->
-    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
-      <button class="mobile-nav-btn active" data-tab="map">
-        <span class="mobile-nav-icon">🗺️</span>
+    <!-- Flutter-Style Material 3 Bottom Navigation Bar -->
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
+      <button class="mobile-nav-btn active" data-tab="map" id="mob-nav-map" aria-label="Map View">
+        <div class="mobile-nav-pill">
+          <span class="mobile-nav-icon">🗺️</span>
+        </div>
         <span class="mobile-nav-label">Map</span>
       </button>
-      <button class="mobile-nav-btn" data-tab="rankings">
-        <span class="mobile-nav-icon">🏆</span>
-        <span class="mobile-nav-label">Top Mandals</span>
+      <button class="mobile-nav-btn" data-tab="rankings" id="mob-nav-mandals" aria-label="Mandals List">
+        <div class="mobile-nav-pill">
+          <span class="mobile-nav-icon">🏆</span>
+        </div>
+        <span class="mobile-nav-label">Mandals</span>
       </button>
-      <button class="mobile-nav-btn" data-tab="darshan">
-        <span class="mobile-nav-icon">🪔</span>
-        <span class="mobile-nav-label">Darshan</span>
+      <button class="mobile-nav-btn" data-tab="guide" id="mob-nav-guide" aria-label="Devotee Guide">
+        <div class="mobile-nav-pill">
+          <span class="mobile-nav-icon">🌿</span>
+        </div>
+        <span class="mobile-nav-label">Guide</span>
       </button>
-      <button class="mobile-nav-btn" data-tab="traffic">
-        <span class="mobile-nav-icon">🚦</span>
-        <span class="mobile-nav-label">Road Traffic</span>
-      </button>
-      <button class="mobile-nav-btn" data-tab="suggest" id="mobile-nav-btn-suggest">
-        <span class="mobile-nav-icon">📍</span>
-        <span class="mobile-nav-label">Suggest</span>
+      <button class="mobile-nav-btn" data-tab="cert" id="mob-nav-cert" aria-label="Security Audit">
+        <div class="mobile-nav-pill">
+          <span class="mobile-nav-icon">🛡️</span>
+        </div>
+        <span class="mobile-nav-label">Security</span>
       </button>
     </nav>
   </div>

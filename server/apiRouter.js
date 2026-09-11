@@ -108,6 +108,7 @@ apiRouter.get('/mandals', (req, res) => {
 
     return {
       ...mandal,
+      top_roads: dynamicCrowd.top_roads,
       current_rank: score?.current_rank || null,
       previous_rank: score?.previous_rank || null,
       rank_change: score?.rank_change || 0,
@@ -163,6 +164,7 @@ apiRouter.get('/cities/:city/mandals', (req, res) => {
 
     return {
       ...mandal,
+      top_roads: dynamicCrowd.top_roads,
       current_rank: score?.current_rank || null,
       previous_rank: score?.previous_rank || null,
       rank_change: score?.rank_change || 0,
@@ -210,11 +212,25 @@ apiRouter.get('/mandals/:id', (req, res) => {
   const stage = db.getLatestStageObservation(mandal.id);
   const feeds = db.getFeedsByMandal(mandal.id);
   const events = db.getFestivalEvents(mandal.id);
+  const dynamicCrowd = calculateDynamicCrowd(mandal);
+
+  const enrichedMandal = {
+    ...mandal,
+    top_roads: dynamicCrowd.top_roads,
+    estimated_wait_minutes: dynamicCrowd.estimated_wait_minutes,
+    crowd_density: dynamicCrowd.density_score,
+    rush_category: dynamicCrowd.rush_category,
+    rush_color: dynamicCrowd.rush_color,
+    period_label: dynamicCrowd.period_label,
+    road_status: dynamicCrowd.road_status,
+    avg_speed_kmh: dynamicCrowd.avg_speed_kmh,
+    data_quality: dynamicCrowd.data_quality,
+  };
 
   res.json({
     success: true,
     data: {
-      mandal,
+      mandal: enrichedMandal,
       score,
       crowd,
       stage,

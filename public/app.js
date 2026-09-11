@@ -125,6 +125,20 @@ class FestivalApp {
     }
   }
 
+  safeMapFlyTo(lat, lng, zoom, duration = 1.0) {
+    if (!this.map) return;
+    try {
+      const mapEl = document.getElementById('festival-map');
+      if (mapEl && mapEl.offsetWidth > 0 && mapEl.offsetHeight > 0) {
+        this.map.flyTo([lat, lng], zoom, { duration });
+      } else {
+        this.map.setView([lat, lng], zoom);
+      }
+    } catch (err) {
+      console.warn('[Map] safeMapFlyTo bypassed map error:', err);
+    }
+  }
+
   async loadCityData(citySlug) {
     try {
       const res = await fetch(`/api/cities/${citySlug}/mandals`);
@@ -190,18 +204,34 @@ class FestivalApp {
     });
 
     filtered.forEach((mandal) => {
-      const density = mandal.crowd_density || 50;
+      const density = mandal.crowd_density ?? 15;
       const isFamous = mandal.is_famous;
+
+      let statusClass = 'status-khali';
+      let statusColor = '#10b981';
+      if (density > 85) {
+        statusClass = 'status-jam-packed';
+        statusColor = '#9333ea';
+      } else if (density > 65) {
+        statusClass = 'status-full-rush';
+        statusColor = '#dc2626';
+      } else if (density > 45) {
+        statusClass = 'status-thoda-rush';
+        statusColor = '#f59e0b';
+      } else {
+        statusClass = 'status-khali';
+        statusColor = '#10b981';
+      }
 
       const customIcon = L.divIcon({
         className: 'custom-mandal-marker',
         html: `
-          <div class="marker-beacon-wrap">
-            <div class="marker-pulse-ring"></div>
-            <div class="marker-core ${isFamous ? 'famous' : ''}" title="${mandal.name}">
+          <div class="marker-beacon-wrap ${statusClass}">
+            <div class="marker-pulse-ring" style="border-color: ${statusColor}; box-shadow: 0 0 14px ${statusColor}88;"></div>
+            <div class="marker-core ${isFamous ? 'famous' : ''}" style="border-color: ${statusColor};" title="${mandal.name}">
               🪔
             </div>
-            <div class="marker-rank-badge">#${mandal.current_rank || '-'}</div>
+            <div class="marker-rank-badge" style="background: ${statusColor};">#${mandal.current_rank || '-'}</div>
           </div>
         `,
         iconSize: [38, 38],
@@ -407,7 +437,7 @@ class FestivalApp {
         this.selectedMandal = mandal;
         document.querySelectorAll('.ranking-card').forEach((c) => c.classList.remove('selected'));
         card.classList.add('selected');
-        this.map.flyTo([mandal.latitude, mandal.longitude], 16, { duration: 1.2 });
+        this.safeMapFlyTo(mandal.latitude, mandal.longitude, 16, 1.2);
         this.openPOVModal(mandal.id, 'crowd');
       });
 
@@ -421,38 +451,74 @@ class FestivalApp {
 
       matchingAds.forEach((ad) => {
         const adCard = document.createElement('div');
-        adCard.className = 'ad-card-native';
-        adCard.innerHTML = `
-          <div class="ad-sponsor-top-bar">
-            <div class="ad-sponsor-badge">
-              <span>✨</span>
-              <span>${ad.badge_text || 'OFFICIAL FESTIVAL SWEETS PARTNER'}</span>
-            </div>
-            <span class="ad-slot-tag">Sponsored • Slot #${rankNum}</span>
-          </div>
-          <div class="ad-sponsor-main">
-            <div class="ad-sponsor-avatar">🥟</div>
-            <div class="ad-sponsor-info">
-              <div class="ad-sponsor-title-row">
-                <h3 class="ad-native-sponsor">${ad.sponsor_name}</h3>
-                <span class="ad-est-badge">Est. 1950 • Pune</span>
+        const isHelpline = (ad.badge_text || '').toUpperCase().includes('HELPLINE') || (ad.id || '').includes('bank') || (ad.sponsor_name || '').toLowerCase().includes('bank');
+        adCard.className = `ad-card-native ${isHelpline ? 'type-helpline' : 'type-sweets'}`;
+
+        if (isHelpline) {
+          adCard.innerHTML = `
+            <div class="ad-sponsor-top-bar">
+              <div class="ad-sponsor-badge">
+                <span>🚨</span>
+                <span>${ad.badge_text || 'DEVOTEE HELPLINE & SEVA'}</span>
               </div>
-              <p class="ad-native-desc">${ad.description || 'Authentic Pure Ghee Modaks, Pedhas & Mahaprasad offerings for Ganpati Bappa across Pune & Mumbai.'}</p>
+              <span class="ad-slot-tag">Sponsored • Slot #${rankNum}</span>
             </div>
-          </div>
-          <div class="ad-sponsor-highlights">
-            <span class="ad-pill">🥟 Ukadiche Modak</span>
-            <span class="ad-pill">🥨 Famous Bakarwadi</span>
-            <span class="ad-pill">🥭 Amba Barfi</span>
-            <span class="ad-pill">🛵 Doorstep Delivery</span>
-          </div>
-          <div class="ad-sponsor-footer">
-            <a href="${ad.cta_url || 'https://chitalebandhu.in'}" target="_blank" rel="noopener noreferrer" class="ad-native-cta-btn">
-              <span>🛍️ ${ad.cta_text || 'Order Fresh Prasad & Sweets ↗'}</span>
-            </a>
-            <button type="button" class="ad-native-inquire-link">Partner with us ↗</button>
-          </div>
-        `;
+            <div class="ad-sponsor-main">
+              <div class="ad-sponsor-avatar">📞</div>
+              <div class="ad-sponsor-info">
+                <div class="ad-sponsor-title-row">
+                  <h3 class="ad-native-sponsor">${ad.sponsor_name}</h3>
+                  <span class="ad-est-badge" style="color:#34d399; background:rgba(16,185,129,0.15); font-weight:700;">24x7 Active</span>
+                </div>
+                <p class="ad-native-desc">${ad.description || '24x7 Devotee Aid & Digital Dakshina Seva across major Mandals in Pune & Mumbai. Toll Free: 1800-233-4526.'}</p>
+              </div>
+            </div>
+            <div class="ad-sponsor-highlights">
+              <span class="ad-pill">📞 Toll Free: 1800-233-4526</span>
+              <span class="ad-pill">🚑 Emergency First Aid</span>
+              <span class="ad-pill">💧 Free Water Booths</span>
+              <span class="ad-pill">🪙 Fast UPI Dakshina</span>
+            </div>
+            <div class="ad-sponsor-footer">
+              <a href="tel:18002334526" class="ad-native-cta-btn">
+                <span>📞 Call 24x7 Toll-Free Helpline (1800-233-4526)</span>
+              </a>
+              <button type="button" class="ad-native-inquire-link">Partner with us ↗</button>
+            </div>
+          `;
+        } else {
+          adCard.innerHTML = `
+            <div class="ad-sponsor-top-bar">
+              <div class="ad-sponsor-badge">
+                <span>✨</span>
+                <span>${ad.badge_text || 'OFFICIAL FESTIVAL SWEETS PARTNER'}</span>
+              </div>
+              <span class="ad-slot-tag">Sponsored • Slot #${rankNum}</span>
+            </div>
+            <div class="ad-sponsor-main">
+              <div class="ad-sponsor-avatar">🥟</div>
+              <div class="ad-sponsor-info">
+                <div class="ad-sponsor-title-row">
+                  <h3 class="ad-native-sponsor">${ad.sponsor_name}</h3>
+                  <span class="ad-est-badge">Est. 1950 • Pune</span>
+                </div>
+                <p class="ad-native-desc">${ad.description || 'Authentic Pure Ghee Modaks, Pedhas & Mahaprasad offerings for Ganpati Bappa across Pune & Mumbai.'}</p>
+              </div>
+            </div>
+            <div class="ad-sponsor-highlights">
+              <span class="ad-pill">🥟 Ukadiche Modak</span>
+              <span class="ad-pill">🥨 Famous Bakarwadi</span>
+              <span class="ad-pill">🥭 Amba Barfi</span>
+              <span class="ad-pill">🛵 Doorstep Delivery</span>
+            </div>
+            <div class="ad-sponsor-footer">
+              <a href="${ad.cta_url || 'https://chitalebandhu.in'}" target="_blank" rel="noopener noreferrer" class="ad-native-cta-btn">
+                <span>🛍️ ${ad.cta_text || 'Order Fresh Prasad & Sweets ↗'}</span>
+              </a>
+              <button type="button" class="ad-native-inquire-link">Partner with us ↗</button>
+            </div>
+          `;
+        }
         const inquireLink = adCard.querySelector('.ad-native-inquire-link');
         if (inquireLink) {
           inquireLink.addEventListener('click', (e) => {
@@ -539,21 +605,33 @@ class FestivalApp {
         setTimeout(() => {
           this.map.invalidateSize();
           if (targetMandal) {
-            this.map.flyTo([targetMandal.latitude, targetMandal.longitude], 16, { duration: 0.8 });
+            this.safeMapFlyTo(targetMandal.latitude, targetMandal.longitude, 16, 0.8);
           } else {
             const coords = CITY_COORDS[this.currentCity];
-            if (coords) this.map.setView([coords.lat, coords.lng], coords.zoom);
+            if (coords) this.safeMapFlyTo(coords.lat, coords.lng, coords.zoom, 0.8);
           }
         }, 100);
       }
       this.renderMobileMapCarousel(targetMandal ? targetMandal.id : null);
     } else if (tabName === 'rankings') {
       document.body.classList.remove('mobile-view-map');
+      const recModal = document.getElementById('recommendations-modal');
+      const guideModal = document.getElementById('modal-devotee-guide');
+      if (recModal) recModal.classList.remove('open');
+      if (guideModal) guideModal.classList.remove('open');
     } else if (tabName === 'best') {
       this.openRecommendations('best_experience');
+      if (!window._isPopStateHandling) {
+        history.pushState({ modal: 'recommendations' }, '', '#best_mandals');
+      }
     } else if (tabName === 'guide') {
       const guideModal = document.getElementById('modal-devotee-guide');
-      if (guideModal) guideModal.classList.add('open');
+      if (guideModal) {
+        guideModal.classList.add('open');
+        if (!window._isPopStateHandling) {
+          history.pushState({ modal: 'guide' }, '', '#devotee_guide');
+        }
+      }
     }
   }
 
@@ -601,13 +679,13 @@ class FestivalApp {
 
       card.querySelector('.carousel-btn-locate')?.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (this.map) this.map.flyTo([mandal.latitude, mandal.longitude], 16, { duration: 0.8 });
+        this.safeMapFlyTo(mandal.latitude, mandal.longitude, 16, 0.8);
       });
 
       card.addEventListener('click', () => {
         document.querySelectorAll('.carousel-mandal-card').forEach((c) => c.classList.remove('active-card'));
         card.classList.add('active-card');
-        if (this.map) this.map.flyTo([mandal.latitude, mandal.longitude], 16, { duration: 0.8 });
+        this.safeMapFlyTo(mandal.latitude, mandal.longitude, 16, 0.8);
       });
 
       carousel.appendChild(card);
@@ -633,6 +711,25 @@ class FestivalApp {
         this.switchToMobileTab(btn.dataset.tab);
       });
     });
+
+    // Tactile Back Buttons for Mobile Sheets
+    const btnBackRec = document.getElementById('btn-back-rec');
+    if (btnBackRec) {
+      btnBackRec.addEventListener('click', () => {
+        const recModal = document.getElementById('recommendations-modal');
+        if (recModal) recModal.classList.remove('open');
+        this.switchToMobileTab('rankings');
+      });
+    }
+
+    const btnBackGuide = document.getElementById('btn-back-guide');
+    if (btnBackGuide) {
+      btnBackGuide.addEventListener('click', () => {
+        const guideModal = document.getElementById('modal-devotee-guide');
+        if (guideModal) guideModal.classList.remove('open');
+        this.switchToMobileTab('rankings');
+      });
+    }
 
     if (chipJumpMap) {
       chipJumpMap.addEventListener('click', () => {
@@ -721,8 +818,10 @@ class FestivalApp {
         mandalModal.classList.remove('open');
       } else if (recModal && recModal.classList.contains('open')) {
         recModal.classList.remove('open');
+        this.switchToMobileTab('rankings');
       } else if (guideModal && guideModal.classList.contains('open')) {
         guideModal.classList.remove('open');
+        this.switchToMobileTab('rankings');
       } else if (certModal && certModal.classList.contains('open')) {
         certModal.classList.remove('open');
       } else if (adminModal && adminModal.classList.contains('open')) {
@@ -762,7 +861,7 @@ class FestivalApp {
     this.darshanZoomIndex = 0;
 
     // Fly map down to street coordinates
-    this.map.flyTo([mandal.latitude, mandal.longitude], 17, { duration: 1.0 });
+    this.safeMapFlyTo(mandal.latitude, mandal.longitude, 17, 1.0);
 
     const modalNameEl = document.getElementById('pov-mandal-name');
     if (modalNameEl) {
@@ -951,22 +1050,52 @@ class FestivalApp {
   }
 
   setupTrafficPane(mandal) {
+    const trafficMiniMapEl = document.getElementById('traffic-road-mini-map');
     const trafficIframe = document.getElementById('traffic-road-iframe');
     const trafficMapsLink = document.getElementById('traffic-maps-link');
     const trafficRoadName = document.getElementById('traffic-road-name');
     const trafficRoadStatus = document.getElementById('traffic-road-status');
     const selectorEl = document.getElementById('traffic-roads-selector');
 
-    const roads = (mandal.top_roads && mandal.top_roads.length >= 3)
+    const density = mandal.crowd_density ?? 15;
+    const isNightLull = density < 20;
+
+    let roads = (mandal.top_roads && mandal.top_roads.length >= 3)
       ? mandal.top_roads
       : [
-          { name: `${mandal.name} Main Approach`, distance: '120m from mandal', color: 'red', status: 'Heavy Jam • Crawling at 5 km/h', delay: '~40 min delay', avg_speed: '5 km/h', maps_query: `${mandal.name} Main Road` },
-          { name: `${mandal.name} Parallel Arterial`, distance: '380m from mandal', color: 'orange', status: 'Moderate Rush • Moving at 16 km/h', delay: '~18 min delay', avg_speed: '16 km/h', maps_query: `${mandal.name} Approach` },
-          { name: `${mandal.name} Outer Ring Connector`, distance: '750m from mandal', color: 'blue', status: 'Clear • Free flow route', delay: '~6 min delay', avg_speed: '32 km/h', maps_query: `${mandal.address || mandal.name}` },
+          { name: `${mandal.name} Main Approach`, distance: '120m from mandal', distance_meters: 120, color: 'blue', status: 'Clear • Free flow route', delay: '< 3 min delay', avg_speed: '36 km/h', maps_query: `${mandal.name} Main Road` },
+          { name: `${mandal.name} Parallel Arterial`, distance: '380m from mandal', distance_meters: 380, color: 'blue', status: 'Clear • Smooth Movement', delay: '< 2 min delay', avg_speed: '40 km/h', maps_query: `${mandal.name} Approach` },
+          { name: `${mandal.name} Outer Ring Connector`, distance: '750m from mandal', distance_meters: 750, color: 'blue', status: 'Clear • Midnight Free Flow', delay: '< 2 min delay', avg_speed: '45 km/h', maps_query: `${mandal.address || mandal.name}` },
         ];
+
+    // Client-side guarantee: if night lull (11 PM - 5:30 AM / density < 20), enforce 100% blue / clear
+    if (isNightLull) {
+      roads = roads.map((r, i) => ({
+        ...r,
+        color: 'blue',
+        status: 'Clear • Midnight Free Flow',
+        delay: i === 0 ? '< 3 min delay' : '< 2 min delay',
+        avg_speed: i === 0 ? '36 km/h' : (i === 1 ? '40 km/h' : '45 km/h'),
+      }));
+    }
 
     if (!selectorEl) return;
     selectorEl.innerHTML = '';
+
+    // Initialize Leaflet mini-map once if container exists
+    if (!this.trafficMiniMap && window.L && trafficMiniMapEl) {
+      this.trafficMiniMap = L.map('traffic-road-mini-map', {
+        center: [mandal.latitude, mandal.longitude],
+        zoom: 16,
+        zoomControl: false,
+        attributionControl: false,
+      });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        className: 'dark-tactical-tile',
+        maxZoom: 19,
+      }).addTo(this.trafficMiniMap);
+      this.trafficMiniMarkerGroup = L.layerGroup().addTo(this.trafficMiniMap);
+    }
 
     const selectRoad = (road, cardEl) => {
       selectorEl.querySelectorAll('.traffic-road-card').forEach((c) => c.classList.remove('active'));
@@ -979,10 +1108,50 @@ class FestivalApp {
         const colorLabel = road.color === 'blue' ? '🔵 CLEAR / FREE FLOW' : (road.color === 'orange' ? '🟠 MODERATE RUSH' : '🔴 HEAVY CONGESTION');
         trafficRoadStatus.textContent = `${colorLabel} • ${road.status} • Expected Delay: ${road.delay} (Avg Speed: ${road.avg_speed})`;
       }
-      if (trafficIframe) {
+
+      // Update interactive mini-map if available
+      if (this.trafficMiniMap && this.trafficMiniMarkerGroup) {
+        this.trafficMiniMarkerGroup.clearLayers();
+        const mandalPin = L.circleMarker([mandal.latitude, mandal.longitude], {
+          radius: 8,
+          color: '#ff9933',
+          fillColor: '#ff6b00',
+          fillOpacity: 1.0,
+          weight: 2,
+        }).addTo(this.trafficMiniMarkerGroup);
+        mandalPin.bindTooltip(`📍 ${mandal.name}`, { permanent: true, direction: 'top', className: 'tactical-tooltip' });
+
+        const distM = road.distance_meters || 250;
+        const offsetLat = mandal.latitude + (distM / 111000);
+        const roadColorHex = road.color === 'blue' ? '#3b82f6' : (road.color === 'red' ? '#ef4444' : '#f59e0b');
+
+        const roadPin = L.circleMarker([offsetLat, mandal.longitude], {
+          radius: 7,
+          color: roadColorHex,
+          fillColor: roadColorHex,
+          fillOpacity: 0.9,
+          weight: 2,
+        }).addTo(this.trafficMiniMarkerGroup);
+        roadPin.bindTooltip(`🚦 ${road.name} (${road.avg_speed})`, { permanent: false, direction: 'bottom' });
+
+        L.polyline([[mandal.latitude, mandal.longitude], [offsetLat, mandal.longitude]], {
+          color: roadColorHex,
+          weight: 3,
+          dashArray: '4, 6',
+          opacity: 0.85,
+        }).addTo(this.trafficMiniMarkerGroup);
+
+        setTimeout(() => {
+          if (this.trafficMiniMap) {
+            this.trafficMiniMap.invalidateSize();
+            this.trafficMiniMap.setView([mandal.latitude, mandal.longitude], 16);
+          }
+        }, 120);
+      } else if (trafficIframe) {
         const query = encodeURIComponent(road.maps_query || `${road.name}, ${mandal.address || mandal.name}`);
         trafficIframe.src = `https://maps.google.com/maps?q=${query}&t=m&z=16&output=embed`;
       }
+
       if (trafficMapsLink) {
         trafficMapsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(road.maps_query || mandal.name)}`;
       }
@@ -990,7 +1159,7 @@ class FestivalApp {
 
     roads.slice(0, 3).forEach((road, idx) => {
       const card = document.createElement('div');
-      card.className = `traffic-road-card color-${road.color || 'orange'}`;
+      card.className = `traffic-road-card color-${road.color || 'blue'}`;
       if (idx === 0) card.classList.add('active');
 
       const badgeClass = road.color === 'blue' ? 'badge-blue' : (road.color === 'red' ? 'badge-red' : 'badge-orange');
@@ -1733,7 +1902,9 @@ class FestivalApp {
     document.title = `GaneshMandal.in — ${cityName} Most Popular Ganesh Mandals Website | Live Darshan & Crowd Intelligence`;
 
     const coords = CITY_COORDS[citySlug];
-    this.map.flyTo([coords.lat, coords.lng], coords.zoom, { duration: 1.5 });
+    if (coords) {
+      this.safeMapFlyTo(coords.lat, coords.lng, coords.zoom, 1.5);
+    }
 
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ type: 'SUBSCRIBE_CITY', city: citySlug }));
@@ -1753,7 +1924,7 @@ class FestivalApp {
       if (data.success && Array.isArray(data.ads)) {
         this.sponsorAds = data.ads;
         this.renderSponsorAds();
-        this.renderMandals();
+        this.renderLeaderboard();
       }
     } catch (err) {
       console.warn('[Ads] Failed to load sponsor ads:', err);

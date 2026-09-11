@@ -116,6 +116,9 @@ export function calculateDynamicCrowd(mandal, date = new Date()) {
     roadStatus = `Devotee Gridlock • ${avgRoadSpeed} km/h`;
   }
 
+  // Determine dynamic top 3 approach roads matching the IST time & crowd level
+  const topRoads = calculateDynamicRoads(mandal.top_roads, density, avgRoadSpeed, mandal);
+
   return {
     density_score: density,
     estimated_wait_minutes: waitMinutes,
@@ -125,7 +128,97 @@ export function calculateDynamicCrowd(mandal, date = new Date()) {
     period_label: periodLabel,
     road_status: roadStatus,
     avg_speed_kmh: avgRoadSpeed,
+    top_roads: topRoads,
     timestamp: new Date().toISOString(),
     data_quality: density < 20 ? 'VERIFIED_NIGHT_LULL' : 'LIVE_TELEMETRY',
   };
+}
+
+/**
+ * Dynamically computes real-time traffic status, delay, and speed for approach roads.
+ * At late night / early morning (density < 20), ALL roads are BLUE (Clear / Free Flow, 35+ km/h, <3m delay).
+ */
+export function calculateDynamicRoads(rawRoads, density, avgRoadSpeed, mandal) {
+  const fallbackRoads = [
+    { name: `${mandal.name} Main Approach`, distance: '120m from mandal', distance_meters: 120, maps_query: `${mandal.name} Main Road` },
+    { name: `${mandal.name} Parallel Arterial`, distance: '380m from mandal', distance_meters: 380, maps_query: `${mandal.name} Approach` },
+    { name: `${mandal.name} Outer Ring Connector`, distance: '750m from mandal', distance_meters: 750, maps_query: `${mandal.address || mandal.name}` },
+  ];
+
+  const sourceRoads = (Array.isArray(rawRoads) && rawRoads.length >= 3) ? rawRoads : fallbackRoads;
+
+  return sourceRoads.slice(0, 3).map((road, idx) => {
+    let color = 'blue';
+    let status = 'Clear • Free Flow';
+    let delay = '< 3 min delay';
+    let speed = `${Math.round(avgRoadSpeed + (idx * 3))} km/h`;
+
+    if (density < 20) {
+      // 11:00 PM - 5:30 AM IST (Midnight Lull / Aarti Closed): All roads 100% CLEAR BLUE
+      color = 'blue';
+      status = 'Clear • Midnight Free Flow';
+      delay = idx === 0 ? '< 3 min delay' : '< 2 min delay';
+      speed = idx === 0 ? '36 km/h' : (idx === 1 ? '40 km/h' : '45 km/h');
+    } else if (density < 45) {
+      // Light crowd (Dawn / Afternoon lull)
+      if (idx === 0 && density > 35) {
+        color = 'orange';
+        status = 'Moderate Flow • Slow Paces';
+        delay = '~8 min delay';
+        speed = '22 km/h';
+      } else {
+        color = 'blue';
+        status = 'Clear • Smooth Movement';
+        delay = idx === 0 ? '~4 min delay' : '< 3 min delay';
+        speed = idx === 0 ? '28 km/h' : '34 km/h';
+      }
+    } else if (density < 75) {
+      // Moderate to Heavy (Morning Peak / Pre-Aarti)
+      if (idx === 0) {
+        color = 'red';
+        status = 'Heavy Rush • Crawling at Entry';
+        delay = '~25 min delay';
+        speed = '10 km/h';
+      } else if (idx === 1) {
+        color = 'orange';
+        status = 'Moderate Rush • Moving Steadily';
+        delay = '~14 min delay';
+        speed = '18 km/h';
+      } else {
+        color = 'blue';
+        status = 'Clear • Recommended Bypass';
+        delay = '~5 min delay';
+        speed = '30 km/h';
+      }
+    } else {
+      // Peak Evening / Devotee Gridlock
+      if (idx === 0) {
+        color = 'red';
+        status = 'Devotee Gridlock • Pedestrian Only';
+        delay = '~45 min delay';
+        speed = '5 km/h';
+      } else if (idx === 1) {
+        color = 'red';
+        status = 'Heavy Jam • Slow Diversions';
+        delay = '~30 min delay';
+        speed = '9 km/h';
+      } else {
+        color = 'orange';
+        status = 'Moderate Rush • Slow Moving';
+        delay = '~15 min delay';
+        speed = '20 km/h';
+      }
+    }
+
+    return {
+      name: road.name,
+      distance: road.distance,
+      distance_meters: road.distance_meters,
+      color,
+      status,
+      delay,
+      avg_speed: speed,
+      maps_query: road.maps_query || `${road.name}, ${mandal.address || mandal.name}`,
+    };
+  });
 }

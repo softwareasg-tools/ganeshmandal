@@ -197,9 +197,6 @@
         <button class="btn-header accent-advertise" id="btn-open-advertise">
           <span>📢 Advertise With Us</span>
         </button>
-        <button class="btn-header" id="btn-open-admin">
-          <span>⚙️ Admin</span>
-        </button>
       </div>
     </header>
 
@@ -257,25 +254,23 @@
             <span class="legend-color legend-purple" style="margin-left:6px;"></span> <span>Jam-Packed</span>
           </div>
         </div>
-      </div>
 
-      <!-- Right Panel: Live Popularity/Ranking Leaderboard (Transforms to Flutter Draggable Bottom Sheet on Mobile) -->
-      <div class="ranking-panel" id="ranking-panel">
-        <!-- Flutter-style Drag Handle Bar (Visible on Mobile) -->
-        <div class="sheet-drag-handle-bar" id="sheet-drag-handle" role="button" aria-label="Toggle mandals list" tabindex="0">
-          <div class="sheet-drag-pill"></div>
-          <div class="sheet-peek-row">
-            <div class="sheet-peek-left">
-              <span class="sheet-peek-icon">🏆</span>
-              <span class="sheet-peek-title">Mandals & Queues</span>
-              <span class="sheet-peek-tag" id="sheet-peek-count">25 Mandals</span>
-            </div>
-            <div class="sheet-peek-right">
-              <span class="sheet-peek-hint" id="sheet-peek-hint">Swipe up for list ⬆</span>
-            </div>
+        <!-- Mobile Interactive Mandal Carousel (Horizontal swipe preview synced with markers) -->
+        <div class="mobile-map-carousel-wrap" id="mobile-map-carousel-wrap">
+          <div class="mobile-map-carousel-header">
+            <span class="carousel-title">✨ Swipe Mandals to Explore</span>
+            <button class="btn-toggle-carousel" id="btn-toggle-map-carousel" type="button" aria-label="Toggle preview carousel">
+              <span id="carousel-toggle-icon">▼ Hide</span>
+            </button>
+          </div>
+          <div class="mobile-map-carousel" id="mobile-map-carousel">
+            <!-- Dynamic Horizontal Cards populated by app.js -->
           </div>
         </div>
+      </div>
 
+      <!-- Right Panel: Live Popularity/Ranking Leaderboard -->
+      <div class="ranking-panel" id="ranking-panel">
         <div class="ranking-header">
           <div class="ranking-title-row">
             <div class="ranking-title">
@@ -285,6 +280,21 @@
             <div class="updated-time" id="leaderboard-updated">Updated: Just now</div>
           </div>
           <input type="text" class="search-filter-input" id="search-input" placeholder="Search mandal by name, galli, or area...">
+          <div class="ranking-quick-chips" id="ranking-quick-chips">
+            <button class="rank-filter-chip active" data-filter="all">All Mandals</button>
+            <button class="rank-filter-chip" data-filter="manache">Manache 5</button>
+            <button class="rank-filter-chip" data-filter="khali">🟢 Khali Now</button>
+            <button class="rank-filter-chip" data-filter="famous">⭐ Famous</button>
+            <button class="rank-filter-chip chip-map-jump" id="chip-jump-to-map">🗺️ View on Map</button>
+          </div>
+          <div class="mobile-action-pill-row" id="mobile-action-pill-row">
+            <button class="m-pill-btn" id="m-pill-suggest" type="button">
+              <span>📍 Suggest Mandal (सुचवा)</span>
+            </button>
+            <button class="m-pill-btn" id="m-pill-advertise" type="button">
+              <span>📢 Advertise With Us</span>
+            </button>
+          </div>
         </div>
 
         <!-- Leaderboard List with Native Devotional Sponsor Card -->
@@ -294,19 +304,25 @@
       </div>
     </div>
 
-    <!-- Flutter-Style Material 3 Bottom Navigation Bar -->
+    <!-- Flutter-Style Material 3 Bottom Navigation Bar (Mandals, Map, Best Mandals, Guide) -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Mobile Navigation">
-      <button class="mobile-nav-btn active" data-tab="map" id="mob-nav-map" aria-label="Map View">
+      <button class="mobile-nav-btn active" data-tab="rankings" id="mob-nav-mandals" aria-label="Mandals List">
+        <div class="mobile-nav-pill">
+          <span class="mobile-nav-icon">🏆</span>
+        </div>
+        <span class="mobile-nav-label">Mandals</span>
+      </button>
+      <button class="mobile-nav-btn" data-tab="map" id="mob-nav-map" aria-label="Map View">
         <div class="mobile-nav-pill">
           <span class="mobile-nav-icon">🗺️</span>
         </div>
         <span class="mobile-nav-label">Map</span>
       </button>
-      <button class="mobile-nav-btn" data-tab="rankings" id="mob-nav-mandals" aria-label="Mandals List">
+      <button class="mobile-nav-btn" data-tab="best" id="mob-nav-best" aria-label="Best Mandals to Visit">
         <div class="mobile-nav-pill">
-          <span class="mobile-nav-icon">🏆</span>
+          <span class="mobile-nav-icon">⭐</span>
         </div>
-        <span class="mobile-nav-label">Mandals</span>
+        <span class="mobile-nav-label">Best Mandals</span>
       </button>
       <button class="mobile-nav-btn" data-tab="guide" id="mob-nav-guide" aria-label="Devotee Guide">
         <div class="mobile-nav-pill">
@@ -314,13 +330,16 @@
         </div>
         <span class="mobile-nav-label">Guide</span>
       </button>
-      <button class="mobile-nav-btn" data-tab="cert" id="mob-nav-cert" aria-label="Security Audit">
-        <div class="mobile-nav-pill">
-          <span class="mobile-nav-icon">🛡️</span>
-        </div>
-        <span class="mobile-nav-label">Security</span>
-      </button>
     </nav>
+
+    <!-- Sleek Flat Security Verification Line (Tappable for Audit Certificate) -->
+    <div class="mobile-security-bar" id="mobile-security-bar" role="button" aria-label="Security Certificate and Bandobast Telemetry" tabindex="0">
+      <div class="mobile-sec-left">
+        <span class="mobile-sec-dot">🟢</span>
+        <span class="mobile-sec-text"><strong>Security Certified 98/100</strong> • CCTV & Police Telemetry Active</span>
+      </div>
+      <span class="mobile-sec-badge">Audit ↗</span>
+    </div>
   </div>
 
   <!-- Mandal Detail & Authentic Darshan Intelligence Modal -->
@@ -459,12 +478,7 @@
           <h2 class="modal-title" style="color:var(--accent-saffron);" id="pov-mandal-name">Shreemant Dagdusheth Halwai — Standing in Front of Bappa</h2>
           <span class="quality-badge quality-LIVE" id="pov-mandal-status-badge">🟢 DARSHAN OPEN</span>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <button class="btn-card-action" id="btn-pov-audio" style="border-color:var(--accent-gold);color:var(--accent-gold);">
-            <span>🔔 Sound: Temple Aarti & Bells</span>
-          </button>
-          <button class="modal-close-btn" id="btn-close-pov-modal">&times;</button>
-        </div>
+        <button class="modal-close-btn" id="btn-close-pov-modal" aria-label="Close dialog">&times;</button>
       </div>
 
       <!-- Crystal-Clear Devotee Tabs (Genuine Wait Time, Real Murti, Top 3 Roads, Social) -->

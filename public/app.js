@@ -133,6 +133,7 @@ class FestivalApp {
         this.mandals = data.data;
         this.renderMapMarkers();
         this.renderLeaderboard();
+        this.renderMobileMapCarousel();
         this.updateCityStats();
       }
       this.refreshHeatmap(citySlug);
@@ -257,6 +258,15 @@ class FestivalApp {
         }
       });
 
+      marker.on('click', () => {
+        const carouselCard = document.getElementById(`carousel-card-${mandal.id}`);
+        if (carouselCard) {
+          document.querySelectorAll('.carousel-mandal-card').forEach((c) => c.classList.remove('active-card'));
+          carouselCard.classList.add('active-card');
+          carouselCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      });
+
       this.markerLayerGroup.addLayer(marker);
     });
   }
@@ -342,43 +352,41 @@ class FestivalApp {
       else if (density > 65) fillClass = 'crowd-bar-red';
       else if (density > 45) fillClass = 'crowd-bar-orange';
 
+      const rushBg = density < 20 ? 'rgba(16,185,129,0.18)' : density < 50 ? 'rgba(245,158,11,0.18)' : 'rgba(239,68,68,0.18)';
+
       card.innerHTML = `
         <div class="card-top-row">
           <div class="rank-number">#${mandal.current_rank || index + 1}</div>
           <div class="mandal-card-info">
-            <div class="mandal-card-name" title="${mandal.name}">${mandal.name}</div>
+            <div class="card-title-row">
+              <div class="mandal-card-name" title="${mandal.name}">${mandal.name}</div>
+              <span class="quality-badge quality-VERIFIED">VERIFIED</span>
+            </div>
             <div class="mandal-card-meta">
               <span class="trend-badge ${trendClass}">${trendIcon}</span>
               <span>📍 ${mandal.address.split(',')[0]}</span>
             </div>
-            <div class="card-badge-row" style="margin-top:4px;">
-              <span class="quality-badge quality-VERIFIED">VERIFIED DARSHAN</span>
-            </div>
-            <div class="card-action-row">
-              <button class="btn-card-action btn-stand-front card-pov-btn" title="Stand in front of Bappa">
-                <span>👁️ Stand in Front</span>
-              </button>
-              <button class="btn-card-action card-traffic-btn" title="Check road traffic to mandal">
-                <span>🚦 Road Rush</span>
-              </button>
-              <button class="btn-card-action card-intel-btn" title="Pandal lore and live darshan details">
-                <span>ℹ️ Details</span>
-              </button>
-            </div>
           </div>
         </div>
-        <div class="card-metrics">
-          <div class="metric-pill">
-            <span style="color:var(--text-dim);font-size:10px;">FAME:</span>
-            <span class="score-num score-pop">${mandal.popularity_score || 60}</span>
-            <span style="color:var(--text-dim);font-size:10px;margin-left:6px;">DARSHAN:</span>
-            <span class="score-num score-exp">${mandal.experience_score || 65}</span>
+
+        <div class="card-cred-status-row">
+          <div class="cred-rush-pill" style="background:${rushBg}; color:${rushColor};">
+            <span class="cred-pulse-dot" style="background:${rushColor};"></span>
+            <strong>${rushText} (${density}%)</strong>
+            <span class="cred-wait-tag">• ~${waitMins}m wait</span>
           </div>
-          <div class="crowd-bar-mini" title="Rush level: ${density}%">
-            <div class="crowd-bar-fill ${fillClass}" style="width: ${density}%;"></div>
+          <div class="cred-road-pill">
+            <span>🚗 34 km/h</span>
           </div>
-          <span style="font-size:11px; font-weight:700; color:${rushColor};">${rushText} (${density}%) • ~${waitMins}m wait</span>
-          <span style="font-size:10px; color:var(--text-dim); margin-left:4px;">• ${periodLabel}</span>
+        </div>
+
+        <div class="card-action-row">
+          <button class="btn-card-action btn-stand-front card-pov-btn" title="Stand in front of Bappa">
+            <span>👁️ Stand in Front of Bappa</span>
+          </button>
+          <button class="btn-card-action card-map-btn" title="View mandal on live map">
+            <span>🗺️ Map</span>
+          </button>
         </div>
       `;
 
@@ -388,16 +396,10 @@ class FestivalApp {
         this.openPOVModal(mandal.id, 'crowd');
       });
 
-      // Road Traffic Button Handler
-      card.querySelector('.card-traffic-btn').addEventListener('click', (e) => {
+      // View on Map Button Handler
+      card.querySelector('.card-map-btn')?.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.openPOVModal(mandal.id, 'traffic');
-      });
-
-      // Intelligence Button Handler
-      card.querySelector('.card-intel-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.openPOVModal(mandal.id, 'crowd');
+        this.switchToMobileTab('map', mandal);
       });
 
       // Card Body Click Handler
@@ -421,15 +423,34 @@ class FestivalApp {
         const adCard = document.createElement('div');
         adCard.className = 'ad-card-native';
         adCard.innerHTML = `
-          <div class="ad-native-header">
-            <span class="ad-badge">${ad.badge_text || 'SPONSORED PARTNER'}</span>
-            <span class="ad-native-sponsor">${ad.sponsor_name}</span>
-            <span style="margin-left:auto; font-size:10px; color:var(--text-dim);">Slot: After #${rankNum}</span>
+          <div class="ad-sponsor-top-bar">
+            <div class="ad-sponsor-badge">
+              <span>✨</span>
+              <span>${ad.badge_text || 'OFFICIAL FESTIVAL SWEETS PARTNER'}</span>
+            </div>
+            <span class="ad-slot-tag">Sponsored • Slot #${rankNum}</span>
           </div>
-          <div class="ad-native-desc">${ad.description}</div>
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:8px;">
-            <a href="${ad.cta_url || '#'}" target="_blank" rel="noopener noreferrer" class="ad-native-cta-btn">${ad.cta_text || 'Learn More ↗'}</a>
-            <span class="ad-native-inquire-link">Sponsor a slot ↗</span>
+          <div class="ad-sponsor-main">
+            <div class="ad-sponsor-avatar">🥟</div>
+            <div class="ad-sponsor-info">
+              <div class="ad-sponsor-title-row">
+                <h3 class="ad-native-sponsor">${ad.sponsor_name}</h3>
+                <span class="ad-est-badge">Est. 1950 • Pune</span>
+              </div>
+              <p class="ad-native-desc">${ad.description || 'Authentic Pure Ghee Modaks, Pedhas & Mahaprasad offerings for Ganpati Bappa across Pune & Mumbai.'}</p>
+            </div>
+          </div>
+          <div class="ad-sponsor-highlights">
+            <span class="ad-pill">🥟 Ukadiche Modak</span>
+            <span class="ad-pill">🥨 Famous Bakarwadi</span>
+            <span class="ad-pill">🥭 Amba Barfi</span>
+            <span class="ad-pill">🛵 Doorstep Delivery</span>
+          </div>
+          <div class="ad-sponsor-footer">
+            <a href="${ad.cta_url || 'https://chitalebandhu.in'}" target="_blank" rel="noopener noreferrer" class="ad-native-cta-btn">
+              <span>🛍️ ${ad.cta_text || 'Order Fresh Prasad & Sweets ↗'}</span>
+            </a>
+            <button type="button" class="ad-native-inquire-link">Partner with us ↗</button>
           </div>
         `;
         const inquireLink = adCard.querySelector('.ad-native-inquire-link');
@@ -442,6 +463,28 @@ class FestivalApp {
         container.appendChild(adCard);
       });
     });
+
+    // Community Suggest & Advertise Invitation Card at the end of the leaderboard
+    const inviteCard = document.createElement('div');
+    inviteCard.className = 'mandal-community-invite-card';
+    inviteCard.innerHTML = `
+      <div class="comm-card-icon">🪔</div>
+      <div class="comm-card-content">
+        <div class="comm-card-title">Know an iconic Ganpati Mandal?</div>
+        <div class="comm-card-sub">Help devotees discover Bappa's pandals, live rush, and darshan timings across Pune & Mumbai.</div>
+        <div class="comm-card-buttons">
+          <button class="btn-comm-action" id="invite-btn-suggest" type="button">📍 Suggest a Mandal (सुचवा)</button>
+          <button class="btn-comm-action accent" id="invite-btn-advertise" type="button">📢 Advertise With Us</button>
+        </div>
+      </div>
+    `;
+    inviteCard.querySelector('#invite-btn-suggest')?.addEventListener('click', () => {
+      this.openCommunityModal('suggest');
+    });
+    inviteCard.querySelector('#invite-btn-advertise')?.addEventListener('click', () => {
+      this.openCommunityModal('advertise');
+    });
+    container.appendChild(inviteCard);
 
     const updatedEl = document.getElementById('leaderboard-updated');
     if (updatedEl) updatedEl.textContent = `Updated: ${new Date().toLocaleTimeString()}`;
@@ -482,105 +525,191 @@ class FestivalApp {
   }
 
   // -------------------------------------------------------------
-  // Mobile-First Navigation Bindings
+  // Mobile Navigation & Interactive Map Carousel
   // -------------------------------------------------------------
-  bindMobileNavigation() {
-    const sheet = document.getElementById('ranking-panel');
-    const handle = document.getElementById('sheet-drag-handle');
+  switchToMobileTab(tabName, targetMandal = null) {
     const navButtons = document.querySelectorAll('.mobile-nav-btn');
-
-    if (!sheet) return;
-
-    // Set initial snap state on mobile: Peek mode (120px) so map is prominent
-    if (window.innerWidth <= 768) {
-      sheet.classList.add('sheet-peek');
-      sheet.classList.remove('sheet-half', 'sheet-full');
-    }
-
-    window.addEventListener('resize', () => {
-      if (window.innerWidth <= 768 && !sheet.classList.contains('sheet-peek') && !sheet.classList.contains('sheet-half') && !sheet.classList.contains('sheet-full')) {
-        sheet.classList.add('sheet-peek');
-      } else if (window.innerWidth > 768) {
-        sheet.classList.remove('sheet-peek', 'sheet-half', 'sheet-full');
-      }
+    navButtons.forEach((b) => {
+      b.classList.toggle('active', b.dataset.tab === tabName);
     });
 
-    const setSheetState = (state) => {
-      sheet.classList.remove('sheet-peek', 'sheet-half', 'sheet-full');
-      sheet.classList.add(`sheet-${state}`);
-      const hint = document.getElementById('sheet-peek-hint');
-      if (hint) {
-        hint.textContent = state === 'full' ? 'Swipe down to map ⬇' : state === 'half' ? 'Swipe up for all ⬆' : 'Swipe up for list ⬆';
-      }
-
-      // Update mobile bottom nav active indicator
-      const navMap = document.getElementById('mob-nav-map');
-      const navMandals = document.getElementById('mob-nav-mandals');
-      if (state === 'peek') {
-        navButtons.forEach(b => b.classList.remove('active'));
-        navMap?.classList.add('active');
-      } else {
-        navButtons.forEach(b => b.classList.remove('active'));
-        navMandals?.classList.add('active');
-      }
-    };
-
-    if (handle) {
-      handle.addEventListener('click', () => {
-        if (sheet.classList.contains('sheet-peek')) {
-          setSheetState('half');
-        } else if (sheet.classList.contains('sheet-half')) {
-          setSheetState('full');
-        } else {
-          setSheetState('peek');
-        }
-      });
-
-      // Flutter swipe gestures (touch drag)
-      let touchStartY = 0;
-      handle.addEventListener('touchstart', (e) => {
-        touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-
-      handle.addEventListener('touchend', (e) => {
-        const deltaY = e.changedTouches[0].clientY - touchStartY;
-        if (deltaY < -30) {
-          // Swiped up
-          if (sheet.classList.contains('sheet-peek')) setSheetState('half');
-          else if (sheet.classList.contains('sheet-half')) setSheetState('full');
-        } else if (deltaY > 30) {
-          // Swiped down
-          if (sheet.classList.contains('sheet-full')) setSheetState('half');
-          else if (sheet.classList.contains('sheet-half')) setSheetState('peek');
-        }
-      }, { passive: true });
-    }
-
-    navButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const tab = btn.dataset.tab;
-        if (tab === 'map') {
-          setSheetState('peek');
-          if (this.map) {
-            this.map.invalidateSize();
+    if (tabName === 'map') {
+      document.body.classList.add('mobile-view-map');
+      if (this.map) {
+        setTimeout(() => {
+          this.map.invalidateSize();
+          if (targetMandal) {
+            this.map.flyTo([targetMandal.latitude, targetMandal.longitude], 16, { duration: 0.8 });
+          } else {
             const coords = CITY_COORDS[this.currentCity];
             if (coords) this.map.setView([coords.lat, coords.lng], coords.zoom);
           }
-        } else if (tab === 'rankings') {
-          if (sheet.classList.contains('sheet-full')) {
-            setSheetState('half');
-          } else {
-            setSheetState('full');
-          }
-        } else if (tab === 'guide') {
-          const guideModal = document.getElementById('modal-devotee-guide');
-          if (guideModal) guideModal.classList.add('open');
-        } else if (tab === 'cert') {
-          const certModal = document.getElementById('modal-cert-details');
-          if (certModal) certModal.classList.add('open');
-        }
+        }, 100);
+      }
+      this.renderMobileMapCarousel(targetMandal ? targetMandal.id : null);
+    } else if (tabName === 'rankings') {
+      document.body.classList.remove('mobile-view-map');
+    } else if (tabName === 'best') {
+      this.openRecommendations('best_experience');
+    } else if (tabName === 'guide') {
+      const guideModal = document.getElementById('modal-devotee-guide');
+      if (guideModal) guideModal.classList.add('open');
+    }
+  }
+
+  renderMobileMapCarousel(activeMandalId = null) {
+    const carousel = document.getElementById('mobile-map-carousel');
+    if (!carousel) return;
+    carousel.innerHTML = '';
+
+    const mandalsToShow = this.mandals || [];
+    mandalsToShow.forEach((mandal, idx) => {
+      const density = mandal.crowd_density ?? 10;
+      const waitMins = mandal.estimated_wait_minutes ?? 2;
+      const rushText = mandal.rush_category || (density < 20 ? 'Khali' : density < 50 ? 'Thoda Rush' : 'Full Rush');
+      const rushBg = density < 20 ? 'rgba(16,185,129,0.2)' : density < 50 ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)';
+      const rushColor = density < 20 ? '#10b981' : density < 50 ? '#f59e0b' : '#ef4444';
+
+      const card = document.createElement('div');
+      card.className = `carousel-mandal-card ${mandal.id === activeMandalId ? 'active-card' : ''}`;
+      card.id = `carousel-card-${mandal.id}`;
+      card.innerHTML = `
+        <div class="carousel-card-top">
+          <span class="carousel-rank-badge">#${mandal.current_rank || idx + 1}</span>
+          <span class="carousel-mandal-name" title="${mandal.name}">${mandal.name}</span>
+        </div>
+        <div class="carousel-card-meta">
+          <span class="carousel-rush-pill" style="background:${rushBg}; color:${rushColor};">
+            ${rushText} (${density}%)
+          </span>
+          <span class="carousel-wait-text">⏱️ ~${waitMins}m wait</span>
+        </div>
+        <div class="carousel-card-actions">
+          <button class="carousel-btn-pov" type="button">
+            <span>👁️ Stand in Front</span>
+          </button>
+          <button class="carousel-btn-locate" type="button" title="Center on Map">
+            <span>📍 Center</span>
+          </button>
+        </div>
+      `;
+
+      card.querySelector('.carousel-btn-pov')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openPOVModal(mandal.id, 'crowd');
+      });
+
+      card.querySelector('.carousel-btn-locate')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.map) this.map.flyTo([mandal.latitude, mandal.longitude], 16, { duration: 0.8 });
+      });
+
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.carousel-mandal-card').forEach((c) => c.classList.remove('active-card'));
+        card.classList.add('active-card');
+        if (this.map) this.map.flyTo([mandal.latitude, mandal.longitude], 16, { duration: 0.8 });
+      });
+
+      carousel.appendChild(card);
+    });
+
+    if (activeMandalId) {
+      const activeCard = document.getElementById(`carousel-card-${activeMandalId}`);
+      if (activeCard) {
+        activeCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }
+
+  bindMobileNavigation() {
+    const navButtons = document.querySelectorAll('.mobile-nav-btn');
+    const secBar = document.getElementById('mobile-security-bar');
+    const chipJumpMap = document.getElementById('chip-jump-to-map');
+    const pillSuggest = document.getElementById('m-pill-suggest');
+    const pillAdvertise = document.getElementById('m-pill-advertise');
+    const quickChips = document.querySelectorAll('.rank-filter-chip:not(.chip-map-jump)');
+
+    navButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        this.switchToMobileTab(btn.dataset.tab);
       });
     });
+
+    if (chipJumpMap) {
+      chipJumpMap.addEventListener('click', () => {
+        this.switchToMobileTab('map');
+      });
+    }
+
+    if (secBar) {
+      secBar.addEventListener('click', () => {
+        const certModal = document.getElementById('modal-cert-details');
+        if (certModal) certModal.classList.add('open');
+      });
+    }
+
+    if (pillSuggest) {
+      pillSuggest.addEventListener('click', () => {
+        this.openCommunityModal('suggest');
+      });
+    }
+
+    if (pillAdvertise) {
+      pillAdvertise.addEventListener('click', () => {
+        this.openCommunityModal('advertise');
+      });
+    }
+
+    // Quick filter chips (All, Manache, Khali, Famous)
+    quickChips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        quickChips.forEach((c) => c.classList.remove('active'));
+        chip.classList.add('active');
+        const filterType = chip.dataset.filter;
+        if (filterType === 'all') {
+          this.filters.quickOnly = false;
+          this.filters.famousOnly = false;
+          this.filters.manacheOnly = false;
+        } else if (filterType === 'manache') {
+          this.filters.quickOnly = false;
+          this.filters.famousOnly = false;
+          this.filters.manacheOnly = true;
+        } else if (filterType === 'khali') {
+          this.filters.quickOnly = true;
+          this.filters.famousOnly = false;
+          this.filters.manacheOnly = false;
+        } else if (filterType === 'famous') {
+          this.filters.quickOnly = false;
+          this.filters.famousOnly = true;
+          this.filters.manacheOnly = false;
+        }
+        this.renderLeaderboard();
+        this.renderMapMarkers();
+      });
+    });
+
+    // Wire mobile carousel toggle
+    const toggleCarouselBtn = document.getElementById('btn-toggle-map-carousel');
+    const carouselWrap = document.getElementById('mobile-map-carousel-wrap');
+    if (toggleCarouselBtn && carouselWrap) {
+      toggleCarouselBtn.addEventListener('click', () => {
+        const isMin = carouselWrap.classList.toggle('minimized');
+        const labelEl = toggleCarouselBtn.querySelector('span');
+        if (labelEl) labelEl.textContent = isMin ? '▲ Show Cards' : '▼ Hide';
+      });
+    }
+
+    // Direct routing: check if user accessed /admin or #admin
+    if (
+      window.location.pathname === '/admin' ||
+      window.location.hash === '#admin' ||
+      window.location.search.includes('admin=1')
+    ) {
+      const adminModal = document.getElementById('admin-modal');
+      if (adminModal) {
+        adminModal.classList.add('open');
+      }
+    }
   }
 
   // -------------------------------------------------------------
@@ -982,17 +1111,15 @@ class FestivalApp {
     });
 
     // Close POV Modal
-    document.getElementById('btn-close-pov-modal').addEventListener('click', () => {
-      const trafficIframe = document.getElementById('traffic-road-iframe');
-      if (trafficIframe) trafficIframe.src = '';
-      document.getElementById('pov-street-modal').classList.remove('open');
-      this.stopPOVAudio();
-    });
-
-    // Sound / Audio Button
-    document.getElementById('btn-pov-audio').addEventListener('click', () => {
-      this.togglePOVAudio();
-    });
+    const btnClosePov = document.getElementById('btn-close-pov-modal');
+    if (btnClosePov) {
+      btnClosePov.addEventListener('click', () => {
+        const trafficIframe = document.getElementById('traffic-road-iframe');
+        if (trafficIframe) trafficIframe.src = '';
+        document.getElementById('pov-street-modal').classList.remove('open');
+        this.stopPOVAudio();
+      });
+    }
   }
 
   // -------------------------------------------------------------
@@ -1133,78 +1260,11 @@ class FestivalApp {
 
 
   // -------------------------------------------------------------
-  // Ambient Temple Sound Synthesizer (Bells & Dhol)
+  // Ambient Temple Sound Synthesizer (Disabled as requested)
   // -------------------------------------------------------------
-  togglePOVAudio() {
-    const btn = document.getElementById('btn-pov-audio');
-    if (this.audioPlaying) {
-      this.stopPOVAudio();
-      if (btn) btn.querySelector('span').textContent = '🔔 Sound: Temple Aarti (OFF)';
-    } else {
-      this.startPOVAudio();
-      if (btn) btn.querySelector('span').textContent = '🔔 Sound: Temple Aarti (PLAYING)';
-    }
-  }
-
-  startPOVAudio() {
-    try {
-      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtxClass) return;
-      if (!this.audioCtx) this.audioCtx = new AudioCtxClass();
-      if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
-
-      this.audioPlaying = true;
-
-      // Authentic periodic temple bell chimes
-      const playBell = () => {
-        if (!this.audioPlaying || !this.audioCtx) return;
-        const now = this.audioCtx.currentTime;
-
-        [1180, 820, 560].forEach((freq, idx) => {
-          const osc = this.audioCtx.createOscillator();
-          const gain = this.audioCtx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq + (Math.random() * 8 - 4), now);
-
-          gain.gain.setValueAtTime(0.08 / (idx + 1), now);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
-
-          osc.connect(gain);
-          gain.connect(this.audioCtx.destination);
-
-          osc.start(now);
-          osc.stop(now + 1.8);
-        });
-
-        // Low resonant dhol pulse
-        const dholOsc = this.audioCtx.createOscillator();
-        const dholGain = this.audioCtx.createGain();
-        dholOsc.type = 'triangle';
-        dholOsc.frequency.setValueAtTime(85, now);
-        dholOsc.frequency.exponentialRampToValueAtTime(45, now + 0.35);
-        dholGain.gain.setValueAtTime(0.12, now);
-        dholGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-        dholOsc.connect(dholGain);
-        dholGain.connect(this.audioCtx.destination);
-        dholOsc.start(now);
-        dholOsc.stop(now + 0.35);
-
-        this.audioTimer = setTimeout(playBell, 900 + Math.random() * 500);
-      };
-
-      playBell();
-    } catch (e) {
-      console.warn('[Audio] Web Audio initialization ignored:', e.message);
-    }
-  }
-
-  stopPOVAudio() {
-    this.audioPlaying = false;
-    if (this.audioTimer) clearTimeout(this.audioTimer);
-    const btn = document.getElementById('btn-pov-audio');
-    if (btn) btn.querySelector('span').textContent = '🔔 Sound: Temple Aarti & Bells';
-  }
+  togglePOVAudio() {}
+  startPOVAudio() {}
+  stopPOVAudio() {}
 
   // -------------------------------------------------------------
   // WebSocket Connection & Real-Time Sync

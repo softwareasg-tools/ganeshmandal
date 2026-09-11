@@ -8,6 +8,7 @@
  */
 
 import express from 'express';
+import crypto from 'node:crypto';
 import { db } from './db.js';
 import { scoringEngine } from './scoringEngine.js';
 import { cvEngine } from './cvEngine.js';
@@ -21,9 +22,17 @@ export const apiRouter = express.Router();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'asg12345$';
 const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'ganpati-admin-secret-2026';
 
+function safeCompare(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 function requireAdminAuth(req, res, next) {
   const authHeader = req.headers['x-admin-password'] || req.headers['x-admin-key'] || req.query.admin_password || req.query.admin_key;
-  if (authHeader === ADMIN_PASSWORD || authHeader === ADMIN_API_KEY) {
+  if (safeCompare(authHeader, ADMIN_PASSWORD) || safeCompare(authHeader, ADMIN_API_KEY)) {
     return next();
   }
   return res.status(401).json({

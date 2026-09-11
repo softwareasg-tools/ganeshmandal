@@ -58,6 +58,12 @@ class FestivalApp {
   }
 
   async init() {
+    const taglineEl = document.getElementById('brand-tagline');
+    if (taglineEl) {
+      taglineEl.textContent = this.currentCity === 'pune'
+        ? "Pune's most popular ganesh mandal's website"
+        : "Mumbai's most popular ganesh mandal's website";
+    }
     this.initMap();
     this.bindEvents();
     this.bindMobileNavigation();
@@ -1387,6 +1393,59 @@ class FestivalApp {
         document.getElementById('admin-modal').classList.remove('open');
       });
     }
+
+    // Devotee Guide & Eco-Idols Modal
+    const btnOpenGuide = document.getElementById('btn-open-devotee-guide');
+    const modalGuide = document.getElementById('modal-devotee-guide');
+    const btnCloseGuide = document.getElementById('btn-close-devotee-guide');
+    if (btnOpenGuide && modalGuide) {
+      btnOpenGuide.addEventListener('click', () => modalGuide.classList.add('open'));
+    }
+    if (btnCloseGuide && modalGuide) {
+      btnCloseGuide.addEventListener('click', () => modalGuide.classList.remove('open'));
+    }
+
+    // Devotee Guide Navigation Tabs
+    const guideTabBtns = document.querySelectorAll('.guide-tab-btn');
+    guideTabBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        guideTabBtns.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const targetTab = btn.dataset.guideTab;
+        document.querySelectorAll('.guide-tab-pane').forEach((pane) => {
+          pane.style.display = pane.id === `guide-pane-${targetTab}` ? 'block' : 'none';
+        });
+      });
+    });
+
+    // Devotee Guide Real-Time Search Filter
+    const guideSearchInput = document.getElementById('guide-search-input');
+    if (guideSearchInput) {
+      guideSearchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        const activePane = document.querySelector('.guide-tab-pane[style*="display: block"]') || document.querySelector('.guide-tab-pane.active');
+        const itemsToFilter = document.querySelectorAll('.guide-card, .guide-list-item, .faq-item');
+        itemsToFilter.forEach((item) => {
+          const text = item.textContent.toLowerCase();
+          if (!query || text.includes(query)) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    // Security Certification Modal
+    const btnOpenCert = document.getElementById('btn-open-cert-modal');
+    const modalCert = document.getElementById('modal-cert-details');
+    const btnCloseCert = document.getElementById('btn-close-cert-modal');
+    if (btnOpenCert && modalCert) {
+      btnOpenCert.addEventListener('click', () => modalCert.classList.add('open'));
+    }
+    if (btnCloseCert && modalCert) {
+      btnCloseCert.addEventListener('click', () => modalCert.classList.remove('open'));
+    }
   }
 
   async switchCity(citySlug) {
@@ -1395,6 +1454,18 @@ class FestivalApp {
 
     document.getElementById('btn-city-pune').classList.toggle('active', citySlug === 'pune');
     document.getElementById('btn-city-mumbai').classList.toggle('active', citySlug === 'mumbai');
+
+    // Dynamic Tagline update based on active tab
+    const taglineEl = document.getElementById('brand-tagline');
+    if (taglineEl) {
+      taglineEl.textContent = citySlug === 'pune'
+        ? "Pune's most popular ganesh mandal's website"
+        : "Mumbai's most popular ganesh mandal's website";
+    }
+
+    // Dynamic Document Title update for SEO
+    const cityName = citySlug === 'pune' ? "Pune's" : "Mumbai's";
+    document.title = `GaneshMandal.in — ${cityName} Most Popular Ganesh Mandals Website | Live Darshan & Crowd Intelligence`;
 
     const coords = CITY_COORDS[citySlug];
     this.map.flyTo([coords.lat, coords.lng], coords.zoom, { duration: 1.5 });

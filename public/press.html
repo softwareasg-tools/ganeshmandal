@@ -283,8 +283,10 @@
       tbody.innerHTML = '';
       (mandals || []).forEach(m => {
         const density = m.crowd_density ?? 35;
-        const wait = m.estimated_wait_minutes ?? 15;
-        const road = m.top_roads?.[0]?.name || m.address || 'Main Road';
+        const roads = m.top_roads || [];
+        const fastestRoad = roads.find(r => r.color === 'blue') || roads.find(r => r.color === 'orange') || roads[0];
+        const road = fastestRoad?.name || m.address || 'Main Road';
+        const speed = fastestRoad?.avg_speed ? ` (${fastestRoad.avg_speed})` : '';
         let color = '#10b981';
         let rushText = 'Khali';
         if (density >= 85) {
@@ -308,7 +310,7 @@
             </span>
           </td>
           <td style="font-weight:600;">~${wait} mins</td>
-          <td style="color:#93c5fd;">🚗 ${road}</td>
+          <td style="color:#93c5fd;">🚗 ${road}${speed}</td>
         `;
         tbody.appendChild(tr);
       });

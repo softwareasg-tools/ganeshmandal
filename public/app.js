@@ -293,6 +293,12 @@ class FestivalApp {
         statusColor = '#10b981';
       }
 
+      const roads = mandal.top_roads || [];
+      const entryRoad = roads[0];
+      const roadSpeed = entryRoad?.avg_speed || (mandal.avg_speed_kmh ? `${mandal.avg_speed_kmh} km/h` : '24 km/h');
+      const roadNameShort = entryRoad?.name ? entryRoad.name.split('(')[0].trim() : 'Approach Corridor';
+      const roadStatusText = entryRoad?.status || mandal.road_status || 'Live movement';
+
       const customIcon = L.divIcon({
         className: 'custom-mandal-marker',
         html: `
@@ -315,9 +321,13 @@ class FestivalApp {
         <div style="font-family:var(--font-sans); font-size:12px; color:var(--text-main); background:#171512; padding:12px; border-radius:10px; border:1px solid rgba(245,158,11,0.4); min-width:240px; box-shadow:0 8px 24px rgba(0,0,0,0.7);">
           <div style="font-weight:700; color:var(--text-cream); font-size:13px; margin-bottom:4px;">${mandal.name}</div>
           <div style="color:var(--text-muted); font-size:11px; margin-bottom:8px;">${mandal.address}</div>
-          <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-family:var(--font-mono); font-size:11px;">
-            <span>Rush: <strong style="color:var(--accent-gold);">${density}%</strong></span>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-family:var(--font-mono); font-size:11px;">
+            <span>Rush: <strong style="color:${statusColor};">${density}%</strong> (${mandal.rush_category || 'Active'})</span>
             <span>Wait: <strong style="color:var(--accent-saffron);">~${mandal.estimated_wait_minutes || 15} min</strong></span>
+          </div>
+          <div style="margin-bottom:10px; padding:6px 9px; border-radius:6px; background:rgba(255,255,255,0.04); border:1px solid ${statusColor}40; font-size:11px;">
+            <div style="color:${statusColor}; font-weight:700;">🚗 Corridor: ${roadNameShort} (${roadSpeed})</div>
+            <div style="color:var(--text-dim); font-size:10px; margin-top:2px;">${roadStatusText}</div>
           </div>
           <button id="pop-btn-pov-${mandal.id}" style="width:100%; background:linear-gradient(135deg,#c2410c,#ea580c); color:#fff; font-weight:700; border:none; padding:7px 10px; border-radius:4px; cursor:pointer; font-size:11px; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:5px; box-shadow:0 0 12px rgba(234,88,12,0.4);">
             <span>👁️ Stand in Front of Bappa</span>
@@ -493,6 +503,12 @@ class FestivalApp {
         rushBg = 'rgba(16, 185, 129, 0.18)';
         fillClass = 'crowd-bar-green';
       }
+      const roads = mandal.top_roads || [];
+      const entryRoad = roads[0];
+      const roadSpeed = entryRoad?.avg_speed || (mandal.avg_speed_kmh ? `${mandal.avg_speed_kmh} km/h` : '24 km/h');
+      const roadNameShort = entryRoad?.name ? entryRoad.name.split('(')[0].trim() : 'Approach';
+      const roadStatusShort = density >= 85 ? 'Gridlock' : density >= 65 ? 'Heavy Jam' : density >= 45 ? 'Slow' : 'Clear Flow';
+      const roadBadgeColor = density >= 85 ? '#c084fc' : density >= 65 ? '#ef4444' : density >= 45 ? '#f59e0b' : '#10b981';
       const periodLabel = mandal.period_label || (density < 20 ? 'Aarti Closed for Night' : 'Active Queue');
 
       card.innerHTML = `
@@ -517,8 +533,8 @@ class FestivalApp {
             <strong>${rushText} (${density}%)</strong>
             <span class="cred-wait-tag">• ~${waitMins}m wait</span>
           </div>
-          <div class="cred-road-pill">
-            <span>🚗 34 km/h</span>
+          <div class="cred-road-pill card-traffic-quick-btn" style="border-color:${roadBadgeColor}44; color:${roadBadgeColor}; cursor:pointer;" title="Click to view approach traffic on ${entryRoad?.name || 'Main Corridor'} (${roadSpeed})">
+            <span>🚗 ${roadNameShort}: <strong>${roadSpeed}</strong> (${roadStatusShort})</span>
           </div>
         </div>
 
@@ -534,6 +550,16 @@ class FestivalApp {
           </button>
         </div>
       `;
+
+      // Quick Traffic Pill Handler
+      const trafficPill = card.querySelector('.card-traffic-quick-btn');
+      if (trafficPill) {
+        trafficPill.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          this.openPOVModal(mandal.id, 'traffic');
+        });
+      }
 
       // Stand in Front Button Handler (Touch & Click Safe)
       const povBtn = card.querySelector('.card-pov-btn');
@@ -796,7 +822,7 @@ class FestivalApp {
 
     let mandalsToShow = customList || this.mandals || [];
     if (!customList) {
-      if (this.filters.quickOnly) mandalsToShow = mandalsToShow.filter((m) => (m.estimated_wait_minutes || 25) <= 20);
+      if (this.filters.quickOnly) mandalsToShow = mandalsToShow.filter((m) => m.crowd_density < 45 || (m.estimated_wait_minutes || 25) <= 20);
       if (this.filters.famousOnly) mandalsToShow = mandalsToShow.filter((m) => m.is_famous);
       if (this.filters.manacheOnly) mandalsToShow = mandalsToShow.filter((m) => this.isManacheMandal(m));
       if (this.filters.search) {
@@ -828,7 +854,10 @@ class FestivalApp {
         rushText = 'Thoda Rush';
         rushBg = 'rgba(245,158,11,0.2)';
         rushColor = '#f59e0b';
-      }
+      const roads = mandal.top_roads || [];
+      const entryRoad = roads[0];
+      const roadSpeed = entryRoad?.avg_speed || (mandal.avg_speed_kmh ? `${mandal.avg_speed_kmh} km/h` : '24 km/h');
+      const roadNameShort = entryRoad?.name ? entryRoad.name.split('(')[0].trim() : 'Corridor';
 
       const card = document.createElement('div');
       card.className = `carousel-mandal-card ${mandal.id === activeMandalId ? 'active-card' : ''}`;
@@ -843,6 +872,9 @@ class FestivalApp {
             ${rushText} (${density}%)
           </span>
           <span class="carousel-wait-text">⏱️ ~${waitMins}m wait</span>
+        </div>
+        <div style="font-size:11px; color:${rushColor}; margin-bottom:8px; display:flex; align-items:center; gap:4px; opacity:0.95;">
+          <span>🚗 ${roadNameShort}: <strong>${roadSpeed}</strong></span>
         </div>
         <div class="carousel-card-actions">
           <button class="carousel-btn-pov" type="button">
@@ -1409,15 +1441,18 @@ class FestivalApp {
     else if (density >= 65) { rushEmoji = '🔴'; rushText = 'जास्त गर्दी (Full Rush)'; }
     else if (density >= 45) { rushEmoji = '🟠'; rushText = 'मध्यम गर्दी (Moderate Queue)'; }
 
-    const roadName = mandal.top_roads?.[0]?.name || 'मुख्य मार्ग';
-    const city = (mandal.city || 'pune').toUpperCase();
+    const roads = mandal.top_roads || [];
+    const fastestRoad = roads.find(r => r.color === 'blue') || roads.find(r => r.color === 'orange') || roads[0];
+    const roadName = fastestRoad?.name || mandal.traffic_road || 'मुख्य मार्ग';
+    const roadSpeed = fastestRoad?.avg_speed ? ` (${fastestRoad.avg_speed})` : '';
+    const city = (mandal.city_id?.includes('mumbai') || mandal.city?.toLowerCase() === 'mumbai' || this.currentCity === 'mumbai') ? 'MUMBAI' : 'PUNE';
     const url = `https://ganeshmandal.in/mandal/${mandal.id}?src=wa`;
 
     const text = [
       `🚩 *${mandal.name} (${city}) - थेट गर्दी व दर्शन अपडेट*`,
       `📊 सद्यस्थिती: ${rushEmoji} ${density}% ${rushText}`,
       `⏱️ रांगेत प्रतीक्षा वेळ: ~${waitMins} मिनिटे`,
-      `🚗 सर्वात वेगवान रस्ता: ${roadName}`,
+      `🚗 सर्वात वेगवान रस्ता: ${roadName}${roadSpeed}`,
       `\n👁️ थेट दर्शन रांग व लाईव्ह रस्ते पाहण्यासाठी खालील लिंक उघडा:`,
       `👉 ${url}`,
       `\n🕉️ *GaneshMandal.in | महाराष्ट्राचे #१ गणेशोत्सव पोर्टल*`,

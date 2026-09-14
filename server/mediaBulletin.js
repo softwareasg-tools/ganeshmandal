@@ -14,7 +14,8 @@ export function generateHourlyBulletin(city = 'pune') {
   const mandals = (cityObj ? db.getMandalsByCity(cityObj.id) : null) || db.getMandalsByCity(city) || db.getAllMandals();
   const scoredMandals = mandals.map(m => {
     const dyn = calculateDynamicCrowd(m);
-    const topRoadObj = dyn.top_roads?.[0] || m.top_roads?.[0];
+    const roads = dyn.top_roads || m.top_roads || [];
+    const topRoadObj = roads.find(r => r.color === 'blue') || roads.find(r => r.color === 'orange') || roads[0];
     return {
       id: m.id,
       name: m.name,

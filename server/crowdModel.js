@@ -168,25 +168,43 @@ export function calculateDynamicRoads(rawRoads, density, avgRoadSpeed, mandal) {
       delay = idx === 0 ? '< 3 min delay' : '< 2 min delay';
       speed = idx === 0 ? '36 km/h' : (idx === 1 ? '40 km/h' : '45 km/h');
     } else if (density < 45) {
-      // Light crowd (Dawn / Afternoon lull)
-      if (idx === 0 && density > 35) {
+      // Khali (< 45%): Free flow corridors
+      if (idx === 0 && density > 38) {
         color = 'orange';
         status = 'Moderate Flow • Slow Paces';
-        delay = '~8 min delay';
-        speed = '22 km/h';
+        delay = '~6 min delay';
+        speed = '24 km/h';
       } else {
         color = 'blue';
         status = 'Clear • Smooth Movement';
-        delay = idx === 0 ? '~4 min delay' : '< 3 min delay';
+        delay = idx === 0 ? '~3 min delay' : '< 2 min delay';
         speed = idx === 0 ? '28 km/h' : '34 km/h';
       }
-    } else if (density < 75) {
-      // Moderate to Heavy (Morning Peak / Pre-Aarti)
+    } else if (density < 65) {
+      // Thoda Rush (45-64%): Moderate crowd movement
+      if (idx === 0) {
+        color = 'orange';
+        status = 'Moderate Flow • Active Traffic';
+        delay = '~10 min delay';
+        speed = '20 km/h';
+      } else if (idx === 1) {
+        color = 'blue';
+        status = 'Smooth Movement • Steady';
+        delay = '~5 min delay';
+        speed = '26 km/h';
+      } else {
+        color = 'blue';
+        status = 'Clear • Free Corridor';
+        delay = '< 3 min delay';
+        speed = '32 km/h';
+      }
+    } else if (density < 85) {
+      // Full Rush (65-84%): Heavy festival peak traffic
       if (idx === 0) {
         color = 'red';
         status = 'Heavy Rush • Crawling at Entry';
         delay = '~25 min delay';
-        speed = '10 km/h';
+        speed = '11 km/h';
       } else if (idx === 1) {
         color = 'orange';
         status = 'Moderate Rush • Moving Steadily';
@@ -196,10 +214,10 @@ export function calculateDynamicRoads(rawRoads, density, avgRoadSpeed, mandal) {
         color = 'blue';
         status = 'Clear • Recommended Bypass';
         delay = '~5 min delay';
-        speed = '30 km/h';
+        speed = '28 km/h';
       }
     } else {
-      // Peak Evening / Devotee Gridlock
+      // Jam-Packed (>= 85%): Devotee Gridlock at sanctum
       if (idx === 0) {
         color = 'red';
         status = 'Devotee Gridlock • Pedestrian Only';
@@ -212,7 +230,7 @@ export function calculateDynamicRoads(rawRoads, density, avgRoadSpeed, mandal) {
         speed = '9 km/h';
       } else {
         color = 'orange';
-        status = 'Moderate Rush • Slow Moving';
+        status = 'Moderate Rush • Slow Moving Bypass';
         delay = '~15 min delay';
         speed = '20 km/h';
       }

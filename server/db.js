@@ -36,6 +36,32 @@ export class FestivalDatabase {
     this.mandalSuggestions = []; // Array of visitor suggestions
     this.advertiserInquiries = []; // Array of advertiser partnership inquiries
 
+    // Privacy-preserving Website Telemetry & Visual Heatmap Store
+    this.telemetry = {
+      totalViews: 0,
+      uniqueSessions: new Set(),
+      referrers: { whatsapp: 0, google: 0, twitter: 0, direct: 0, other: 0 },
+      devices: { mobile: 0, desktop: 0, tablet: 0 },
+      // Visual Feature/Zone Click Buckets
+      featureHeat: {
+        stand_in_front_pov: 0,
+        whatsapp_share: 0,
+        map_satellite_toggle: 0,
+        map_rush_heatmap: 0,
+        filter_manache: 0,
+        filter_quick: 0,
+        filter_famous: 0,
+        search_query: 0,
+        devotee_guide: 0,
+        society_poster: 0,
+        media_bulletin: 0,
+        suggest_mandal: 0,
+        city_switch: 0,
+      },
+      mandalClicks: new Map(), // mandalId -> count
+      recentEvents: [], // rolling last 100 events
+    };
+
     // Configurable scoring weights
     this.scoringWeights = {
       crowdActivity: 0.35,
@@ -394,6 +420,125 @@ export class FestivalDatabase {
 
   getAllAdvertiserInquiries() {
     return [...this.advertiserInquiries];
+  }
+
+  // --- Telemetry & Heatmap Aggregations ---
+  recordTelemetryEvent(event = {}) {
+    this.telemetry.totalViews++;
+    if (event.sessionId) {
+      this.telemetry.uniqueSessions.add(event.sessionId);
+    }
+    if (event.device && this.telemetry.devices[event.device] !== undefined) {
+      this.telemetry.devices[event.device]++;
+    }
+    if (event.referrerSource && this.telemetry.referrers[event.referrerSource] !== undefined) {
+      this.telemetry.referrers[event.referrerSource]++;
+    } else {
+      this.telemetry.referrers.direct++;
+    }
+
+    if (event.feature) {
+      if (this.telemetry.featureHeat[event.feature] !== undefined) {
+        this.telemetry.featureHeat[event.feature]++;
+      } else {
+        this.telemetry.featureHeat[event.feature] = 1;
+      }
+    }
+
+    if (event.mandalId) {
+      const current = this.telemetry.mandalClicks.get(event.mandalId) || 0;
+      this.telemetry.mandalClicks.set(event.mandalId, current + 1);
+    }
+
+    this.telemetry.recentEvents.unshift({
+      ...event,
+      timestamp: new Date().toISOString(),
+    });
+    if (this.telemetry.recentEvents.length > 200) {
+      this.telemetry.recentEvents.pop();
+    }
+  }
+
+  getTelemetrySummary() {
+    const totalFeatureClicks = Object.values(this.telemetry.featureHeat).reduce((a, b) => a + b, 0);
+
+    const FEATURE_DISPLAY_NAMES = {
+      stand_in_front_pov: '🪔 Stand in Front (Darshan POV)',
+      stand_in_front: '🪔 Stand in Front (Darshan POV)',
+      whatsapp_share: '📲 WhatsApp Status Share',
+      map_satellite_toggle: '🛰️ Satellite & Traffic Layer',
+      map_rush_heatmap: '🗺️ Map Crowd Heatmap',
+      filter_manache: '🚩 Filter: Manache 5 Ganpati',
+      filter_quick: '⚡ Filter: Quick Darshan (Khali)',
+      filter_famous: '⭐ Filter: Most Popular Mandals',
+      search_query: '🔍 Mandal Search & Discovery',
+      devotee_guide: '📖 Devotee Guide (Modak / Idols)',
+      society_poster: '🖨️ Housing Society Notice Poster',
+      media_bulletin: '📻 Radio RJ / Media Bulletin',
+      suggest_mandal: '✍️ Community Mandal Suggestion',
+      city_switch: '🌆 City Switch (Pune / Mumbai)',
+      pageview: '🌐 Main Portal Visit'
+    };
+
+    const featureList = Object.entries(this.telemetry.featureHeat).map(([key, clicks]) => {
+      const percentage = totalFeatureClicks > 0 ? Math.round((clicks / totalFeatureClicks) * 100) : 0;
+      let tempClass = 'temp-moderate';
+      let badgeClass = 'badge-moderate';
+      let tempLabel = 'MODERATE';
+      if (percentage >= 25 || clicks >= 50) {
+        tempClass = 'temp-hot';
+        badgeClass = 'badge-hot';
+        tempLabel = '🔥 VERY HIGH INTEREST';
+      } else if (percentage >= 10 || clicks >= 20) {
+        tempClass = 'temp-warm';
+        badgeClass = 'badge-warm';
+        tempLabel = '⚡ ACTIVE INTEREST';
+      }
+      return {
+        feature_key: key,
+        feature_name: FEATURE_DISPLAY_NAMES[key] || key.replace(/_/g, ' ').toUpperCase(),
+        clicks,
+        percentage,
+        temp_class: tempClass,
+        badge_class: badgeClass,
+        temp_label: tempLabel,
+      };
+    }).sort((a, b) => b.clicks - a.clicks);
+
+    // Top device and traffic source
+    const topDevice = Object.entries(this.telemetry.devices).sort((a, b) => b[1] - a[1])[0]?.[0] || 'mobile';
+    const topSource = Object.entries(this.telemetry.referrers).sort((a, b) => b[1] - a[1])[0]?.[0] || 'direct';
+
+    // Top 10 mandals clicked
+    const mandalRanking = Array.from(this.telemetry.mandalClicks.entries())
+      .map(([mandalId, clicks]) => {
+        const mandal = this.getMandal(mandalId);
+        return {
+          mandalId,
+          name: mandal ? mandal.name : mandalId,
+          city: mandal ? mandal.city : 'pune',
+          clicks,
+        };
+      })
+      .sort((a, b) => b.clicks - a.clicks)
+      .slice(0, 10);
+
+    return {
+      total_views: this.telemetry.totalViews,
+      unique_sessions: this.telemetry.uniqueSessions.size,
+      top_device: topDevice === 'mobile' ? 'Mobile (Phones)' : (topDevice === 'desktop' ? 'Desktop / Laptop' : 'Tablet'),
+      top_source: topSource === 'whatsapp' ? 'WhatsApp (Direct Share)' : (topSource === 'google' ? 'Google Search' : 'Direct Devotees'),
+      devices: this.telemetry.devices,
+      referrers: this.telemetry.referrers,
+      feature_heat: featureList,
+      top_mandals: mandalRanking.map(m => ({
+        mandal_id: m.mandalId,
+        mandal_name: m.name,
+        city: m.city,
+        clicks: m.clicks
+      })),
+      recent_events: this.telemetry.recentEvents.slice(0, 25),
+    };
   }
 
   // --- Persistence snapshot ---

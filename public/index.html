@@ -948,9 +948,10 @@
         <!-- 2. Authenticated Admin Dashboard -->
         <div id="admin-dashboard-view" style="display:none;">
           <!-- Admin Navigation Tabs -->
-          <div class="map-control-row" style="margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:10px;">
+          <div class="map-control-row" style="margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:10px; flex-wrap:wrap; gap:8px;">
             <button class="map-chip-btn active admin-tab-btn" data-tab="mandals">🕉️ Mandals (Add / Delete)</button>
             <button class="map-chip-btn admin-tab-btn" data-tab="ads">📢 Sponsor Ads (Add / Delete)</button>
+            <button class="map-chip-btn admin-tab-btn" data-tab="heatmap" style="background:rgba(234,88,12,0.2); border-color:#f97316; color:#ffedd5;">🔥 Visual Website Heatmap</button>
             <button class="map-chip-btn admin-tab-btn" data-tab="suggestions">📥 Visitor Suggestions (<span id="admin-sug-count">0</span>)</button>
             <button class="map-chip-btn admin-tab-btn" data-tab="advertisers">💼 Advertiser Leads (<span id="admin-adv-count">0</span>)</button>
             <button class="map-chip-btn" id="btn-admin-logout" style="margin-left:auto; border-color:#ef4444; color:#ef4444;">🚪 Logout</button>
@@ -1104,6 +1105,51 @@
                 <span style="font-size:11px; color:var(--text-muted);">Dispatched to softwareasg@gmail.com</span>
               </div>
               <div id="admin-advertisers-list" style="display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 5: Visual Website Heatmap & Interest Telemetry -->
+          <div class="admin-tab-pane" id="admin-pane-heatmap" style="display:none;">
+            <!-- Real-Time Metrics Strip -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:18px;">
+              <div class="info-card" style="padding:14px; text-align:center;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:700;">Total Interactions</div>
+                <div id="heat-total-views" style="font-size:24px; font-weight:900; color:var(--accent-gold); margin-top:4px;">0</div>
+              </div>
+              <div class="info-card" style="padding:14px; text-align:center;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:700;">Unique Devotee Sessions</div>
+                <div id="heat-unique-visitors" style="font-size:24px; font-weight:900; color:#34d399; margin-top:4px;">0</div>
+              </div>
+              <div class="info-card" style="padding:14px; text-align:center;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:700;">Top Traffic Source</div>
+                <div id="heat-top-source" style="font-size:16px; font-weight:800; color:#38bdf8; margin-top:6px;">WhatsApp (Direct)</div>
+              </div>
+              <div class="info-card" style="padding:14px; text-align:center;">
+                <div style="font-size:11px; color:var(--text-dim); text-transform:uppercase; font-weight:700;">Primary Device</div>
+                <div id="heat-top-device" style="font-size:16px; font-weight:800; color:#f472b6; margin-top:6px;">Mobile (Phones)</div>
+              </div>
+            </div>
+
+            <!-- Visual Website Section Heatmap Wireframe -->
+            <div class="info-card" style="margin-bottom:18px;">
+              <div class="info-card-title" style="display:flex; justify-content:space-between; align-items:center;">
+                <span>🔥 Visual Website Section Interest Heatmap</span>
+                <span style="font-size:11px; color:var(--text-dim);">Real-time Click Density (Warmer = More Devotee Activity)</span>
+              </div>
+              <div class="heat-wireframe-grid" id="heat-wireframe-container" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px;">
+                <!-- Dynamically populated with glowing heat bars -->
+              </div>
+            </div>
+
+            <!-- Top Mandals Clicked & Interacted -->
+            <div class="info-card">
+              <div class="info-card-title">
+                <span>🏆 Top Mandals by Devotee Interest & Engagement</span>
+                <span style="font-size:11px; color:var(--text-muted);">Clicks on "Stand in Front", "WhatsApp Share", or "Check Road"</span>
+              </div>
+              <div id="heat-top-mandals-list" style="display:flex; flex-direction:column; gap:10px;">
                 <!-- Populated dynamically -->
               </div>
             </div>

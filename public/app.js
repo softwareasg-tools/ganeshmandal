@@ -58,6 +58,33 @@ class FestivalApp {
   }
 
   async init() {
+    // 0. Auto Geo-IP Detection: If visitor arrives from Mumbai, default to Mumbai tab first
+    try {
+      const savedCity = localStorage.getItem('gm_preferred_city');
+      if (savedCity === 'mumbai' || savedCity === 'pune') {
+        this.currentCity = savedCity;
+      } else {
+        const geoRes = await fetch('/api/geo/detect-city');
+        if (geoRes.ok) {
+          const geoJson = await geoRes.json();
+          if (geoJson.detected_city === 'mumbai') {
+            this.currentCity = 'mumbai';
+          }
+        }
+      }
+    } catch (_) {}
+
+    // Update active city switcher tab UI
+    const puneBtn = document.getElementById('btn-city-pune');
+    const mumbaiBtn = document.getElementById('btn-city-mumbai');
+    if (this.currentCity === 'mumbai') {
+      if (puneBtn) puneBtn.classList.remove('active');
+      if (mumbaiBtn) mumbaiBtn.classList.add('active');
+    } else {
+      if (mumbaiBtn) mumbaiBtn.classList.remove('active');
+      if (puneBtn) puneBtn.classList.add('active');
+    }
+
     const taglineEl = document.getElementById('brand-tagline');
     if (taglineEl) {
       taglineEl.textContent = this.currentCity === 'pune'
@@ -71,6 +98,7 @@ class FestivalApp {
     this.bindPOVControls();
     this.bindAdminControls();
     this.bindSuggestControls();
+    this.trackPageView();
     this.connectWebSocket();
     await Promise.all([
       this.loadCityData(this.currentCity),
@@ -678,6 +706,7 @@ class FestivalApp {
   // Mobile Navigation & Interactive Map Carousel
   // -------------------------------------------------------------
   switchToMobileTab(tabName, targetMandal = null) {
+    this.trackInteraction('nav_tab_' + tabName);
     const navButtons = document.querySelectorAll('.mobile-nav-btn');
     navButtons.forEach((b) => {
       const isActive = b.dataset.tab === tabName;
@@ -1107,6 +1136,7 @@ class FestivalApp {
     this.povMandal = mandal;
     this.povAngle = 'sanctum';
     this.darshanZoomIndex = 0;
+    this.trackInteraction('stand_in_front', mandal.id);
 
     // 1. Immediately open modal so devotee gets instant 60fps feedback
     const povModalEl = document.getElementById('pov-street-modal');
@@ -1324,6 +1354,7 @@ class FestivalApp {
   async shareToWhatsApp(mandal) {
     if (!mandal) mandal = this.povMandal || (this.mandals && this.mandals[0]);
     if (!mandal) return;
+    this.trackInteraction('whatsapp_share', mandal.id);
 
     const density = mandal.crowd_density ?? 35;
     const waitMins = mandal.estimated_wait_minutes ?? 15;
@@ -2618,11 +2649,14 @@ class FestivalApp {
         const paneAds = document.getElementById('admin-pane-ads');
         const paneSug = document.getElementById('admin-pane-suggestions');
         const paneAdv = document.getElementById('admin-pane-advertisers');
+        const paneHeatmap = document.getElementById('admin-pane-heatmap');
         if (paneMandals) paneMandals.style.display = tab === 'mandals' ? 'block' : 'none';
         if (paneAds) paneAds.style.display = tab === 'ads' ? 'block' : 'none';
         if (paneSug) paneSug.style.display = tab === 'suggestions' ? 'block' : 'none';
         if (paneAdv) paneAdv.style.display = tab === 'advertisers' ? 'block' : 'none';
+        if (paneHeatmap) paneHeatmap.style.display = tab === 'heatmap' ? 'block' : 'none';
         if (tab === 'advertisers') this.renderAdminAdvertisers();
+        if (tab === 'heatmap') this.renderAdminHeatmap();
       });
     });
 
@@ -2991,6 +3025,156 @@ class FestivalApp {
       }
     } catch (err) {
       container.innerHTML = '<div style="color:#ef4444; font-size:12px;">Failed to load advertiser leads.</div>';
+    }
+  }
+
+  // -------------------------------------------------------------
+  // Privacy-Preserving Devotee Telemetry & Visual Section Heatmap
+  // -------------------------------------------------------------
+  trackPageView() {
+    try {
+      const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const device = isMobile ? 'mobile' : 'desktop';
+      let ref = 'direct';
+      if (document.referrer) {
+        const r = document.referrer.toLowerCase();
+        if (r.includes('whatsapp') || r.includes('wa.me')) ref = 'whatsapp';
+        else if (r.includes('google')) ref = 'google';
+        else if (r.includes('twitter') || r.includes('t.co')) ref = 'twitter';
+        else ref = 'other';
+      }
+      const city = this.currentCity || 'pune';
+
+      const payload = JSON.stringify({
+        type: 'pageview',
+        feature: 'pageview',
+        city,
+        device,
+        referrerSource: ref
+      });
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/telemetry/event', blob);
+      } else {
+        fetch('/api/telemetry/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (_) {}
+  }
+
+  trackInteraction(feature, mandalId = null) {
+    try {
+      if (!feature) return;
+      const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const payload = JSON.stringify({
+        type: 'click',
+        feature,
+        mandalId,
+        city: this.currentCity || 'pune',
+        device: isMobile ? 'mobile' : 'desktop'
+      });
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/telemetry/event', blob);
+      } else {
+        fetch('/api/telemetry/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+      }
+    } catch (_) {}
+  }
+
+  async renderAdminHeatmap() {
+    const totalViewsEl = document.getElementById('heat-total-views');
+    const uniqueVisitorsEl = document.getElementById('heat-unique-visitors');
+    const topSourceEl = document.getElementById('heat-top-source');
+    const topDeviceEl = document.getElementById('heat-top-device');
+    const wireframeContainer = document.getElementById('heat-wireframe-container');
+    const mandalsListEl = document.getElementById('heat-top-mandals-list');
+
+    if (!wireframeContainer) return;
+    wireframeContainer.innerHTML = '<div style="color:var(--text-dim); padding:16px;">Loading heatmap data...</div>';
+
+    try {
+      const res = await fetch('/api/admin/traffic-heatmap', {
+        headers: {
+          'X-Admin-Password': this.adminToken || 'asg12345$'
+        }
+      });
+      if (!res.ok) throw new Error('Unauthorized or failed to fetch heatmap');
+      const data = await res.json();
+
+      if (totalViewsEl) totalViewsEl.textContent = Number(data.total_views || 0).toLocaleString('en-IN');
+      if (uniqueVisitorsEl) uniqueVisitorsEl.textContent = Number(data.unique_sessions || 0).toLocaleString('en-IN');
+      if (topSourceEl) topSourceEl.textContent = data.top_source || 'Direct / WhatsApp';
+      if (topDeviceEl) topDeviceEl.textContent = data.top_device || 'Mobile (Phones)';
+
+      // Feature Wireframe Heatmap Cards
+      wireframeContainer.innerHTML = '';
+      const heatItems = data.feature_heat || [];
+      if (heatItems.length === 0) {
+        wireframeContainer.innerHTML = '<div style="color:var(--text-dim); padding:16px;">No interaction telemetry recorded yet. Clicks and views will illuminate sections here.</div>';
+      } else {
+        heatItems.forEach((item) => {
+          const card = document.createElement('div');
+          card.className = `heat-wireframe-item ${item.temp_class || 'temp-moderate'}`;
+          card.innerHTML = `
+            <div class="heat-wireframe-header">
+              <span class="heat-wireframe-label">${item.feature_name}</span>
+              <span class="heat-wireframe-badge ${item.badge_class}">${item.temp_label}</span>
+            </div>
+            <div class="heat-wireframe-bar-wrap">
+              <div class="heat-wireframe-bar ${item.temp_class || 'temp-moderate'}" style="width:${Math.max(6, item.percentage || 0)}%;"></div>
+            </div>
+            <div class="heat-wireframe-meta">
+              <span><strong>${(item.clicks || 0).toLocaleString('en-IN')}</strong> interactions</span>
+              <span><strong>${item.percentage || 0}%</strong> devotee focus</span>
+            </div>
+          `;
+          wireframeContainer.appendChild(card);
+        });
+      }
+
+      // Top Mandals List
+      if (mandalsListEl) {
+        mandalsListEl.innerHTML = '';
+        const topMandals = data.top_mandals || [];
+        if (topMandals.length === 0) {
+          mandalsListEl.innerHTML = '<div style="color:var(--text-dim); padding:12px; font-size:12px;">No mandal-specific interactions recorded yet.</div>';
+        } else {
+          const maxClicks = Math.max(1, topMandals[0]?.clicks || 1);
+          topMandals.forEach((m, idx) => {
+            const row = document.createElement('div');
+            row.className = 'heat-mandal-row';
+            const pct = Math.round((m.clicks / maxClicks) * 100);
+            row.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:12px; font-weight:800; color:var(--accent-gold); width:24px;">#${idx + 1}</span>
+                  <strong style="color:var(--text-cream); font-size:13px;">${m.mandal_name || m.mandal_id}</strong>
+                </div>
+                <span style="font-size:12px; font-weight:700; color:#38bdf8;">${m.clicks.toLocaleString('en-IN')} clicks</span>
+              </div>
+              <div class="heat-wireframe-bar-wrap" style="height:6px; margin:4px 0 0 0;">
+                <div class="heat-wireframe-bar temp-hot" style="width:${pct}%; height:100%;"></div>
+              </div>
+            `;
+            mandalsListEl.appendChild(row);
+          });
+        }
+      }
+    } catch (err) {
+      console.error('[Admin Heatmap] Failed to render:', err);
+      wireframeContainer.innerHTML = '<div style="color:#ef4444; padding:16px;">Failed to load heatmap data. Please check password authentication.</div>';
     }
   }
 

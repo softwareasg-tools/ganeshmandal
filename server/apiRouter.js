@@ -865,6 +865,81 @@ apiRouter.get('/admin/health', requireAdminAuth, (req, res) => {
 });
 
 /**
+ * GET /api/geo/detect-city
+ * Detects whether visitor IP is from Mumbai or Pune, allowing auto-tab selection
+ */
+apiRouter.get('/geo/detect-city', (req, res) => {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.ip || req.connection.remoteAddress || '';
+  
+  // Header inspection (Cloudflare / Reverse Proxy Geolocation Headers)
+  const cfCity = (req.headers['cf-ipcity'] || '').toLowerCase();
+  const cfRegion = (req.headers['cf-region'] || '').toLowerCase();
+  const cfTimezone = (req.headers['cf-timezone'] || '').toLowerCase();
+  const clientCityHint = (req.headers['x-client-city'] || req.query.city_hint || '').toLowerCase();
+
+  let detectedCity = 'pune'; // default anchor
+  let detectionSource = 'default';
+
+  if (cfCity.includes('mumbai') || cfCity.includes('bombay') || cfCity.includes('thane') || cfCity.includes('navi mumbai') || clientCityHint.includes('mumbai')) {
+    detectedCity = 'mumbai';
+    detectionSource = 'cf-city';
+  } else if (cfCity.includes('pune') || cfCity.includes('poona') || cfCity.includes('pcmc') || clientCityHint.includes('pune')) {
+    detectedCity = 'pune';
+    detectionSource = 'cf-city';
+  } else {
+    // If client timezone offset is Asia/Kolkata and client coordinates / hint given
+    if (clientCityHint === 'mumbai') {
+      detectedCity = 'mumbai';
+      detectionSource = 'hint';
+    }
+  }
+
+  res.json({
+    success: true,
+    detected_city: detectedCity,
+    source: detectionSource,
+    ip_masked: ip.split('.').slice(0, 2).join('.') + '.*.*',
+  });
+});
+
+/**
+ * POST /api/telemetry/event
+ * Privacy-preserving event beacon to register visitor interaction & feature heat
+ */
+apiRouter.post('/telemetry/event', (req, res) => {
+  const b = req.body || {};
+  const feature = b.feature;
+  const mandalId = b.mandalId || b.mandal_id;
+  const device = b.device || 'mobile';
+  const referrerSource = b.referrerSource || b.referrer || 'direct';
+  const sessionId = b.sessionId || b.session_id || req.ip || 'anon';
+  
+  // Record in backend database
+  db.recordTelemetryEvent({
+    feature,
+    mandalId,
+    device,
+    referrerSource,
+    sessionId,
+  });
+
+  res.status(202).json({ success: true });
+});
+
+/**
+ * GET /api/admin/traffic-heatmap
+ * Visual heatmap distribution and telemetry report (Admin password protected)
+ */
+apiRouter.get('/admin/traffic-heatmap', requireAdminAuth, (req, res) => {
+  const summary = db.getTelemetrySummary();
+  res.json({
+    success: true,
+    timestamp: new Date().toISOString(),
+    ...summary,
+  });
+});
+
+/**
  * GET /api/og/mandal/:id
  * Dynamic Open Graph SVG preview banner
  */

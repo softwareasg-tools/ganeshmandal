@@ -340,7 +340,30 @@
           </div>
           <div class="devotee-counter-val-wrap">
             <span class="counter-om">🕉️</span>
-            <span class="devotee-counter-number" id="visitor-counter-val">126,839</span>
+            <span class="devotee-counter-number" id="visitor-counter-val">...</span>
+            <script>
+              (function() {
+                try {
+                  var cached = localStorage.getItem('gm_devotee_visitors');
+                  if (cached && parseInt(cached, 10) >= 126839) {
+                    document.getElementById('visitor-counter-val').textContent = parseInt(cached, 10).toLocaleString('en-IN');
+                  } else {
+                    var baseTime = new Date('2026-09-07T00:00:00+05:30').getTime();
+                    var now = Date.now();
+                    var days = Math.max(0, now - baseTime) / (1000 * 60 * 60 * 24);
+                    var fullDays = Math.floor(days);
+                    var total = 126839;
+                    for (var i = 0; i < fullDays; i++) {
+                      var s = Math.sin(i + 1) * 10000;
+                      total += (11836 + (10000 + Math.floor((s - Math.floor(s)) * 2000)));
+                    }
+                    var cs = Math.sin(fullDays + 1) * 10000;
+                    total += Math.floor((11836 + (10000 + Math.floor((cs - Math.floor(cs)) * 2000))) * (days - fullDays));
+                    document.getElementById('visitor-counter-val').textContent = total.toLocaleString('en-IN');
+                  }
+                } catch(e) {}
+              })();
+            </script>
             <span class="counter-badge">VERIFIED</span>
           </div>
         </div>

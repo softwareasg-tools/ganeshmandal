@@ -1122,7 +1122,10 @@ body {
 .crowd-bar-green { background: #10b981; }
 .crowd-bar-orange { background: #f59e0b; }
 .crowd-bar-red { background: #dc2626; }
-.crowd-bar-purple { background: #9333ea; }
+.crowd-bar-purple {
+  background: linear-gradient(90deg, #9333ea, #c084fc);
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.6);
+}
 
 /* ==========================================================================
    Sponsored Native Partner Card (Chitale Bandhu Mithaiwale & Festival Sponsors)

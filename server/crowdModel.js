@@ -98,21 +98,21 @@ export function calculateDynamicCrowd(mandal, date = new Date()) {
   let rushColor = '#10b981'; // Green
   let roadStatus = 'Clear Roads • Fast Movement';
 
-  if (density < 20) {
+  if (density < 45) {
     rushCategory = 'Khali';
-    rushColor = '#10b981'; // Green
+    rushColor = '#10b981'; // Green (<45%)
     roadStatus = `Clear Roads • ${avgRoadSpeed} km/h`;
-  } else if (density <= 50) {
+  } else if (density < 65) {
     rushCategory = 'Thoda Rush';
-    rushColor = '#f59e0b'; // Amber / Yellow
+    rushColor = '#f59e0b'; // Amber / Orange (45-64%)
     roadStatus = `Moderate Flow • ${avgRoadSpeed} km/h`;
-  } else if (density <= 75) {
+  } else if (density < 85) {
     rushCategory = 'Full Rush';
-    rushColor = '#f97316'; // Orange
+    rushColor = '#ef4444'; // Red (65-84%)
     roadStatus = `Heavy Traffic • ${avgRoadSpeed} km/h`;
   } else {
     rushCategory = 'Jam-Packed';
-    rushColor = '#dc2626'; // Red
+    rushColor = '#9333ea'; // Royal Purple (>=85%)
     roadStatus = `Devotee Gridlock • ${avgRoadSpeed} km/h`;
   }
 

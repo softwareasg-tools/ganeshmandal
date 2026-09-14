@@ -279,13 +279,13 @@ class FestivalApp {
 
       let statusClass = 'status-khali';
       let statusColor = '#10b981';
-      if (density > 85) {
+      if (density >= 85) {
         statusClass = 'status-jam-packed';
         statusColor = '#9333ea';
-      } else if (density > 65) {
+      } else if (density >= 65) {
         statusClass = 'status-full-rush';
-        statusColor = '#dc2626';
-      } else if (density > 45) {
+        statusColor = '#ef4444';
+      } else if (density >= 45) {
         statusClass = 'status-thoda-rush';
         statusColor = '#f59e0b';
       } else {
@@ -463,16 +463,34 @@ class FestivalApp {
 
       const density = mandal.crowd_density ?? 10;
       const waitMins = mandal.estimated_wait_minutes ?? 2;
-      const rushText = mandal.rush_category || (density < 20 ? 'Khali' : density < 50 ? 'Thoda Rush' : 'Full Rush');
-      const rushColor = mandal.rush_color || (density < 20 ? '#10b981' : density < 50 ? '#f59e0b' : '#ef4444');
-      const periodLabel = mandal.period_label || (density < 20 ? 'Aarti Closed for Night' : 'Active Queue');
 
+      let rushText = mandal.rush_category || 'Khali';
+      let rushColor = '#10b981';
+      let rushBg = 'rgba(16, 185, 129, 0.18)';
       let fillClass = 'crowd-bar-green';
-      if (density > 85) fillClass = 'crowd-bar-purple';
-      else if (density > 65) fillClass = 'crowd-bar-red';
-      else if (density > 45) fillClass = 'crowd-bar-orange';
 
-      const rushBg = density < 20 ? 'rgba(16,185,129,0.18)' : density < 50 ? 'rgba(245,158,11,0.18)' : 'rgba(239,68,68,0.18)';
+      if (density >= 85) {
+        rushText = 'Jam-Packed';
+        rushColor = '#c084fc';
+        rushBg = 'rgba(147, 51, 234, 0.22)';
+        fillClass = 'crowd-bar-purple';
+      } else if (density >= 65) {
+        rushText = 'Full Rush';
+        rushColor = '#ef4444';
+        rushBg = 'rgba(239, 68, 68, 0.18)';
+        fillClass = 'crowd-bar-red';
+      } else if (density >= 45) {
+        rushText = 'Thoda Rush';
+        rushColor = '#f59e0b';
+        rushBg = 'rgba(245, 158, 11, 0.18)';
+        fillClass = 'crowd-bar-orange';
+      } else {
+        rushText = 'Khali';
+        rushColor = '#10b981';
+        rushBg = 'rgba(16, 185, 129, 0.18)';
+        fillClass = 'crowd-bar-green';
+      }
+      const periodLabel = mandal.period_label || (density < 20 ? 'Aarti Closed for Night' : 'Active Queue');
 
       card.innerHTML = `
         <div class="card-top-row">
@@ -790,9 +808,24 @@ class FestivalApp {
     mandalsToShow.forEach((mandal, idx) => {
       const density = mandal.crowd_density ?? 10;
       const waitMins = mandal.estimated_wait_minutes ?? 2;
-      const rushText = mandal.rush_category || (density < 20 ? 'Khali' : density < 50 ? 'Thoda Rush' : 'Full Rush');
-      const rushBg = density < 20 ? 'rgba(16,185,129,0.2)' : density < 50 ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)';
-      const rushColor = density < 20 ? '#10b981' : density < 50 ? '#f59e0b' : '#ef4444';
+
+      let rushText = 'Khali';
+      let rushBg = 'rgba(16,185,129,0.2)';
+      let rushColor = '#10b981';
+
+      if (density >= 85) {
+        rushText = 'Jam-Packed';
+        rushBg = 'rgba(147,51,234,0.25)';
+        rushColor = '#c084fc';
+      } else if (density >= 65) {
+        rushText = 'Full Rush';
+        rushBg = 'rgba(239,68,68,0.2)';
+        rushColor = '#ef4444';
+      } else if (density >= 45) {
+        rushText = 'Thoda Rush';
+        rushBg = 'rgba(245,158,11,0.2)';
+        rushColor = '#f59e0b';
+      }
 
       const card = document.createElement('div');
       card.className = `carousel-mandal-card ${mandal.id === activeMandalId ? 'active-card' : ''}`;
@@ -1262,20 +1295,27 @@ class FestivalApp {
     }
 
     if (statusPillEl) {
-      if (baseWait >= 35) {
-        statusPillEl.textContent = '🔴 PEAK AARTI RUSH';
+      const density = mandal.crowd_density ?? 15;
+      if (density >= 85 || baseWait >= 55) {
+        statusPillEl.textContent = '🟣 JAM-PACKED • PEAK RUSH';
+        statusPillEl.style.color = '#c084fc';
+        statusPillEl.style.borderColor = 'rgba(147, 51, 234, 0.5)';
+        statusPillEl.style.background = 'rgba(147, 51, 234, 0.22)';
+        if (waitDescEl) waitDescEl.textContent = 'Peak festival barricaded rush • Devotee gridlock with maximum waiting';
+      } else if (density >= 65 || baseWait >= 35) {
+        statusPillEl.textContent = '🔴 PEAK AARTI RUSH (FULL RUSH)';
         statusPillEl.style.color = '#ef4444';
         statusPillEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
         statusPillEl.style.background = 'rgba(239, 68, 68, 0.15)';
         if (waitDescEl) waitDescEl.textContent = 'High festival evening rush • Barricaded darshan queues active';
-      } else if (baseWait >= 18) {
-        statusPillEl.textContent = '🟠 MODERATE EVENING RUSH';
+      } else if (density >= 45 || baseWait >= 18) {
+        statusPillEl.textContent = '🟠 MODERATE RUSH (THODA RUSH)';
         statusPillEl.style.color = 'var(--accent-gold)';
         statusPillEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
         statusPillEl.style.background = 'rgba(245, 158, 11, 0.18)';
         if (waitDescEl) waitDescEl.textContent = 'Steady queue movement inside pandal • 2-3 paces every minute';
       } else {
-        statusPillEl.textContent = '🟢 SMOOTH DARSHAN FLOW';
+        statusPillEl.textContent = '🟢 SMOOTH DARSHAN FLOW (KHALI)';
         statusPillEl.style.color = '#10b981';
         statusPillEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
         statusPillEl.style.background = 'rgba(16, 185, 129, 0.15)';

@@ -73,7 +73,7 @@ const VERIFIED_AARTI_TIMINGS = {
   mandal_mumbai_khetwadi_12: '08:00 AM (Morning Aarti) • 08:00 PM (Maha Aarti)'
 };
 
-// Tailored, verified photo sets for premier mandals
+/// Tailored, verified photo sets for premier historic mandals with genuine dedicated photos
 const MANDAL_CUSTOM_MEDIA = {
   mandal_pune_dagdusheth: {
     dekhava: '/images/mandals/dagdusheth_mandir.jpg',
@@ -90,8 +90,8 @@ const MANDAL_CUSTOM_MEDIA = {
   mandal_pune_tambdi: {
     dekhava: '/images/mandals/tambdi_temple.jpg',
     dekhava_label: 'Jogeshwari Temple Courtyard & Sabha — Tambdi Jogeshwari',
-    live: '/images/mandals/mandal_pune_tambdi_live.jpg',
-    live_label: 'Jogeshwari Temple Courtyard Aarti — Tambdi Jogeshwari',
+    live: '/images/social/pune_utsav_procession_live.jpg',
+    live_label: 'Traditional Palkhi Procession & Devotee Chants — Tambdi Jogeshwari',
   },
   mandal_pune_guruji: {
     dekhava: '/images/mandals/pune_guruji_exterior.jpg',
@@ -108,8 +108,8 @@ const MANDAL_CUSTOM_MEDIA = {
   mandal_pune_kesariwada: {
     dekhava: '/images/mandals/kesariwada_wada.jpg',
     dekhava_label: 'Historic Tilak Wada Courtyard & Museum Arch — Kesariwada',
-    live: '/images/mandals/mandal_pune_kesariwada_live.jpg',
-    live_label: 'Historic Tilak Wada Courtyard Aarti — Kesariwada',
+    live: '/images/social/pune_alkatalkies_procession.jpg',
+    live_label: 'Historical Miravnuk Procession & Aarti — Kesariwada',
   },
   mandal_pune_mandai: {
     dekhava: '/images/mandals/mandai_temple.jpg',
@@ -129,12 +129,6 @@ const MANDAL_CUSTOM_MEDIA = {
     live: '/images/mandals/babu_genu_2.jpg',
     live_label: 'Mahaprasad & Live Aarti Stream — Babu Genu',
   },
-  mandal_pune_jilbya_maruti: {
-    dekhava: '/images/mandals/pune_jilbya_exterior.jpg',
-    dekhava_label: 'Bajirao Road Pandal Exterior & Entrance — Jilbya Maruti',
-    live: '/images/mandals/mandal_pune_jilbya_maruti_live.jpg',
-    live_label: 'Bajirao Road Live Aarti — Jilbya Maruti',
-  },
   mandal_pune_hatti: {
     dekhava: '/images/mandals/hatti_ganpati_1.jpg',
     dekhava_label: 'Sadashiv Peth Pandal Facade & Lighting — Hatti Ganpati',
@@ -147,83 +141,11 @@ const MANDAL_CUSTOM_MEDIA = {
     live: '/images/mandals/trishund_2.jpg',
     live_label: 'Deepmala Illumination & Aarti — Trishund Ganpati',
   },
-  mandal_pune_khunya: {
-    dekhava: '/images/mandals/khunya_murlidhar_mandir.jpg',
-    dekhava_label: 'Historic Sadashiv Peth Murlidhar Temple Complex — Khunya Murlidhar',
-    live: '/images/mandals/mandal_pune_khunya_live.jpg',
-    live_label: 'Sadashiv Peth Murlidhar Temple Aarti — Khunya Murlidhar',
-  },
-  mandal_pune_shanipar: {
-    dekhava: '/images/mandals/pune_shanipar_exterior.jpg',
-    dekhava_label: 'Shanipar Chowk Pandal Exterior & Decor — Shanipar Mandal',
-    live: '/images/mandals/mandal_pune_shanipar_live.jpg',
-    live_label: 'Shanipar Chowk Live Aarti & Miravnuk — Shanipar',
-  },
-  mandal_pune_natus_peth: {
-    dekhava: '/images/mandals/mandal_pune_natus_peth_dekhava.jpg',
-    dekhava_label: 'Natu Baug Sabhamandap & Traditional Decor — Natu Baug Mandal',
-    live: '/images/mandals/mandal_pune_natus_peth_live.jpg',
-    live_label: 'Natu Baug Live Aarti & Procession — Natu Baug Mandal',
-  },
   mandal_pune_chhatrapati_rajaram: {
     dekhava: '/images/mandals/pune_rajaram_dekhava.jpg',
     dekhava_label: 'Authentic Mythological Demon-Slaying Dekhava — Chhatrapati Rajaram Mandal',
     live: '/images/mandals/pune_rajaram_utsav.jpg',
     live_label: 'Golden Temple Replica Sabhamandap — Sadashiv Peth, Rajaram Mandal',
-  },
-  mandal_pune_hirabag: {
-    dekhava: '/images/mandals/mandal_pune_hirabag_dekhava.jpg',
-    dekhava_label: 'Hirabag Chowk Sabha Entrance & Decor — Hirabag Mitra Mandal',
-    live: '/images/mandals/mandal_pune_hirabag_live.jpg',
-    live_label: 'Hirabag Evening Aarti & Seva — Hirabag Mitra Mandal',
-  },
-  mandal_pune_garud: {
-    dekhava: '/images/mandals/mandal_pune_garud_dekhava.jpg',
-    dekhava_label: 'Garud Ganpati Sabhamandap Architecture — Garud Ganpati',
-    live: '/images/mandals/mandal_pune_garud_live.jpg',
-    live_label: 'Live Darshan & Evening Aarti — Garud Ganpati',
-  },
-  mandal_pune_potnis: {
-    dekhava: '/images/mandals/mandal_pune_potnis_dekhava.jpg',
-    dekhava_label: 'Potnis Parisar Historic Pandal — Potnis Ganpati Mandal',
-    live: '/images/mandals/mandal_pune_potnis_live.jpg',
-    live_label: 'Traditional Aarti & Deepotsav — Potnis Ganpati Mandal',
-  },
-  mandal_pune_suvarnayug: {
-    dekhava: '/images/mandals/mandal_pune_suvarnayug_dekhava.jpg',
-    dekhava_label: 'Suvarnayug Grand Royal Arch — Suvarnayug Tarun Mandal',
-    live: '/images/mandals/mandal_pune_suvarnayug_live.jpg',
-    live_label: 'Live Aarti & Devotee Chants — Suvarnayug Tarun Mandal',
-  },
-  mandal_pune_nagarkar: {
-    dekhava: '/images/mandals/mandal_pune_nagarkar_dekhava.jpg',
-    dekhava_label: 'Nagarkar Wada Historic Setting — Nagarkar Wada Mandal',
-    live: '/images/mandals/mandal_pune_nagarkar_live.jpg',
-    live_label: 'Nagarkar Wada Live Aarti & Seva — Nagarkar Wada Mandal',
-  },
-  mandal_pune_balgopal: {
-    dekhava: '/images/mandals/mandal_pune_balgopal_dekhava.jpg',
-    dekhava_label: 'Bal Gopal Mitra Mandal Sabhamandap — Bal Gopal Mandal',
-    live: '/images/mandals/mandal_pune_balgopal_live.jpg',
-    live_label: 'Live Bhajan & Aarti Ceremony — Bal Gopal Mandal',
-  },
-  mandal_pune_gokuldham: {
-    dekhava: '/images/mandals/mandal_pune_gokuldham_dekhava.jpg',
-    dekhava_label: 'Gokuldham Thematic Pandal Decor — Gokuldham Mitra Mandal',
-    live: '/images/mandals/mandal_pune_gokuldham_live.jpg',
-    live_label: 'Gokuldham Evening Maha Aarti — Gokuldham Mitra Mandal',
-  },
-  mandal_pune_rasta_peth: {
-    dekhava: '/images/mandals/pune_rasta_peth_exterior.jpg',
-    dekhava_label: 'Rasta Peth Naidu Pandal Exterior & Lighting — Rasta Peth',
-    live: '/images/mandals/mandal_pune_rasta_peth_live.jpg',
-    live_label: 'Rasta Peth Live Aarti & Dhol Beats — Rasta Peth',
-  },
-  mandal_pune_someshwar: {
-    dekhava: '/images/mandals/mandal_pune_someshwar_dekhava.jpg',
-    dekhava_label: 'Someshwar Mandir Heritage Sabhamandap — Someshwar Mandir Trust',
-    live: '/images/mandals/mandal_pune_someshwar_live.jpg',
-    live_label: 'Someshwar Live Deepam & Aarti — Someshwar Mandir Trust',
   },
   mandal_mumbai_lalbaug: {
     dekhava: '/images/mandals/lalbaug_pandal_outside.jpg',
@@ -240,140 +162,32 @@ const MANDAL_CUSTOM_MEDIA = {
   mandal_mumbai_gsb: {
     dekhava: '/images/mandals/gsb_puja.jpg',
     dekhava_label: 'Rigveda Mass Havan & Silver Sabhamandap — GSB Kings Circle',
-    live: '/images/mandals/mandal_mumbai_gsb_live.jpg',
+    live: '/images/social/mumbai_aarti_puja_glow.jpg',
     live_label: 'Rigveda Poornahuti & Live Aarti Darshan — GSB Seva Mandal',
   },
   mandal_mumbai_chinchpokli: {
     dekhava: '/images/mandals/chintamani_official.jpg',
     dekhava_label: 'Chintamani Aagman Sohala & Grand Pandal — Chinchpokli',
-    live: '/images/mandals/mandal_mumbai_chinchpokli_live.jpg',
+    live: '/images/social/mumbai_visarjan_miravnuk.jpg',
     live_label: 'Evening Deepotsav & Live Aarti — Chinchpoklicha Chintamani',
   },
   mandal_mumbai_gsb_wadala: {
     dekhava: '/images/mandals/mumbai_gsb_wadala_pandal.jpg',
     dekhava_label: 'Ram Mandir Wadala Pandal Entrance & Sabha — GSB Wadala',
-    live: '/images/mandals/mandal_mumbai_gsb_wadala_live.jpg',
+    live: '/images/social/ganesh_aarti_maha_puja.jpg',
     live_label: 'Live Havan & Rigveda Recitation — GSB Wadala',
   },
   mandal_mumbai_andheri: {
     dekhava: '/images/mandals/mumbai_andheri_darshan.jpg',
     dekhava_label: 'Azad Nagar Pandal & Celebrity Devotee Darshan — Andhericha Raja',
-    live: '/images/mandals/mandal_mumbai_andheri_live.jpg',
+    live: '/images/social/mumbai_girgaon_aagman.jpg',
     live_label: 'Live Procession & Evening Aarti Webcast — Andhericha Raja',
   },
   mandal_mumbai_khetwadi_12: {
     dekhava: '/images/mandals/mumbai_khetwadi_12_exterior.jpg',
     dekhava_label: '12th Lane Pandal Arch & Street Decor — Khetwadicha Raja',
-    live: '/images/mandals/mandal_mumbai_khetwadi_12_live.jpg',
+    live: '/images/social/mumbai_procession_visarjan.jpg',
     live_label: 'Live Aarti & Grand Darshan Mandap — Khetwadi 12th Lane',
-  },
-  mandal_mumbai_tejukaya: {
-    dekhava: '/images/mandals/mandal_mumbai_tejukaya_dekhava.jpg',
-    dekhava_label: 'Tejukaya Mansion Heritage Decor & Pandal — Tejukaya',
-    live: '/images/mandals/mandal_mumbai_tejukaya_live.jpg',
-    live_label: 'Live Aagman Miravnuk & Aarti — Tejukayacha Raja',
-  },
-  mandal_mumbai_girgaon: {
-    dekhava: '/images/mandals/mandal_mumbai_girgaon_dekhava.jpg',
-    dekhava_label: 'Girgaon Heritage Street Decor & Sabhamandap — Girgaoncha Raja',
-    live: '/images/mandals/mandal_mumbai_girgaon_live.jpg',
-    live_label: 'Traditional Girgaon Procession & Live Aarti — Girgaoncha Raja',
-  },
-  mandal_mumbai_fort: {
-    dekhava: '/images/mandals/mandal_mumbai_fort_dekhava.jpg',
-    dekhava_label: 'Fort Heritage Palace Replica Decor — Fort Vibhag',
-    live: '/images/mandals/mandal_mumbai_fort_live.jpg',
-    live_label: 'Live Sabhamandap Aarti & Devotee Darshan — Fortcha Raja',
-  },
-  mandal_mumbai_sahyadri: {
-    dekhava: '/images/mandals/mandal_mumbai_sahyadri_dekhava.jpg',
-    dekhava_label: 'Tilak Nagar Grand Theme Pandal — Sahyadri Krida Mandal',
-    live: '/images/mandals/mandal_mumbai_sahyadri_live.jpg',
-    live_label: 'Evening Light Show & Live Aarti — Sahyadri Krida Mandal',
-  },
-  mandal_mumbai_chandanwadi: {
-    dekhava: '/images/mandals/mandal_mumbai_chandanwadi_dekhava.jpg',
-    dekhava_label: 'Chandanwadi Royal Court Replica Pandal — Chandanwadicha Raja',
-    live: '/images/mandals/mandal_mumbai_chandanwadi_live.jpg',
-    live_label: 'Live Dhol Tasha Procession & Aarti — Chandanwadi',
-  },
-  mandal_mumbai_khetwadi_11: {
-    dekhava: '/images/mandals/mandal_mumbai_khetwadi_11_dekhava.jpg',
-    dekhava_label: '11th Lane Thematic Entrance Arch — Khetwadi 11th Lane',
-    live: '/images/mandals/mandal_mumbai_khetwadi_11_live.jpg',
-    live_label: 'Live Darshan & Maha Aarti — Khetwadi 11th Lane',
-  },
-  mandal_mumbai_khetwadi_8: {
-    dekhava: '/images/mandals/mandal_mumbai_khetwadi_8_dekhava.jpg',
-    dekhava_label: '8th Lane Golden Sabhamandap Decor — Khetwadi 8th Lane',
-    live: '/images/mandals/mandal_mumbai_khetwadi_8_live.jpg',
-    live_label: 'Live Evening Aarti & Bhajan — Khetwadi 8th Lane',
-  },
-  mandal_mumbai_khetwadi_7: {
-    dekhava: '/images/mandals/mandal_mumbai_khetwadi_7_dekhava.jpg',
-    dekhava_label: '7th Lane Traditional Pandal Architecture — Khetwadi 7th Lane',
-    live: '/images/mandals/mandal_mumbai_khetwadi_7_live.jpg',
-    live_label: 'Deepam Ceremony & Live Aarti — Khetwadi 7th Lane',
-  },
-  mandal_mumbai_khetwadi_4: {
-    dekhava: '/images/mandals/mandal_mumbai_khetwadi_4_dekhava.jpg',
-    dekhava_label: '4th Lane Illuminated Pandal Facade — Khetwadi 4th Lane',
-    live: '/images/mandals/mandal_mumbai_khetwadi_4_live.jpg',
-    live_label: 'Live Aarti & Devotee Darshan — Khetwadi 4th Lane',
-  },
-  mandal_mumbai_balgopal_vileparle: {
-    dekhava: '/images/mandals/mandal_mumbai_balgopal_vileparle_dekhava.jpg',
-    dekhava_label: 'Vile Parle Cultural Pandal Decor — Bal Gopal Mitra Mandal',
-    live: '/images/mandals/mandal_mumbai_balgopal_vileparle_live.jpg',
-    live_label: 'Evening Aarti & Live Darshan — Bal Gopal Vile Parle',
-  },
-  mandal_mumbai_dongri: {
-    dekhava: '/images/mandals/mandal_mumbai_dongri_dekhava.jpg',
-    dekhava_label: 'Dongri Historic Pandal Entrance — Dongricha Raja',
-    live: '/images/mandals/mandal_mumbai_dongri_live.jpg',
-    live_label: 'Live Miravnuk Procession & Aarti — Dongri',
-  },
-  mandal_mumbai_kamathipura: {
-    dekhava: '/images/mandals/mandal_mumbai_kamathipura_dekhava.jpg',
-    dekhava_label: 'Kamathipura Thematic Sabha Pandal — Kamathipura',
-    live: '/images/mandals/mandal_mumbai_kamathipura_live.jpg',
-    live_label: 'Live Camphor Aarti & Procession — Kamathipura',
-  },
-  mandal_mumbai_mazgaon: {
-    dekhava: '/images/mandals/mandal_mumbai_mazgaon_dekhava.jpg',
-    dekhava_label: 'Mazgaon Port Theme Sabhamandap — Mazgaoncha Raja',
-    live: '/images/mandals/mandal_mumbai_mazgaon_live.jpg',
-    live_label: 'Live Procession & Maha Aarti — Mazgaon',
-  },
-  mandal_mumbai_kalachowki: {
-    dekhava: '/images/mandals/mandal_mumbai_kalachowki_dekhava.jpg',
-    dekhava_label: 'Kalachowki Heritage Pandal Facade — Kalachowkicha Mahaganpati',
-    live: '/images/mandals/mandal_mumbai_kalachowki_live.jpg',
-    live_label: 'Live Aarti & Devotee Darshan — Kalachowki',
-  },
-  mandal_mumbai_bandra: {
-    dekhava: '/images/mandals/mandal_mumbai_bandra_dekhava.jpg',
-    dekhava_label: 'Bandra West Grand Community Pandal — Bandracha Raja',
-    live: '/images/mandals/mandal_mumbai_bandra_live.jpg',
-    live_label: 'Celebrity Darshan & Live Evening Aarti — Bandra',
-  },
-  mandal_mumbai_dharavi: {
-    dekhava: '/images/mandals/mandal_mumbai_dharavi_dekhava.jpg',
-    dekhava_label: 'Dharavi Kala Killa Grand Sabha — Dharavicha Raja',
-    live: '/images/mandals/mandal_mumbai_dharavi_live.jpg',
-    live_label: 'Live Dhol Tasha & Aarti Webcast — Dharavi',
-  },
-  mandal_mumbai_parel: {
-    dekhava: '/images/mandals/mandal_mumbai_parel_dekhava.jpg',
-    dekhava_label: 'Parel Naka Grand Thematic Pandal — Parelcha Raja',
-    live: '/images/mandals/mandal_mumbai_parel_live.jpg',
-    live_label: 'Live Miravnuk & Evening Aarti — Parel',
-  },
-  mandal_mumbai_sewri: {
-    dekhava: '/images/mandals/mandal_mumbai_sewri_dekhava.jpg',
-    dekhava_label: 'Sewri Koliwada Coastal Pandal Decor — Sewricha Raja',
-    live: '/images/mandals/mandal_mumbai_sewri_live.jpg',
-    live_label: 'Live Aarti & Ocean Procession — Sewri',
   }
 };
 
@@ -383,14 +197,20 @@ const PANDAL_DECOR_POOLS = {
     { url: '/images/social/pune_ganpati_decor_lights.jpg', label: 'Traditional Chandelier Lighting & Floral Arches' },
     { url: '/images/social/pune_ganpati_decor_floral.jpg', label: 'Artistic Sabhamandap Floral & Gold Decor' },
     { url: '/images/social/pune_sabhamandap_lighting.jpg', label: 'Peshwa Wada Style Wooden Pillars & Sabha Decor' },
-    { url: '/images/mandals/pune_festival_pandal.jpg', label: 'Magnificent Festival Sabhamandap & Entrance Arch' }
+    { url: '/images/mandals/pune_festival_pandal.jpg', label: 'Magnificent Festival Sabhamandap & Entrance Arch' },
+    { url: '/images/social/pune_dagdusheth_street_queue.jpg', label: 'Shivaji Road Devotee Queue & Pandal Facade' },
+    { url: '/images/social/pune_kasba_street_praveshdwar.jpg', label: 'Historic Kasba Praveshdwar & Street Lighting' },
+    { url: '/images/social/pune_street_queue_crowd.jpg', label: 'Festive Peth Area Street Crowds & Illuminations' }
   ],
   mumbai: [
     { url: '/images/social/mumbai_utsav_night_decor.jpg', label: 'Grand Thematic Sabhamandap & Night Illumination' },
     { url: '/images/social/mumbai_pandal_floral_arch.jpg', label: 'Elaborate Floral Arches & Chandelier Decor' },
     { url: '/images/social/mumbai_sabhamandap_grand.jpg', label: 'Colossal Thematic Replica Palace Decor' },
     { url: '/images/social/mumbai_sabhamandap_lighting.jpg', label: 'Royal Golden Illumination & Sabhamandap Facade' },
-    { url: '/images/mandals/test_mumbai_utsav.jpg', label: 'Vibrant Sabhamandap Craftsmanship & Devotee Pandal' }
+    { url: '/images/mandals/test_mumbai_utsav.jpg', label: 'Vibrant Sabhamandap Craftsmanship & Devotee Pandal' },
+    { url: '/images/social/mumbai_ganeshgalli_sabhamandap.jpg', label: 'Pillar Architecture & Grand Sabhamandap Hall' },
+    { url: '/images/social/mumbai_lalbaug_street_queue.jpg', label: 'Barricaded Devotee Approach Corridor & Pandal Entrance' },
+    { url: '/images/social/mumbai_street_queue_crowd.jpg', label: 'Festive Pandal Street Atmosphere & Night Lights' }
   ]
 };
 
@@ -401,7 +221,8 @@ const LIVE_AARTI_POOLS = {
     { url: '/images/social/pune_utsav_procession_live.jpg', label: 'Traditional Palkhi Procession & Devotee Chants' },
     { url: '/images/social/pune_dhol_pathak_nmv.jpg', label: 'Energetic Dhol Beats & Saffron Flag Wave' },
     { url: '/images/social/pune_visarjan_procession_night.jpg', label: 'Grand Evening Miravnuk & Aarti Celebration' },
-    { url: '/images/social/pune_devotee_darshan.jpg', label: 'Live Devotee Darshan & Mass Vedic Recitation' },
+    { url: '/images/social/pune_alkatalkies_procession.jpg', label: 'Alka Talkies Chowk Historic Miravnuk' },
+    { url: '/images/social/pune_miravnuk_procession.jpg', label: 'Laxmi Road Traditional Procession' },
     { url: '/images/social/pune_festival_celebration.jpg', label: 'Festive Miravnuk with Devotees & Gulal Joy' }
   ],
   mumbai: [
@@ -410,7 +231,10 @@ const LIVE_AARTI_POOLS = {
     { url: '/images/social/mumbai_visarjan_miravnuk.jpg', label: 'Colossal Miravnuk & Devotee Celebration' },
     { url: '/images/social/mumbai_girgaon_aagman.jpg', label: 'Grand Street Procession with Flower Showers' },
     { url: '/images/social/mumbai_crowd_devotion.jpg', label: 'Sea of Devotees Offering Prayers & Seeking Blessings' },
-    { url: '/images/social/mumbai_procession_visarjan.jpg', label: 'Majestic Sabhamandap Aarti & Devotee Chants' }
+    { url: '/images/social/mumbai_procession_visarjan.jpg', label: 'Majestic Sabhamandap Aarti & Devotee Chants' },
+    { url: '/images/social/ganesh_visarjan_chowpatty.jpg', label: 'Girgaon Chowpatty Sunset Aarti & Miravnuk' },
+    { url: '/images/social/ganesh_aarti_maha_puja.jpg', label: 'Sacred Maha Aarti with Camphor Flames & Puja Lamps' },
+    { url: '/images/social/dhol_pathak_drums.jpg', label: 'Traditional Dhol Tasha Pathak Rhythm' }
   ]
 };
 

@@ -101,6 +101,12 @@ export function renderMandalPage(mandalId, req) {
           "name": mandal.name,
           "url": canonicalUrl
         },
+        "publisher": {
+          "@type": "Organization",
+          "name": "GaneshMandal.in",
+          "url": `${protocol}://${host}/`,
+          "logo": `${protocol}://${host}/images/logo/ganeshmandal_logo.svg`
+        },
         "isAccessibleForFree": true
       },
       {

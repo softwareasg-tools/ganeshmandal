@@ -1,0 +1,179 @@
+/**
+ * Programmatic SEO & Bot Crawler Prerendering Engine
+ * 
+ * Serves optimized HTML with dynamic meta tags, OpenGraph previews,
+ * and Schema.org JSON-LD rich snippets for search engines & social crawlers.
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { db } from './db.js';
+import { calculateDynamicCrowd } from './crowdModel.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT_DIR = path.join(__dirname, '..');
+
+let baseIndexHtml = null;
+
+function getBaseIndexHtml() {
+  if (!baseIndexHtml || process.env.NODE_ENV !== 'production') {
+    baseIndexHtml = fs.readFileSync(path.join(ROOT_DIR, 'public', 'index.html'), 'utf8');
+  }
+  return baseIndexHtml;
+}
+
+export function renderMandalPage(mandalId, req) {
+  const template = getBaseIndexHtml();
+  let mandal = db.getMandal(mandalId);
+  if (!mandal) {
+    const all = db.getAllMandals();
+    mandal = all.find(m => m.id.includes(mandalId) || mandalId.includes(m.id));
+  }
+
+  if (!mandal) {
+    return template;
+  }
+
+  const dynamic = calculateDynamicCrowd(mandal);
+  const density = dynamic.crowd_density ?? mandal.crowd_density ?? 35;
+  const waitMins = dynamic.estimated_wait_minutes ?? mandal.estimated_wait_minutes ?? 20;
+  const cityName = (mandal.city || 'Pune').toUpperCase();
+  const fastestRoad = mandal.top_roads?.[0]?.name || 'Main Approach Road';
+
+  const host = req.get('host') || 'ganeshmandal.in';
+  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+  const canonicalUrl = `${protocol}://${host}/mandal/${mandal.id}`;
+  const ogImageUrl = `${protocol}://${host}/api/og/mandal/${mandal.id}`;
+
+  const title = `${mandal.name} Live Crowd Status (${density}% Rush, ~${waitMins}m Wait) — GaneshMandal.in`;
+  const description = `Live queue wait time (~${waitMins} mins), real-time crowd rush (${density}%), fastest approach road (${fastestRoad}) and direct street darshan for ${mandal.name} in ${cityName}. Verified live festival telemetry.`;
+
+  const schemaJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CivicStructure",
+        "@id": `${canonicalUrl}#mandal`,
+        "name": mandal.name,
+        "description": description,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": mandal.address || mandal.name,
+          "addressLocality": mandal.city || "Pune",
+          "addressRegion": "Maharashtra",
+          "addressCountry": "IN"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": mandal.latitude,
+          "longitude": mandal.longitude
+        },
+        "isAccessibleForFree": true,
+        "openingHours": "Mo-Su 05:00-23:59",
+        "image": mandal.image_url ? `${protocol}://${host}${mandal.image_url}` : ogImageUrl
+      },
+      {
+        "@type": "Event",
+        "@id": `${canonicalUrl}#darshan`,
+        "name": `${mandal.name} Sarvajanik Ganeshotsav 2026`,
+        "description": description,
+        "startDate": "2026-09-07T05:00:00+05:30",
+        "endDate": "2026-09-18T23:59:59+05:30",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+        "location": {
+          "@type": "Place",
+          "name": mandal.name,
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": mandal.city || "Pune",
+            "addressRegion": "Maharashtra",
+            "addressCountry": "IN"
+          }
+        },
+        "organizer": {
+          "@type": "Organization",
+          "name": mandal.name,
+          "url": canonicalUrl
+        },
+        "isAccessibleForFree": true
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": `What is the current wait time at ${mandal.name}?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `As of right now, the estimated darshan queue wait time at ${mandal.name} is ~${waitMins} minutes with crowd density at ${density}%.`
+            }
+          },
+          {
+            "@type": "Question",
+            "name": `Which is the best approach road to reach ${mandal.name}?`,
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": `The fastest recommended approach corridor is ${fastestRoad}. Devotees can check live approach road traffic speeds and barricade updates on GaneshMandal.in.`
+            }
+          }
+        ]
+      }
+    ]
+  };
+
+  const headInjections = `
+  <!-- Programmatic SEO & OpenGraph Dynamic Tags -->
+  <title>${escapeHtml(title)}</title>
+  <meta name="description" content="${escapeHtml(description)}">
+  <link rel="canonical" href="${canonicalUrl}">
+
+  <!-- OpenGraph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="${canonicalUrl}">
+  <meta property="og:title" content="${escapeHtml(title)}">
+  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:image" content="${ogImageUrl}">
+  <meta property="og:image:type" content="image/svg+xml">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="GaneshMandal.in">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="${canonicalUrl}">
+  <meta name="twitter:title" content="${escapeHtml(title)}">
+  <meta name="twitter:description" content="${escapeHtml(description)}">
+  <meta name="twitter:image" content="${ogImageUrl}">
+
+  <!-- JSON-LD Structured Data Schema -->
+  <script type="application/ld+json">
+${JSON.stringify(schemaJsonLd, null, 2)}
+  </script>
+
+  <!-- Client-side auto-hydration trigger -->
+  <script>
+    window._INITIAL_MANDAL_ID = "${escapeHtml(mandal.id)}";
+  </script>
+  `;
+
+  // Replace default title and inject tags
+  let modifiedHtml = template.replace(/<title>.*?<\/title>/i, '');
+  modifiedHtml = modifiedHtml.replace('</head>', `${headInjections}\n</head>`);
+
+  return modifiedHtml;
+}
+
+function escapeHtml(unsafe) {
+  return String(unsafe).replace(/[<>&'"]/g, (c) => {
+    switch (c) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '\'': return '&#39;';
+      case '"': return '&quot;';
+    }
+  });
+}

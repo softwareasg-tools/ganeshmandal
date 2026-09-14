@@ -145,7 +145,7 @@
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <!-- Custom Devotional Stylesheet -->
-  <link rel="stylesheet" href="/app.css?v=20260912-03">
+  <link rel="stylesheet" href="/app.css?v=20260914-01">
 </head>
 <body>
   <div class="app-container">
@@ -176,6 +176,14 @@
         <button class="btn-header accent-guide" id="btn-open-devotee-guide" title="Eco-friendly Idols, Modaks, Puja Vidhi & Decoration Guide">
           <span>🌿 Devotee Guide & Eco-Idols</span>
         </button>
+
+        <!-- Media Hub & Notice Board Posters -->
+        <a href="/press" class="btn-header" title="Real-Time Media & Radio Newsroom Bulletin" target="_blank" style="text-decoration:none; color:var(--text-cream); border-color:rgba(245,158,11,0.4);">
+          <span>📻 Media Bulletin</span>
+        </a>
+        <a href="/poster" class="btn-header" title="Print Notice Board Poster for Housing Societies" target="_blank" style="text-decoration:none; color:var(--text-cream); border-color:rgba(245,158,11,0.4);">
+          <span>🖨️ Society Poster</span>
+        </a>
 
         <!-- Live Sync Button -->
         <button class="btn-header accent-sync" id="btn-sync-feeds" title="Refresh content with latest live feeds & crowd telemetry">
@@ -285,6 +293,8 @@
             <button class="rank-filter-chip" data-filter="manache">Manache 5</button>
             <button class="rank-filter-chip" data-filter="khali">🟢 Khali Now</button>
             <button class="rank-filter-chip" data-filter="famous">⭐ Famous</button>
+            <a href="/poster" class="rank-filter-chip" target="_blank" style="text-decoration:none; color:var(--text-cream); display:inline-flex; align-items:center;">🖨️ Society Poster</a>
+            <a href="/press" class="rank-filter-chip" target="_blank" style="text-decoration:none; color:var(--text-cream); display:inline-flex; align-items:center;">📻 Media Bulletin</a>
             <button class="rank-filter-chip chip-map-jump" id="chip-jump-to-map">🗺️ View on Map</button>
           </div>
           <div class="mobile-action-pill-row" id="mobile-action-pill-row">
@@ -522,6 +532,13 @@
               <div class="rush-advice-strip" id="rush-advice-strip">
                 <span class="rush-advice-icon">📢</span>
                 <span class="rush-advice-text" id="rush-advice-text">Devotee lines are moving steadily along the barricaded corridor. Dedicated queues for senior citizens & families with children are functioning smoothly.</span>
+              </div>
+
+              <!-- 1-Tap Viral WhatsApp Share Banner -->
+              <div class="rush-viral-wa-wrap" style="margin-top:12px;">
+                <button class="btn-viral-wa-share" id="btn-pov-share-wa" type="button">
+                  <span>📲 WhatsApp वर थेट गर्दी अपडेट पाठवा (Share Status with Family)</span>
+                </button>
               </div>
             </div>
 
@@ -1403,6 +1420,6 @@
   <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
   
   <!-- Frontend Logic Module -->
-  <script type="module" src="/app.js?v=20260912-03"></script>
+  <script type="module" src="/app.js?v=20260914-01"></script>
 </body>
 </html>

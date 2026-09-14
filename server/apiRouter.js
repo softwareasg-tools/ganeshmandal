@@ -16,6 +16,9 @@ import { recommendationEngine } from './recommendationEngine.js';
 import { weatherService } from './weatherService.js';
 import { socialAggregator } from './socialAggregator.js';
 import { calculateDynamicCrowd } from './crowdModel.js';
+import { generateMandalOgSvg } from './ogGenerator.js';
+import { generateHourlyBulletin } from './mediaBulletin.js';
+import { generateSitemapXml } from './sitemapGenerator.js';
 
 export const apiRouter = express.Router();
 
@@ -860,3 +863,40 @@ apiRouter.get('/admin/health', requireAdminAuth, (req, res) => {
     memory_usage_mb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
   });
 });
+
+/**
+ * GET /api/og/mandal/:id
+ * Dynamic Open Graph SVG preview banner
+ */
+apiRouter.get('/og/mandal/:id', (req, res) => {
+  const svg = generateMandalOgSvg(req.params.id);
+  if (!svg) {
+    return res.status(404).send('Mandal not found');
+  }
+  res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120');
+  res.send(svg);
+});
+
+/**
+ * GET /api/media/hourly-bulletin
+ * Automated hourly newsroom & radio RJ bulletin
+ */
+apiRouter.get('/media/hourly-bulletin', (req, res) => {
+  const city = req.query.city || 'pune';
+  const bulletin = generateHourlyBulletin(city);
+  res.setHeader('Cache-Control', 'public, max-age=120, s-maxage=300');
+  res.json(bulletin);
+});
+
+/**
+ * GET /api/sitemap.xml
+ * Real-time fast-indexing sitemap
+ */
+apiRouter.get('/sitemap.xml', (req, res) => {
+  const xml = generateSitemapXml(req);
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600');
+  res.send(xml);
+});
+

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Mandal Crowd Badge</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #120e0a;
+      color: #fffbeb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+    .embed-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100vh;
+      max-height: 130px;
+      padding: 12px;
+      background: linear-gradient(135deg, #1e1913, #130f0c);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 12px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      transition: all 0.2s ease;
+    }
+    .embed-card:hover {
+      border-color: #f59e0b;
+      transform: translateY(-1px);
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-size: 10px;
+      font-weight: 800;
+      color: #f59e0b;
+      letter-spacing: 1px;
+    }
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.15);
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 6px #10b981;
+    }
+    .mandal-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fffbeb;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin: 4px 0 6px;
+    }
+    .stats-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .rush-pill {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .wait-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: #d6d3d1;
+    }
+    .cta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #8b8580;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 6px;
+    }
+    .cta-link {
+      color: #ea580c;
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <a class="embed-card" id="card-link" href="https://ganeshmandal.in" target="_blank" rel="noopener">
+    <div class="top-row">
+      <span class="brand">🚩 GANESHMANDAL.IN</span>
+      <span class="live-indicator"><span class="pulse-dot"></span>LIVE CROWD</span>
+    </div>
+    <div class="mandal-name" id="mandal-name">Shreemant Dagdusheth Halwai</div>
+    <div class="stats-row">
+      <span class="rush-pill" id="rush-pill">35% RUSH</span>
+      <span class="wait-pill" id="wait-pill">⏱️ ~15 min wait</span>
+    </div>
+    <div class="cta-row">
+      <span>Approach Traffic: Clear</span>
+      <span class="cta-link">View Full Telemetry ↗</span>
+    </div>
+  </a>
+
+  <script>
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const urlParams = new URLSearchParams(window.location.search);
+    const mandalId = (pathParts[1] && pathParts[0] === 'embed') ? pathParts[1] : (urlParams.get('mandal') || 'dagdusheth');
+
+    async function loadEmbedData() {
+      try {
+        const res = await fetch(`/api/mandals/${mandalId}`);
+        const json = await res.json();
+        if (!json || !json.success || !json.data || !json.data.mandal) return;
+        const m = json.data.mandal;
+
+        document.getElementById('mandal-name').textContent = m.name;
+        document.getElementById('card-link').href = `https://ganeshmandal.in/mandal/${m.id}?src=embed`;
+
+        const density = m.crowd_density ?? 35;
+        const wait = m.estimated_wait_minutes ?? 15;
+        const rushEl = document.getElementById('rush-pill');
+        rushEl.textContent = `${density}% RUSH`;
+
+        if (density > 70) {
+          rushEl.style.color = '#ef4444';
+          rushEl.style.background = 'rgba(239, 68, 68, 0.2)';
+          rushEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        } else if (density > 45) {
+          rushEl.style.color = '#f59e0b';
+          rushEl.style.background = 'rgba(245, 158, 11, 0.2)';
+          rushEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
+        } else {
+          rushEl.style.color = '#10b981';
+          rushEl.style.background = 'rgba(16, 185, 129, 0.2)';
+          rushEl.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        }
+
+        document.getElementById('wait-pill').textContent = `⏱️ ~${wait} min wait`;
+      } catch (e) {
+        console.warn('Embed load error:', e);
+      }
+    }
+
+    loadEmbedData();
+    setInterval(loadEmbedData, 45000);
+  </script>
+</body>
+</html>

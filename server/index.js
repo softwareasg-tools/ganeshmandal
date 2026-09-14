@@ -18,6 +18,9 @@ import { db } from './db.js';
 import { initializeSeedData } from './seedData.js';
 import { apiRouter } from './apiRouter.js';
 import { festivalWs } from './websocketServer.js';
+import { renderMandalPage } from './seoRenderer.js';
+import { generateSitemapXml } from './sitemapGenerator.js';
+import { cronWorker } from './cronWorker.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -92,6 +95,38 @@ export function createApp() {
   // Mount API
   app.use('/api', apiRouter);
 
+  // Root Dynamic Sitemap for Googlebot & Bingbot fast indexing
+  app.get('/sitemap.xml', (req, res) => {
+    const xml = generateSitemapXml(req);
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=600');
+    res.send(xml);
+  });
+
+  // Autonomous Media Press Room
+  app.get('/press', (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, 'public', 'press.html'));
+  });
+
+  // Printable Society Notice Board Poster
+  app.get('/poster', (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, 'public', 'poster.html'));
+  });
+
+  // Embeddable Live Mandal Badge
+  app.get(['/embed', '/embed/:id'], (req, res) => {
+    res.sendFile(path.join(ROOT_DIR, 'public', 'embed.html'));
+  });
+
+  // Deep-linked Programmatic SEO & OpenGraph Route
+  app.get(['/mandal/:id', '/mandal/:city/:id'], (req, res) => {
+    const mandalId = req.params.id;
+    const html = renderMandalPage(mandalId, req);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=120');
+    res.send(html);
+  });
+
   // Serve static assets
   app.use(express.static(path.join(ROOT_DIR, 'public')));
   app.use('/src', express.static(path.join(ROOT_DIR, 'src')));
@@ -139,6 +174,9 @@ export function startServer(port = PORT) {
     console.log(`[Server] REST API base: http://localhost:${port}/api`);
     console.log(`[Server] WebSocket live stream: ws://localhost:${port}/api/live?city=pune`);
     console.log('========================================================\n');
+
+    // 5. Start autonomous 7-day distribution cron worker
+    cronWorker.start();
   });
 
   return { app, server };

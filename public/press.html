@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Press & Media Real-Time Bulletin — GaneshMandal.in</title>
+  <meta name="description" content="Official real-time festival press bulletin, radio scripts, and live crowd telemetry for newsrooms, journalists, and radio RJs covering Pune and Mumbai Ganeshotsav 2026.">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/app.css?v=20260914-01">
+  <style>
+    body {
+      background: #0c0a09;
+      color: #fffbeb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 0;
+      margin: 0;
+    }
+    .press-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 80px;
+    }
+    .press-header {
+      background: linear-gradient(135deg, rgba(34, 30, 25, 0.9), rgba(23, 21, 18, 0.95));
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    }
+    .press-tag {
+      display: inline-block;
+      background: rgba(245, 158, 11, 0.2);
+      color: #f59e0b;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .press-title {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fffbeb;
+      margin: 0 0 8px;
+    }
+    .press-subtitle {
+      color: #d6d3d1;
+      font-size: 14px;
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+    .press-meta-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      font-size: 12px;
+      color: #8b8580;
+    }
+    .live-pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      margin-right: 6px;
+    }
+    .bulletin-card {
+      background: #171512;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .bulletin-card h3 {
+      font-size: 16px;
+      color: #f59e0b;
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .script-box {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #fef3c7;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+    .btn-copy {
+      background: linear-gradient(135deg, #ea580c, #c2410c);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-copy:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-copy:active {
+      transform: scale(0.97);
+    }
+    .city-switch {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .city-tab {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #d6d3d1;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .city-tab.active {
+      background: #ea580c;
+      color: #fff;
+      border-color: #ea580c;
+    }
+    .telemetry-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .telemetry-table th {
+      text-align: left;
+      padding: 10px;
+      color: #8b8580;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+    }
+    .telemetry-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: #fffbeb;
+    }
+    .embed-snippet {
+      background: #000;
+      color: #93c5fd;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      word-break: break-all;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #f59e0b;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="press-container">
+    <a href="/" class="back-home">‹ Back to Live Platform (GaneshMandal.in)</a>
+
+    <header class="press-header">
+      <span class="press-tag">OFFICIAL MEDIA &amp; RADIO DESK</span>
+      <h1 class="press-title">Real-Time Festival Telemetry &amp; Newsroom Feed</h1>
+      <p class="press-subtitle">
+        Automated hourly crowd rush bulletins, radio RJ broadcast scripts, and approach road intelligence for media houses, newsrooms, radio stations, and traffic desks covering Ganeshotsav 2026.
+      </p>
+      <div class="press-meta-strip">
+        <span><span class="live-pulse"></span>Live Broadcast Feed Active</span>
+        <span>•</span>
+        <span id="bulletin-timestamp">Updating live...</span>
+        <span>•</span>
+        <span>Attribution: Free to quote &amp; syndicate</span>
+      </div>
+    </header>
+
+    <div class="city-switch">
+      <button class="city-tab active" data-city="pune" id="btn-tab-pune">Pune Mandals</button>
+      <button class="city-tab" data-city="mumbai" id="btn-tab-mumbai">Mumbai Mandals</button>
+    </div>
+
+    <!-- Radio RJ Script Marathi -->
+    <div class="bulletin-card">
+      <h3>
+        <span>📻 20-Second Radio RJ / News Broadcast Script (Marathi)</span>
+        <button class="btn-copy" id="btn-copy-mr">📋 कॉपी करा (Copy Script)</button>
+      </h3>
+      <div class="script-box" id="box-script-mr">Loading Marathi radio bulletin...</div>
+    </div>
+
+    <!-- Radio RJ Script English -->
+    <div class="bulletin-card">
+      <h3>
+        <span>📻 20-Second Radio RJ / News Broadcast Script (English)</span>
+        <button class="btn-copy" id="btn-copy-en">📋 Copy English Script</button>
+      </h3>
+      <div class="script-box" id="box-script-en">Loading English radio bulletin...</div>
+    </div>
+
+    <!-- Live Telemetry Table -->
+    <div class="bulletin-card">
+      <h3><span>📊 Current Mandal Wait Times &amp; Crowd Densities</span></h3>
+      <div style="overflow-x:auto;">
+        <table class="telemetry-table">
+          <thead>
+            <tr>
+              <th>Mandal</th>
+              <th>Crowd Rush</th>
+              <th>Est. Wait Time</th>
+              <th>Fastest Approach Corridor</th>
+            </tr>
+          </thead>
+          <tbody id="telemetry-tbody">
+            <tr><td colspan="4" style="text-align:center; color:#8b8580;">Loading live telemetry...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Embeddable Live Widget for News Blogs -->
+    <div class="bulletin-card">
+      <h3><span>📰 Embed Live Crowd Badge on Your Website / News Portal</span></h3>
+      <p style="font-size:13px; color:#d6d3d1; margin-bottom:12px;">
+        Local news portals, housing society blogs, and community forums can embed this real-time 320x130 responsive widget:
+      </p>
+      <div class="embed-snippet" id="embed-code-box">&lt;iframe src="https://ganeshmandal.in/embed/dagdusheth" width="340" height="130" frameborder="0" style="border-radius:12px; overflow:hidden;"&gt;&lt;/iframe&gt;</div>
+      <button class="btn-copy" style="margin-top:12px;" id="btn-copy-embed">📋 Copy Embed Code</button>
+    </div>
+  </div>
+
+  <script>
+    let currentCity = 'pune';
+
+    async function loadBulletin() {
+      try {
+        const res = await fetch(`/api/media/hourly-bulletin?city=${currentCity}`);
+        const data = await res.json();
+        if (!data || !data.success) return;
+
+        document.getElementById('bulletin-timestamp').textContent = `IST: ${data.ist_time}`;
+        document.getElementById('box-script-mr').textContent = data.radio_script_mr;
+        document.getElementById('box-script-en').textContent = data.radio_script_en;
+
+        const mandalsRes = await fetch(`/api/cities/${currentCity}/mandals`);
+        const mandalsData = await mandalsRes.json();
+        if (mandalsData && mandalsData.success) {
+          renderTable(mandalsData.data);
+        }
+      } catch (err) {
+        console.error('Failed to load media bulletin:', err);
+      }
+    }
+
+    function renderTable(mandals) {
+      const tbody = document.getElementById('telemetry-tbody');
+      tbody.innerHTML = '';
+      (mandals || []).forEach(m => {
+        const density = m.crowd_density ?? 35;
+        const wait = m.estimated_wait_minutes ?? 15;
+        const road = m.top_roads?.[0]?.name || m.address || 'Main Road';
+        const color = density > 70 ? '#ef4444' : (density > 45 ? '#f59e0b' : '#10b981');
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="font-weight:700;">${m.name}</td>
+          <td><strong style="color:${color};">${density}%</strong></td>
+          <td>~${wait} mins</td>
+          <td style="color:#93c5fd;">🚗 ${road}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Copy Handlers
+    function copyToClipboard(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+      });
+    }
+
+    document.getElementById('btn-copy-mr').addEventListener('click', function() {
+      copyToClipboard(document.getElementById('box-script-mr').textContent, this);
+    });
+    document.getElementById('btn-copy-en').addEventListener('click', function() {
+      copyToClipboard(document.getElementById('box-script-en').textContent, this);
+    });
+    document.getElementById('btn-copy-embed').addEventListener('click', function() {
+      copyToClipboard(document.getElementById('embed-code-box').textContent, this);
+    });
+
+    document.getElementById('btn-tab-pune').addEventListener('click', function() {
+      document.getElementById('btn-tab-mumbai').classList.remove('active');
+      this.classList.add('active');
+      currentCity = 'pune';
+      loadBulletin();
+    });
+    document.getElementById('btn-tab-mumbai').addEventListener('click', function() {
+      document.getElementById('btn-tab-pune').classList.remove('active');
+      this.classList.add('active');
+      currentCity = 'mumbai';
+      loadBulletin();
+    });
+
+    loadBulletin();
+    setInterval(loadBulletin, 60000);
+  </script>
+</body>
+</html>

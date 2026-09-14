@@ -930,6 +930,57 @@ body {
   color: #fff;
 }
 
+.btn-card-action.card-wa-share-btn {
+  flex: 0.9;
+  background: rgba(37, 211, 102, 0.14);
+  border: 1px solid rgba(37, 211, 102, 0.35);
+  color: #25d366;
+  min-height: 40px;
+  border-radius: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-card-action.card-wa-share-btn:hover {
+  background: rgba(37, 211, 102, 0.25);
+  border-color: #25d366;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-viral-wa-share {
+  width: 100%;
+  background: linear-gradient(135deg, #25d366, #128c7e);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.btn-viral-wa-share:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+}
+
+.btn-viral-wa-share:active {
+  transform: scale(0.98);
+}
+
 .btn-card-action.card-map-btn {
   flex: 1;
   background: rgba(255, 255, 255, 0.06);
@@ -3990,6 +4041,18 @@ body {
   .btn-card-action.btn-stand-front:active {
     transform: scale(0.97);
     filter: brightness(1.15);
+  }
+
+  .btn-card-action.card-wa-share-btn {
+    flex: 1;
+    background: rgba(37, 211, 102, 0.15);
+    border: 1px solid rgba(37, 211, 102, 0.35);
+    color: #25d366;
+  }
+
+  .btn-card-action.card-wa-share-btn:active {
+    background: rgba(37, 211, 102, 0.25);
+    transform: scale(0.97);
   }
 
   .btn-card-action.card-map-btn {

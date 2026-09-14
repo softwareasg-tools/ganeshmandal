@@ -76,6 +76,19 @@ class FestivalApp {
       this.loadSponsorAds(),
     ]);
     this.fetchWeather(this.currentCity);
+
+    // Auto-open mandal if user arrived via WhatsApp forward or deep-link
+    const targetMandalId = window._INITIAL_MANDAL_ID || new URLSearchParams(window.location.search).get('mandal');
+    if (targetMandalId) {
+      setTimeout(() => {
+        this.openPOVModal(targetMandalId, 'crowd');
+      }, 400);
+    }
+
+    // Register Service Worker for anonymous golden window alerts
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
   }
 
   // -------------------------------------------------------------
@@ -414,7 +427,10 @@ class FestivalApp {
 
         <div class="card-action-row">
           <button class="btn-card-action btn-stand-front card-pov-btn" type="button" title="Stand in front of Bappa">
-            <span>👁️ Stand in Front of Bappa</span>
+            <span>👁️ Stand in Front</span>
+          </button>
+          <button class="btn-card-action card-wa-share-btn" type="button" title="Share live queue on WhatsApp" aria-label="Share status on WhatsApp">
+            <span>📲 Share</span>
           </button>
           <button class="btn-card-action card-map-btn" type="button" title="View mandal on live map">
             <span>🗺️ Map</span>
@@ -429,6 +445,16 @@ class FestivalApp {
           e.stopPropagation();
           e.preventDefault();
           this.openPOVModal(mandal.id, 'crowd');
+        });
+      }
+
+      // WhatsApp Viral Share Handler
+      const shareBtn = card.querySelector('.card-wa-share-btn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          this.shareToWhatsApp(mandal);
         });
       }
 
@@ -1075,6 +1101,43 @@ class FestivalApp {
     if (mapsNavBtn) {
       mapsNavBtn.href = `https://www.google.com/maps/dir/?api=1&destination=${mandal.latitude},${mandal.longitude}`;
     }
+
+    // Wire up POV Modal 1-Tap WhatsApp Viral Share Button
+    const btnPovWa = document.getElementById('btn-pov-share-wa');
+    if (btnPovWa) {
+      btnPovWa.onclick = () => this.shareToWhatsApp(mandal);
+    }
+  }
+
+  shareToWhatsApp(mandal) {
+    if (!mandal) mandal = this.povMandal || (this.mandals && this.mandals[0]);
+    if (!mandal) return;
+
+    const density = mandal.crowd_density ?? 35;
+    const waitMins = mandal.estimated_wait_minutes ?? 15;
+
+    let rushEmoji = '🟢';
+    let rushText = 'कमी गर्दी (Smooth Darshan Flow)';
+    if (density > 85) { rushEmoji = '🟣'; rushText = 'प्रचंड गर्दी (Jam-Packed)'; }
+    else if (density > 65) { rushEmoji = '🔴'; rushText = 'जास्त गर्दी (Full Rush)'; }
+    else if (density > 45) { rushEmoji = '🟠'; rushText = 'मध्यम गर्दी (Moderate Queue)'; }
+
+    const roadName = mandal.top_roads?.[0]?.name || 'मुख्य मार्ग';
+    const city = (mandal.city || 'pune').toUpperCase();
+    const url = `https://ganeshmandal.in/mandal/${mandal.id}?src=wa`;
+
+    const text = [
+      `🚩 *${mandal.name} (${city}) - थेट गर्दी व दर्शन अपडेट*`,
+      `📊 सद्यस्थिती: ${rushEmoji} ${density}% ${rushText}`,
+      `⏱️ रांगेत प्रतीक्षा वेळ: ~${waitMins} मिनिटे`,
+      `🚗 सर्वात वेगवान रस्ता: ${roadName}`,
+      `\n👁️ थेट दर्शन रांग व लाईव्ह रस्ते पाहण्यासाठी खालील लिंक उघडा:`,
+      `👉 ${url}`,
+      `\n*(दर्शन रांगेत जाण्यापूर्वी मित्र आणि सोसायटी ग्रुपवर नक्की शेअर करा)*`
+    ].join('\n');
+
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
   }
 
   setupTrafficPane(mandal) {

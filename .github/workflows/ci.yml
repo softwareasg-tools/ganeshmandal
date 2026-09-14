@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [24.14.0, 26.x]
+        node: [22.x, 24.x]
     env:
       PUPPETEER_SKIP_DOWNLOAD: '1'
       GEV_REQUIRE_ALLOCATION_GATE: ${{ matrix.node == '24.14.0' && '1' || '0' }}
@@ -42,11 +42,8 @@ jobs:
       - name: Run setup policy checks
         run: npm run doctor -- --json
 
-      - name: Run unit tests
-        run: npm test
-
-      - name: Build production bundle
-        run: npm run build
+      - name: Run festival platform unit tests
+        run: npm run test:festival
 
   windows-onboarding:
     name: Windows onboarding

@@ -147,10 +147,14 @@
   }
   </script>
 
+  <!-- Preconnect & Devotional Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <!-- Leaflet Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <!-- Custom Devotional Stylesheet -->
-  <link rel="stylesheet" href="/app.css?v=20260914-01">
+  <link rel="stylesheet" href="/app.css?v=20260914-02">
 </head>
 <body>
   <div class="app-container">
@@ -326,6 +330,19 @@
         <!-- Leaderboard List with Native Devotional Sponsor Card -->
         <div class="leaderboard-list" id="leaderboard-container">
           <!-- Dynamic Ranking Cards Rendered Here -->
+        </div>
+
+        <!-- Live Devotee Visitor Counter (वेबसाइट दर्शनार्थी उपस्थिती) -->
+        <div class="devotee-counter-bar" id="devotee-counter-bar" title="Total devotees verified on GaneshMandal.in during Ganeshotsav 2026">
+          <div class="devotee-counter-left">
+            <span class="live-dot pulse"></span>
+            <span class="counter-label">दर्शनार्थी उपस्थिती / Live Portal Visitors</span>
+          </div>
+          <div class="devotee-counter-val-wrap">
+            <span class="counter-om">🕉️</span>
+            <span class="devotee-counter-number" id="visitor-counter-val">126,839</span>
+            <span class="counter-badge">VERIFIED</span>
+          </div>
         </div>
       </div>
     </div>

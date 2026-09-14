@@ -84,7 +84,7 @@ body {
 .brand-section {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   flex-shrink: 0;
 }
 
@@ -92,29 +92,30 @@ body {
   display: flex;
   align-items: center;
   text-decoration: none;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .brand-logo-link:hover {
-  transform: scale(1.02);
+  transform: scale(1.03);
 }
 
 .brand-logo-img {
-  height: 42px;
+  height: 44px;
   width: auto;
-  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.4));
+  filter: drop-shadow(0 2px 10px rgba(245, 158, 11, 0.45));
 }
 
 .brand-tagline-container {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  justify-content: center;
 }
 
 .brand-tagline {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
   color: var(--accent-gold);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
@@ -124,14 +125,14 @@ body {
 .brand-cert-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.4);
   color: #34d399;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
   cursor: pointer;
   width: fit-content;
   transition: background 0.2s ease, transform 0.2s ease;
@@ -197,7 +198,7 @@ body {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Sync Button */
@@ -209,7 +210,7 @@ body {
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  padding: 6px 14px;
+  padding: 6px 12px;
 }
 
 .btn-header.accent-sync:hover {
@@ -4058,42 +4059,43 @@ body {
   .leaderboard-list {
     flex: 1;
     overflow-y: auto;
-    padding: 10px 12px 24px;
+    padding: 12px 14px 100px !important; /* Generous 100px breathing space above fixed bottom nav */
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Touch-Friendly Cards on Mobile */
+  /* Touch-Friendly Cards on Mobile with Generous Breathing Room */
   .ranking-card {
-    padding: 14px;
-    margin-bottom: 10px;
-    border-radius: 14px;
-    background: rgba(24, 20, 16, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 15px 16px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    background: rgba(24, 20, 16, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   }
 
   .card-top-row {
-    gap: 10px;
+    gap: 12px;
   }
 
   .rank-number {
     font-size: 17px;
-    min-width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .mandal-card-name {
-    font-size: 14px;
+    font-size: 14.5px;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.35;
   }
 
   .card-action-row {
-    gap: 8px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 12px;
     flex-wrap: nowrap;
     position: relative;
     z-index: 2;
@@ -4116,7 +4118,7 @@ body {
   }
 
   .btn-card-action.btn-stand-front {
-    flex: 2;
+    flex: 2.1;
     background: linear-gradient(135deg, #ea580c, #c2410c);
     color: #ffffff;
     box-shadow: 0 3px 12px rgba(234, 88, 12, 0.4);
@@ -4552,3 +4554,113 @@ body {
     border-radius: var(--radius-lg) !important;
   }
 }
+
+/* ==========================================================================
+   Live Devotee Visitor Counter (वेबसाइट दर्शनार्थी उपस्थिती)
+   Theme: Devotional Brass & Sacred Marigold with Live Pulse
+   ========================================================================== */
+.devotee-counter-bar {
+  background: linear-gradient(135deg, rgba(28, 22, 16, 0.98), rgba(18, 14, 10, 0.98));
+  border-top: 1px solid rgba(245, 158, 11, 0.28);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  z-index: 50;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.6);
+}
+
+.devotee-counter-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devotee-counter-left .live-dot {
+  width: 7px;
+  height: 7px;
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+  border-radius: 50%;
+}
+
+.devotee-counter-left .counter-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+
+.devotee-counter-val-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.devotee-counter-val-wrap .counter-om {
+  font-size: 13px;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.6));
+}
+
+.devotee-counter-number {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffc72c;
+  letter-spacing: 0.8px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2px 10px;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+  transition: all 0.3s ease;
+}
+
+.devotee-counter-number.counter-tick {
+  transform: scale(1.08);
+  color: #ffffff;
+  border-color: #ff9933;
+  box-shadow: 0 0 16px rgba(255, 153, 51, 0.6);
+}
+
+.devotee-counter-val-wrap .counter-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .devotee-counter-bar {
+    position: fixed;
+    bottom: 58px; /* Docked right above the mobile-bottom-nav */
+    left: 0;
+    right: 0;
+    padding: 6px 14px;
+    height: 36px;
+    z-index: 1000;
+    border-top: 1px solid rgba(245, 158, 11, 0.3);
+    background: rgba(18, 14, 10, 0.96);
+    backdrop-filter: blur(16px);
+  }
+
+  .devotee-counter-left .counter-label {
+    font-size: 10.5px;
+  }
+
+  .devotee-counter-number {
+    font-size: 12.5px;
+    padding: 1px 7px;
+  }
+
+  .devotee-counter-val-wrap .counter-badge {
+    display: none;
+  }
+}
+

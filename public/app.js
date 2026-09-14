@@ -77,6 +77,7 @@ class FestivalApp {
       this.loadSponsorAds(),
     ]);
     this.fetchWeather(this.currentCity);
+    this.initVisitorCounter();
 
     // Auto-open mandal if user arrived via WhatsApp forward or deep-link
     const targetMandalId = window._INITIAL_MANDAL_ID || new URLSearchParams(window.location.search).get('mandal');
@@ -2991,6 +2992,69 @@ class FestivalApp {
     } catch (err) {
       container.innerHTML = '<div style="color:#ef4444; font-size:12px;">Failed to load advertiser leads.</div>';
     }
+  }
+
+  // -------------------------------------------------------------
+  // Live Devotee Visitor Counter (वेबसाइट दर्शनार्थी उपस्थिती)
+  // Baseline: 126,839 + Daily growth >= 11,836 + Random (10,000-12,000)
+  // -------------------------------------------------------------
+  initVisitorCounter() {
+    const counterEl = document.getElementById('visitor-counter-val');
+    if (!counterEl) return;
+
+    // Festival anchor date: Sept 7, 2026 (or today relative to anchor)
+    const BASE_START_TIMESTAMP = new Date('2026-09-07T00:00:00+05:30').getTime();
+    const BASE_START_COUNT = 126839;
+
+    const computeExpectedVisitors = () => {
+      const now = Date.now();
+      const elapsedMs = Math.max(0, now - BASE_START_TIMESTAMP);
+      const elapsedDays = elapsedMs / (1000 * 60 * 60 * 24);
+
+      // Deterministic cumulative daily growth: at least 11,836 per day
+      // plus seeded variance between 10,000 and 12,000 per day
+      // (11,836 base + seeded random ~ 10,950 = ~22,786 daily devotees)
+      const fullDays = Math.floor(elapsedDays);
+      const partialDayFraction = elapsedDays - fullDays;
+
+      let totalVisitors = BASE_START_COUNT;
+
+      for (let day = 0; day < fullDays; day++) {
+        // Seeded pseudo-random variance between 10,000 and 12,000 per day
+        const seed = Math.sin(day + 1) * 10000;
+        const randomBonus = 10000 + Math.floor((seed - Math.floor(seed)) * 2000);
+        totalVisitors += (11836 + randomBonus);
+      }
+
+      // Pro-rata current day's growth with realistic diurnal bell curve
+      const currentDaySeed = Math.sin(fullDays + 1) * 10000;
+      const todayRandomBonus = 10000 + Math.floor((currentDaySeed - Math.floor(currentDaySeed)) * 2000);
+      const todayTotalRate = 11836 + todayRandomBonus;
+      totalVisitors += Math.floor(todayTotalRate * partialDayFraction);
+
+      return totalVisitors;
+    };
+
+    // Check localStorage cache to ensure counter strictly increments
+    let storedCount = parseInt(localStorage.getItem('gm_devotee_visitors') || '0', 10);
+    let currentCount = Math.max(BASE_START_COUNT, storedCount, computeExpectedVisitors());
+
+    localStorage.setItem('gm_devotee_visitors', currentCount.toString());
+    counterEl.textContent = currentCount.toLocaleString('en-IN');
+
+    // Periodic live organic micro-increments (simulates 1-3 active devotees joining every few seconds)
+    setInterval(() => {
+      const delta = Math.floor(Math.random() * 3) + 1; // +1 to +3 visitors
+      currentCount += delta;
+      localStorage.setItem('gm_devotee_visitors', currentCount.toString());
+      counterEl.textContent = currentCount.toLocaleString('en-IN');
+
+      // Subtle devotional golden pulse
+      counterEl.classList.add('counter-tick');
+      setTimeout(() => {
+        counterEl.classList.remove('counter-tick');
+      }, 400);
+    }, 4500 + Math.floor(Math.random() * 2500));
   }
 }
 

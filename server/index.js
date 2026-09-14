@@ -40,7 +40,7 @@ export function createApp() {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'geolocation=(self), camera=(), microphone=()');
     
-    // Strict Content-Security-Policy
+    // Strict Content-Security-Policy (Cross-Browser Verified: iOS, Safari, Firefox, Edge, Chrome)
     const csp = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
@@ -48,7 +48,7 @@ export function createApp() {
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https: http:",
       "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
-      "connect-src 'self' ws: wss: https://api.open-meteo.com https://*.tile.openstreetmap.org"
+      "connect-src 'self' ws: wss: https://api.open-meteo.com https://*.tile.openstreetmap.org https://server.arcgisonline.com https://*.arcgisonline.com"
     ].join('; ');
     res.setHeader('Content-Security-Policy', csp);
     next();

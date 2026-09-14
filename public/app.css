@@ -3648,12 +3648,14 @@ body {
 @media (max-width: 768px) {
   body {
     font-size: 14px;
+    height: 100vh;
     height: 100dvh;
     width: 100vw;
     overflow: hidden;
   }
 
   .app-container {
+    height: 100vh;
     height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -3766,7 +3768,8 @@ body {
   .dashboard-body {
     flex: 1;
     position: relative;
-    height: calc(100dvh - 54px - 58px);
+    height: calc(100vh - 54px - 58px - env(safe-area-inset-bottom, 0px));
+    height: calc(100dvh - 54px - 58px - env(safe-area-inset-bottom, 0px));
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -4176,17 +4179,20 @@ body {
     bottom: 0; /* Strictly fixed at bottom */
     left: 0;
     right: 0;
-    height: 58px;
+    height: calc(58px + env(safe-area-inset-bottom, 0px));
+    min-height: 58px;
     background: rgba(14, 12, 10, 0.97);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.65);
     z-index: 2500 !important;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-around;
+    padding-top: 5px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     user-select: none;
+    -webkit-user-select: none;
   }
 
   .mobile-nav-btn {
@@ -4252,19 +4258,19 @@ body {
 
   /* --- Modals & Sheets docked neatly above the persistent bottom menu --- */
   .modal-backdrop {
-    bottom: 58px !important;
-    height: calc(100vh - 58px) !important;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+    height: calc(100vh - 58px - env(safe-area-inset-bottom, 0px)) !important;
     z-index: 2000;
   }
 
   .modal-window {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: calc(100vh - 74px) !important;
+    max-height: calc(100vh - 74px - env(safe-area-inset-bottom, 0px)) !important;
     border-radius: 20px 20px 0 0 !important;
     margin: 0 !important;
     position: absolute !important;
-    bottom: 58px !important;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
     top: auto !important;
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     touch-action: pan-y !important;
@@ -4452,11 +4458,11 @@ body {
   #recommendations-modal .modal-window {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: calc(100vh - 74px) !important;
+    max-height: calc(100vh - 74px - env(safe-area-inset-bottom, 0px)) !important;
     border-radius: 20px 20px 0 0 !important;
     margin: 0 !important;
     position: absolute !important;
-    bottom: 58px !important;
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important;
     top: auto !important;
     display: flex !important;
     flex-direction: column !important;
@@ -4639,7 +4645,7 @@ body {
 @media (max-width: 768px) {
   .devotee-counter-bar {
     position: fixed;
-    bottom: 58px; /* Docked right above the mobile-bottom-nav */
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px)); /* Sits precisely above the mobile-bottom-nav */
     left: 0;
     right: 0;
     padding: 6px 14px;
@@ -4648,6 +4654,7 @@ body {
     border-top: 1px solid rgba(245, 158, 11, 0.3);
     background: rgba(18, 14, 10, 0.96);
     backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
 
   .devotee-counter-left .counter-label {

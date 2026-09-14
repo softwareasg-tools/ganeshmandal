@@ -37,10 +37,14 @@ export function renderMandalPage(mandalId, req) {
   }
 
   const dynamic = calculateDynamicCrowd(mandal);
-  const density = dynamic.crowd_density ?? mandal.crowd_density ?? 35;
-  const waitMins = dynamic.estimated_wait_minutes ?? mandal.estimated_wait_minutes ?? 20;
-  const cityName = (mandal.city || 'Pune').toUpperCase();
-  const fastestRoad = mandal.top_roads?.[0]?.name || 'Main Approach Road';
+  const density = dynamic.density_score ?? 35;
+  const waitMins = dynamic.estimated_wait_minutes ?? 20;
+  const rushCategory = dynamic.rush_category || (density >= 85 ? 'Jam-Packed' : density >= 65 ? 'Full Rush' : density >= 45 ? 'Thoda Rush' : 'Khali');
+  const cityName = (mandal.city_id?.includes('mumbai') || mandal.city?.toLowerCase() === 'mumbai') ? 'MUMBAI' : 'PUNE';
+
+  const roads = dynamic.top_roads || mandal.top_roads || [];
+  const fastestRoadObj = roads.find(r => r.color === 'blue') || roads.find(r => r.color === 'orange') || roads[0];
+  const fastestRoad = fastestRoadObj?.name ? `${fastestRoadObj.name}${fastestRoadObj.avg_speed ? ` (${fastestRoadObj.avg_speed})` : ''}` : 'Main Corridor';
 
   const host = req.get('host') || 'ganeshmandal.in';
   const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
@@ -50,8 +54,8 @@ export function renderMandalPage(mandalId, req) {
     : `${protocol}://${host}/images/mandals/dagdusheth_idol.jpg`;
   const imageType = mandal.image_url?.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-  const title = `${mandal.name} Live Crowd Status (${density}% Rush, ~${waitMins}m Wait) — GaneshMandal.in`;
-  const description = `Live queue wait time (~${waitMins} mins), real-time crowd rush (${density}%), fastest approach road (${fastestRoad}) and direct street darshan for ${mandal.name} in ${cityName}. Verified live festival telemetry.`;
+  const title = `${mandal.name} Live Crowd Status (${density}% ${rushCategory}, ~${waitMins}m Wait) — GaneshMandal.in`;
+  const description = `Live queue wait time ~${waitMins} mins, real-time crowd rush ${density}% (${rushCategory}), fastest approach corridor ${fastestRoad} for ${mandal.name} in ${cityName}. Verified live festival telemetry.`;
 
   const schemaJsonLd = {
     "@context": "https://schema.org",

@@ -26,7 +26,9 @@ export function calculateDynamicCrowd(mandal, date = new Date()) {
   const timeInMinutes = hour * 60 + min;
 
   const isFamous = Boolean(mandal.is_famous);
-  const is24h = mandal.id === 'lalbaugcha_raja' || mandal.id === 'dagdusheth_ganpati';
+  const isLalbaug = Boolean(mandal.id?.includes('lalbaug') || mandal.slug?.includes('lalbaug'));
+  const isDagdusheth = Boolean(mandal.id?.includes('dagdusheth') || mandal.slug?.includes('dagdusheth'));
+  const is24h = isLalbaug || isDagdusheth;
 
   let baseFactor = 0.10; // Default Khali
   let periodLabel = 'Peaceful Night';
@@ -76,17 +78,23 @@ export function calculateDynamicCrowd(mandal, date = new Date()) {
   const variance = ((idHash % 7) - 3) * 0.01; // +/- 3%
   const density = Math.min(98, Math.max(5, Math.round((baseFactor + variance) * 100)));
 
-  // Calculate realistic queue wait minutes
+  // Calculate realistic queue wait minutes continuously across 4 density tiers
+  const queueMultiplier = isLalbaug ? 2.0 : isFamous ? 1.3 : 1.0;
   let waitMinutes = 0;
   if (density < 15) {
     waitMinutes = isFamous && is24h ? 5 : Math.max(0, Math.round(density * 0.2));
-  } else if (density < 40) {
-    waitMinutes = Math.round(5 + (density - 15) * 0.6);
-  } else if (density < 75) {
-    waitMinutes = Math.round(20 + (density - 40) * 1.0);
+  } else if (density < 45) {
+    // Khali (< 45%): 5 to 23 minutes
+    waitMinutes = Math.round((5 + (density - 15) * 0.6) * (isFamous ? 1.15 : 1.0));
+  } else if (density < 65) {
+    // Thoda Rush (45-64%): 24 to 45 minutes
+    waitMinutes = Math.round((24 + (density - 45) * 0.9) * (isFamous ? 1.2 : 1.0));
+  } else if (density < 85) {
+    // Full Rush (65-84%): 45 to 75 minutes
+    waitMinutes = Math.round((42 + (density - 65) * 1.2) * queueMultiplier);
   } else {
-    const multiplier = mandal.id === 'lalbaugcha_raja' ? 2.2 : isFamous ? 1.4 : 1.0;
-    waitMinutes = Math.round((55 + (density - 75) * 1.5) * multiplier);
+    // Jam-Packed (>= 85%): 75 to 160+ minutes
+    waitMinutes = Math.round((66 + (density - 85) * 1.8) * queueMultiplier);
   }
 
   // Calculate People Count estimation

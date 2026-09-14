@@ -251,7 +251,7 @@ class FestivalApp {
     this.markerLayerGroup.clearLayers();
 
     const filtered = this.mandals.filter((m) => {
-      if (this.filters.quickOnly && (m.estimated_wait_minutes || 25) > 20) return false;
+      if (this.filters.quickOnly && (m.crowd_density >= 45 && (m.estimated_wait_minutes || 25) > 20)) return false;
       if (this.filters.famousOnly && !m.is_famous) return false;
       if (this.filters.manacheOnly && !this.isManacheMandal(m)) return false;
       if (this.filters.search) {
@@ -385,21 +385,24 @@ class FestivalApp {
 
     if (this.mandals.length && avgDensityEl) {
       const avg = Math.round(this.mandals.reduce((sum, m) => sum + (m.crowd_density || 0), 0) / this.mandals.length);
-      const rushLabel = avg < 20 ? 'Khali' : avg < 50 ? 'Thoda Rush' : 'Full Rush';
+      const rushLabel = avg >= 85 ? 'Jam-Packed' : avg >= 65 ? 'Full Rush' : avg >= 45 ? 'Thoda Rush' : 'Khali';
       avgDensityEl.textContent = `${avg}% (${rushLabel})`;
-      avgDensityEl.style.color = avg < 20 ? '#10b981' : avg < 50 ? '#f59e0b' : '#ef4444';
+      avgDensityEl.style.color = avg >= 85 ? '#c084fc' : avg >= 65 ? '#ef4444' : avg >= 45 ? '#f59e0b' : '#10b981';
 
       const statusEl = document.querySelector('#map-city-stats strong[style*="color"]');
       if (statusEl) {
-        if (avg < 20) {
-          statusEl.textContent = 'Khali • Night Lull (Aarti Closed)';
-          statusEl.style.color = '#10b981';
-        } else if (avg < 50) {
+        if (avg >= 85) {
+          statusEl.textContent = 'Jam-Packed • Peak Darshan';
+          statusEl.style.color = '#c084fc';
+        } else if (avg >= 65) {
+          statusEl.textContent = 'Full Rush • Peak Hours';
+          statusEl.style.color = '#ef4444';
+        } else if (avg >= 45) {
           statusEl.textContent = 'Thoda Rush • Darshan Open';
           statusEl.style.color = '#f59e0b';
         } else {
-          statusEl.textContent = 'Full Rush • Peak Hours';
-          statusEl.style.color = '#ef4444';
+          statusEl.textContent = 'Khali • Peaceful Flow';
+          statusEl.style.color = '#10b981';
         }
       }
     }
@@ -415,7 +418,7 @@ class FestivalApp {
     const query = (this.filters.search || '').toLowerCase();
     const sorted = [...this.mandals]
       .filter((m) => {
-        if (this.filters.quickOnly && (m.estimated_wait_minutes || 25) > 20) return false;
+        if (this.filters.quickOnly && (m.crowd_density >= 45 && (m.estimated_wait_minutes || 25) > 20)) return false;
         if (this.filters.famousOnly && !m.is_famous) return false;
         if (this.filters.manacheOnly && !this.isManacheMandal(m)) return false;
         if (!query) return true;
@@ -1296,19 +1299,20 @@ class FestivalApp {
 
     if (statusPillEl) {
       const density = mandal.crowd_density ?? 15;
-      if (density >= 85 || baseWait >= 55) {
+      const rushCategory = mandal.rush_category || (density >= 85 ? 'Jam-Packed' : density >= 65 ? 'Full Rush' : density >= 45 ? 'Thoda Rush' : 'Khali');
+      if (rushCategory === 'Jam-Packed' || density >= 85) {
         statusPillEl.textContent = '🟣 JAM-PACKED • PEAK RUSH';
         statusPillEl.style.color = '#c084fc';
         statusPillEl.style.borderColor = 'rgba(147, 51, 234, 0.5)';
         statusPillEl.style.background = 'rgba(147, 51, 234, 0.22)';
         if (waitDescEl) waitDescEl.textContent = 'Peak festival barricaded rush • Devotee gridlock with maximum waiting';
-      } else if (density >= 65 || baseWait >= 35) {
+      } else if (rushCategory === 'Full Rush' || density >= 65) {
         statusPillEl.textContent = '🔴 PEAK AARTI RUSH (FULL RUSH)';
         statusPillEl.style.color = '#ef4444';
         statusPillEl.style.borderColor = 'rgba(239, 68, 68, 0.4)';
         statusPillEl.style.background = 'rgba(239, 68, 68, 0.15)';
         if (waitDescEl) waitDescEl.textContent = 'High festival evening rush • Barricaded darshan queues active';
-      } else if (density >= 45 || baseWait >= 18) {
+      } else if (rushCategory === 'Thoda Rush' || density >= 45) {
         statusPillEl.textContent = '🟠 MODERATE RUSH (THODA RUSH)';
         statusPillEl.style.color = 'var(--accent-gold)';
         statusPillEl.style.borderColor = 'rgba(245, 158, 11, 0.4)';
@@ -1401,9 +1405,9 @@ class FestivalApp {
 
     let rushEmoji = '🟢';
     let rushText = 'कमी गर्दी (Smooth Darshan Flow)';
-    if (density > 85) { rushEmoji = '🟣'; rushText = 'प्रचंड गर्दी (Jam-Packed)'; }
-    else if (density > 65) { rushEmoji = '🔴'; rushText = 'जास्त गर्दी (Full Rush)'; }
-    else if (density > 45) { rushEmoji = '🟠'; rushText = 'मध्यम गर्दी (Moderate Queue)'; }
+    if (density >= 85) { rushEmoji = '🟣'; rushText = 'प्रचंड गर्दी (Jam-Packed)'; }
+    else if (density >= 65) { rushEmoji = '🔴'; rushText = 'जास्त गर्दी (Full Rush)'; }
+    else if (density >= 45) { rushEmoji = '🟠'; rushText = 'मध्यम गर्दी (Moderate Queue)'; }
 
     const roadName = mandal.top_roads?.[0]?.name || 'मुख्य मार्ग';
     const city = (mandal.city || 'pune').toUpperCase();

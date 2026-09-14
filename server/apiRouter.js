@@ -418,7 +418,7 @@ apiRouter.get('/heatmap/:city', (req, res) => {
       popularity_score: popularity,
       intensity,
       color_category:
-        crowdDensity > 85 ? 'extreme' : crowdDensity > 65 ? 'high' : crowdDensity > 45 ? 'moderate' : 'low',
+        crowdDensity >= 85 ? 'extreme' : crowdDensity >= 65 ? 'high' : crowdDensity >= 45 ? 'moderate' : 'low',
     };
   });
 

@@ -11,6 +11,8 @@
  * - Real-time frame analysis and synthetic stream simulation
  */
 
+import { calculateDynamicCrowd } from './crowdModel.js';
+
 export class CVEngine {
   constructor() {
     this.knownTargetClasses = [
@@ -46,24 +48,15 @@ export class CVEngine {
     const quality = isLive ? 'LIVE' : feed.status === 'STALE' ? 'STALE' : 'VERIFIED';
     const now = new Date();
 
-    // Fluctuations around realistic mandal baseline
-    const baseWait = mandal.id.includes('lalbaug')
-      ? 160
-      : mandal.id.includes('dagdusheth')
-      ? 45
-      : mandal.id.includes('gsb')
-      ? 40
-      : mandal.id.includes('tulshibaug')
-      ? 35
-      : 20;
-
-    const noise = (Math.sin(Date.now() / 60000) * 0.15) + (Math.random() * 0.1 - 0.05);
+    // Grounded in authentic IST festival curve
+    const dyn = calculateDynamicCrowd(mandal, now);
+    const noise = (Math.sin(Date.now() / 60000) * 0.04) + (Math.random() * 0.04 - 0.02);
 
     // 1. Crowd Estimation
-    let density = Math.min(99, Math.max(25, Math.round((baseWait > 60 ? 88 : 65) + noise * 30)));
-    let peopleVisible = Math.round(density * 2.8 + Math.random() * 15);
-    let waitMinutes = Math.max(5, Math.round(baseWait + (density - 65) * 0.8));
-    let activityScore = Math.min(100, Math.max(30, Math.round(75 + noise * 25)));
+    let density = Math.min(99, Math.max(5, Math.round(dyn.density_score + noise * 10)));
+    let peopleVisible = dyn.people_count || Math.round(density * 2.8 + Math.random() * 15);
+    let waitMinutes = dyn.estimated_wait_minutes;
+    let activityScore = Math.min(100, Math.max(30, Math.round(density * 0.8 + 15)));
 
     // Direction of movement
     const directions = [

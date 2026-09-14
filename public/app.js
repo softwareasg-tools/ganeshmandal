@@ -2095,8 +2095,18 @@ class FestivalApp {
           found.popularity_score = item.popularity_score;
           found.crowd_score = item.crowd_score;
           found.experience_score = item.experience_score;
-          found.crowd_density = item.crowd_score;
-          found.estimated_wait_minutes = item.estimated_wait_minutes;
+          if (item.crowd_density !== undefined) {
+            found.crowd_density = item.crowd_density;
+          }
+          if (item.rush_category) {
+            found.rush_category = item.rush_category;
+          }
+          if (item.rush_color) {
+            found.rush_color = item.rush_color;
+          }
+          if (item.estimated_wait_minutes !== undefined) {
+            found.estimated_wait_minutes = item.estimated_wait_minutes;
+          }
           found.data_quality = item.data_quality;
         }
       });
@@ -2109,6 +2119,19 @@ class FestivalApp {
       if (found) {
         found.crowd_density = msg.crowd.density_score;
         found.estimated_wait_minutes = msg.crowd.estimated_wait_minutes;
+        if (found.crowd_density >= 85) {
+          found.rush_category = 'Jam-Packed';
+          found.rush_color = '#9333ea';
+        } else if (found.crowd_density >= 65) {
+          found.rush_category = 'Full Rush';
+          found.rush_color = '#ef4444';
+        } else if (found.crowd_density >= 45) {
+          found.rush_category = 'Thoda Rush';
+          found.rush_color = '#f59e0b';
+        } else {
+          found.rush_category = 'Khali';
+          found.rush_color = '#10b981';
+        }
       }
       if (this.selectedMandal && this.selectedMandal.id === msg.mandal_id) {
         this.updateModalTelemetry(msg.crowd, msg.stage);

@@ -12,6 +12,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { db } from './db.js';
 import { scoringEngine } from './scoringEngine.js';
 import { cvEngine } from './cvEngine.js';
+import { calculateDynamicCrowd } from './crowdModel.js';
 
 export class FestivalWebSocketServer {
   constructor() {
@@ -113,20 +114,26 @@ export class FestivalWebSocketServer {
     if (!city) return;
 
     const ranked = scoringEngine.rankCityMandals(db, city.id);
-    const leaderboard = ranked.map((item) => ({
-      rank: item.currentRank,
-      previous_rank: item.previousRank,
-      rank_change: item.rankDelta,
-      trend: item.trend,
-      mandal_id: item.mandal.id,
-      name: item.mandal.name,
-      crowd_score: item.crowdScore,
-      popularity_score: item.popularityScore,
-      experience_score: item.experienceScore,
-      estimated_wait_minutes: item.estimatedWaitMins,
-      data_quality: item.dataQuality,
-      last_updated: item.scoreRecord.last_updated,
-    }));
+    const leaderboard = ranked.map((item) => {
+      const dynamicCrowd = calculateDynamicCrowd(item.mandal);
+      return {
+        rank: item.currentRank,
+        previous_rank: item.previousRank,
+        rank_change: item.rankDelta,
+        trend: item.trend,
+        mandal_id: item.mandal.id,
+        name: item.mandal.name,
+        crowd_score: item.crowdScore,
+        crowd_density: dynamicCrowd.density_score,
+        rush_category: dynamicCrowd.rush_category,
+        rush_color: dynamicCrowd.rush_color,
+        popularity_score: item.popularityScore,
+        experience_score: item.experienceScore,
+        estimated_wait_minutes: dynamicCrowd.estimated_wait_minutes,
+        data_quality: item.dataQuality,
+        last_updated: item.scoreRecord.last_updated,
+      };
+    });
 
     this.sendToClient(ws, {
       type: 'LEADERBOARD_UPDATE',
@@ -177,20 +184,26 @@ export class FestivalWebSocketServer {
 
           // Re-rank city
           const ranked = scoringEngine.rankCityMandals(db, city.id);
-          const leaderboard = ranked.map((item) => ({
-            rank: item.currentRank,
-            previous_rank: item.previousRank,
-            rank_change: item.rankDelta,
-            trend: item.trend,
-            mandal_id: item.mandal.id,
-            name: item.mandal.name,
-            crowd_score: item.crowdScore,
-            popularity_score: item.popularityScore,
-            experience_score: item.experienceScore,
-            estimated_wait_minutes: item.estimatedWaitMins,
-            data_quality: item.dataQuality,
-            last_updated: item.scoreRecord.last_updated,
-          }));
+          const leaderboard = ranked.map((item) => {
+            const dynamicCrowd = calculateDynamicCrowd(item.mandal);
+            return {
+              rank: item.currentRank,
+              previous_rank: item.previousRank,
+              rank_change: item.rankDelta,
+              trend: item.trend,
+              mandal_id: item.mandal.id,
+              name: item.mandal.name,
+              crowd_score: item.crowdScore,
+              crowd_density: dynamicCrowd.density_score,
+              rush_category: dynamicCrowd.rush_category,
+              rush_color: dynamicCrowd.rush_color,
+              popularity_score: item.popularityScore,
+              experience_score: item.experienceScore,
+              estimated_wait_minutes: dynamicCrowd.estimated_wait_minutes,
+              data_quality: item.dataQuality,
+              last_updated: item.scoreRecord.last_updated,
+            };
+          });
 
           // Broadcast leaderboard update
           this.broadcastToCity(city.slug, {

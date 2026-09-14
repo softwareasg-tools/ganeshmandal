@@ -241,6 +241,9 @@
             <button class="map-chip-btn" id="btn-filter-famous">
               <span>⭐ Famous Mandals</span>
             </button>
+            <button class="map-chip-btn" id="btn-filter-manache">
+              <span>🕉️ Manache 5</span>
+            </button>
           </div>
         </div>
 
@@ -279,6 +282,14 @@
 
       <!-- Right Panel: Live Popularity/Ranking Leaderboard -->
       <div class="ranking-panel" id="ranking-panel">
+        <!-- Pull Down to Refresh Mobile Indicator -->
+        <div class="pull-refresh-indicator" id="pull-refresh-indicator">
+          <div class="pull-refresh-spinner">
+            <span class="pull-refresh-icon">🔄</span>
+          </div>
+          <span class="pull-refresh-text" id="pull-refresh-text">Pull down to refresh Bappa darshan...</span>
+        </div>
+
         <div class="ranking-header">
           <div class="ranking-title-row">
             <div class="ranking-title">
@@ -1108,6 +1119,7 @@
         <!-- Filter Navigation Tabs -->
         <div class="guide-nav-tabs">
           <button class="guide-tab-btn active" data-guide-tab="eco-idols">🌱 Eco-Friendly Idols</button>
+          <button class="guide-tab-btn" data-guide-tab="civic-tools">📢 Posters & Bulletins</button>
           <button class="guide-tab-btn" data-guide-tab="puja-vidhi">🪔 Traditional Puja Vidhi</button>
           <button class="guide-tab-btn" data-guide-tab="modaks">🥟 Fresh Modaks & Sweets</button>
           <button class="guide-tab-btn" data-guide-tab="decor">🌸 Decor Ideas (Modern & Flat)</button>
@@ -1117,6 +1129,63 @@
 
         <!-- Guide Content Sections -->
         <div class="guide-content-area" id="guide-content-area">
+
+          <!-- SECTION: Society Posters & Media Bulletins (Viral & Civic Distribution) -->
+          <div class="guide-tab-pane" id="guide-pane-civic-tools" style="display:none;">
+            <div class="guide-grid-2col">
+              <!-- Card 1: Society Notice Board Poster -->
+              <div class="guide-card" style="border: 1px solid rgba(234,88,12,0.4); background: linear-gradient(145deg, rgba(234,88,12,0.08), rgba(20,16,12,0.9));">
+                <div class="guide-badge" style="background:rgba(234,88,12,0.25); color:#ff9933; border:1px solid rgba(234,88,12,0.4);">
+                  🖨️ A4 PRINT-READY • FREE DOWNLOAD
+                </div>
+                <h3 class="guide-card-title">Printable Society Notice Board Poster</h3>
+                <p class="guide-card-p">
+                  Designed exclusively for apartment societies, housing complexes, elevator notices, and building lobbies across Pune & Mumbai. Scan the QR code for instant live queue wait times before stepping out!
+                </p>
+                <div class="guide-list" style="margin-top:12px;">
+                  <div class="guide-list-item">
+                    <span class="store-name">📋 One-Click Clean Print</span>
+                    <span class="store-desc">High-contrast A4 portrait layout with real-time QR code and emergency helpline numbers.</span>
+                  </div>
+                  <div class="guide-list-item">
+                    <span class="store-name">🏢 Zero Tech Setup</span>
+                    <span class="store-desc">Print and pin directly on your society lift or entrance gate notice board.</span>
+                  </div>
+                </div>
+                <div style="margin-top:16px;">
+                  <a href="/poster" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display:inline-flex; align-items:center; justify-content:center; width:100%; text-decoration:none; padding:10px 16px; border-radius:10px; background:linear-gradient(135deg, #c2410c, #ea580c); color:#fff; font-weight:700; font-size:13px; box-shadow:0 3px 12px rgba(234,88,12,0.3);">
+                    🖨️ Open & Print Society Poster ↗
+                  </a>
+                </div>
+              </div>
+
+              <!-- Card 2: Media & Radio RJ Live Newsroom Bulletin -->
+              <div class="guide-card" style="border: 1px solid rgba(245,158,11,0.4); background: linear-gradient(145deg, rgba(245,158,11,0.08), rgba(20,16,12,0.9));">
+                <div class="guide-badge" style="background:rgba(245,158,11,0.25); color:#fbbf24; border:1px solid rgba(245,158,11,0.4);">
+                  📻 PRESS & BROADCAST • LIVE 15-MIN SYNC
+                </div>
+                <h3 class="guide-card-title">Media & Radio RJ Live Newsroom Bulletin</h3>
+                <p class="guide-card-p">
+                  Dedicated real-time feed for TV journalists, newspaper reporters, and FM Radio RJs (Radio Mirchi, Red FM, Radio City). Copy-paste ready bulletin updates formatted for instant on-air reads.
+                </p>
+                <div class="guide-list" style="margin-top:12px;">
+                  <div class="guide-list-item">
+                    <span class="store-name">⚡ 15-Minute Queue Dispatch</span>
+                    <span class="store-desc">Real-time rush categories, average wait minutes, and traffic congestion near top pandals.</span>
+                  </div>
+                  <div class="guide-list-item">
+                    <span class="store-name">📋 One-Click Copy for On-Air / WhatsApp</span>
+                    <span class="store-desc">Instant clipboard copy formatted specifically for quick WhatsApp news bulletins and social media updates.</span>
+                  </div>
+                </div>
+                <div style="margin-top:16px;">
+                  <a href="/press" target="_blank" rel="noopener noreferrer" class="btn-primary" style="display:inline-flex; align-items:center; justify-content:center; width:100%; text-decoration:none; padding:10px 16px; border-radius:10px; background:linear-gradient(135deg, #d97706, #f59e0b); color:#000; font-weight:700; font-size:13px; box-shadow:0 3px 12px rgba(245,158,11,0.3);">
+                    📻 Open Media & RJ Newsroom Bulletin ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <!-- SECTION 1: Eco-Friendly Idols & Pune/Online Makers -->
           <div class="guide-tab-pane active" id="guide-pane-eco-idols">

@@ -649,6 +649,78 @@ body {
   overflow: hidden;
 }
 
+/* ==========================================================================
+   Tactile Mobile Pull Down to Refresh
+   ========================================================================== */
+.pull-refresh-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 0;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.22) 0%, rgba(20, 16, 12, 0.98) 100%);
+  border-bottom: 1px solid rgba(234, 88, 12, 0.35);
+  color: var(--accent-gold);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.pull-refresh-indicator.pulling {
+  transition: none;
+}
+
+.pull-refresh-indicator.refreshing {
+  max-height: 52px !important;
+  height: 52px !important;
+  opacity: 1 !important;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pull-refresh-spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(234, 88, 12, 0.28);
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.pull-refresh-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.pull-refresh-indicator.refreshing .pull-refresh-icon {
+  animation: pull-spin 0.75s linear infinite;
+}
+
+.pull-refresh-indicator.ready {
+  background: linear-gradient(180deg, rgba(234, 88, 12, 0.35) 0%, rgba(20, 16, 12, 0.98) 100%);
+  color: #ff9933;
+}
+
+.pull-refresh-indicator.ready .pull-refresh-spinner {
+  background: rgba(234, 88, 12, 0.45);
+  border-color: #ff9933;
+  box-shadow: 0 0 12px rgba(255, 153, 51, 0.6);
+}
+
+@keyframes pull-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 .ranking-header {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-color);
@@ -931,24 +1003,36 @@ body {
 }
 
 .btn-card-action.card-wa-share-btn {
-  flex: 0.9;
-  background: rgba(37, 211, 102, 0.14);
-  border: 1px solid rgba(37, 211, 102, 0.35);
-  color: #25d366;
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 40px;
+  background: #25D366;
+  border: 1px solid rgba(37, 211, 102, 0.5);
+  color: #ffffff;
   min-height: 40px;
   border-radius: 10px;
-  font-weight: 700;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  box-shadow: 0 3px 10px rgba(37, 211, 102, 0.35);
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 0;
+}
+
+.btn-card-action.card-wa-share-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: #ffffff;
+  display: block;
 }
 
 .btn-card-action.card-wa-share-btn:hover {
-  background: rgba(37, 211, 102, 0.25);
-  border-color: #25d366;
-  color: #fff;
-  transform: translateY(-1px);
+  background: #20ba59;
+  border-color: #20ba59;
+  color: #ffffff;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.5);
 }
 
 .btn-viral-wa-share {
@@ -4044,19 +4128,35 @@ body {
   }
 
   .btn-card-action.card-wa-share-btn {
-    flex: 1;
-    background: rgba(37, 211, 102, 0.15);
-    border: 1px solid rgba(37, 211, 102, 0.35);
-    color: #25d366;
+    flex: 0 0 44px;
+    width: 44px;
+    min-width: 44px;
+    height: 40px;
+    background: #25D366;
+    border: none;
+    color: #ffffff;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(37, 211, 102, 0.4);
+    padding: 0;
+  }
+
+  .btn-card-action.card-wa-share-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: #ffffff;
+    display: block;
   }
 
   .btn-card-action.card-wa-share-btn:active {
-    background: rgba(37, 211, 102, 0.25);
-    transform: scale(0.97);
+    background: #20ba59;
+    transform: scale(0.92);
   }
 
   .btn-card-action.card-map-btn {
-    flex: 1;
+    flex: 1.2;
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.16);
     color: var(--text-cream);
@@ -4075,14 +4175,16 @@ body {
     left: 0;
     right: 0;
     height: 58px;
-    background: rgba(14, 12, 10, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    z-index: 1000;
+    background: rgba(14, 12, 10, 0.97);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.65);
+    z-index: 2500 !important;
     align-items: center;
     justify-content: space-around;
     padding-bottom: env(safe-area-inset-bottom, 0px);
+    user-select: none;
   }
 
   .mobile-nav-btn {
@@ -4097,7 +4199,8 @@ body {
     cursor: pointer;
     min-height: 48px;
     padding: 3px 0;
-    transition: transform 0.15s ease;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    -webkit-tap-highlight-color: transparent;
   }
 
   .mobile-nav-btn:active {
@@ -4105,18 +4208,19 @@ body {
   }
 
   .mobile-nav-pill {
-    width: 44px;
-    height: 26px;
-    border-radius: 13px;
+    width: 48px;
+    height: 28px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .mobile-nav-icon {
     font-size: 17px;
     line-height: 1;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .mobile-nav-label {
@@ -4125,29 +4229,42 @@ body {
     margin-top: 2px;
     letter-spacing: 0.2px;
     color: var(--text-dim);
-    transition: color 0.2s;
+    transition: color 0.22s ease, transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), font-weight 0.2s ease;
   }
 
   .mobile-nav-btn.active .mobile-nav-pill {
-    background: rgba(255, 107, 0, 0.22);
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.32), rgba(245, 158, 11, 0.24));
+    box-shadow: 0 3px 12px rgba(234, 88, 12, 0.35);
+    transform: translateY(-2px) scale(1.06);
+  }
+
+  .mobile-nav-btn.active .mobile-nav-icon {
+    transform: scale(1.1);
   }
 
   .mobile-nav-btn.active .mobile-nav-label {
     color: #ff9933;
     font-weight: 700;
+    transform: translateY(-1px);
   }
 
-  /* --- First-Person Street & Pandal POV Modal on Mobile (Navigable Vertical Stacks) --- */
+  /* --- Modals & Sheets docked neatly above the persistent bottom menu --- */
+  .modal-backdrop {
+    bottom: 58px !important;
+    height: calc(100vh - 58px) !important;
+    z-index: 2000;
+  }
+
   .modal-window {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 92vh !important;
+    max-height: calc(100vh - 74px) !important;
     border-radius: 20px 20px 0 0 !important;
     margin: 0 !important;
     position: absolute !important;
-    bottom: 0 !important;
+    bottom: 58px !important;
     top: auto !important;
-    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     touch-action: pan-y !important;
   }
 
@@ -4333,15 +4450,16 @@ body {
   #recommendations-modal .modal-window {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 92vh !important;
+    max-height: calc(100vh - 74px) !important;
     border-radius: 20px 20px 0 0 !important;
     margin: 0 !important;
     position: absolute !important;
-    bottom: 0 !important;
+    bottom: 58px !important;
     top: auto !important;
     display: flex !important;
     flex-direction: column !important;
     background: var(--bg-secondary) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
   #modal-devotee-guide .modal-header,

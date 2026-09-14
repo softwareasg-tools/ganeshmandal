@@ -112,6 +112,7 @@ export const SEED_MANDALS = [
     "has_verified_entrance": true,
     "status": "active",
     "is_famous": true,
+    "is_manache": true,
     "tags": [
       "Manache Ganpati",
       "Gramdevata",
@@ -170,6 +171,7 @@ export const SEED_MANDALS = [
     "has_verified_entrance": true,
     "status": "active",
     "is_famous": true,
+    "is_manache": true,
     "tags": [
       "Manache Ganpati",
       "Shadu Clay Idol",
@@ -228,6 +230,7 @@ export const SEED_MANDALS = [
     "has_verified_entrance": false,
     "status": "active",
     "is_famous": true,
+    "is_manache": true,
     "tags": [
       "Manache Ganpati",
       "Communal Harmony",
@@ -286,6 +289,7 @@ export const SEED_MANDALS = [
     "has_verified_entrance": true,
     "status": "active",
     "is_famous": true,
+    "is_manache": true,
     "tags": [
       "Manache Ganpati",
       "13-Foot Idol",
@@ -344,6 +348,7 @@ export const SEED_MANDALS = [
     "has_verified_entrance": true,
     "status": "active",
     "is_famous": true,
+    "is_manache": true,
     "tags": [
       "Manache Ganpati",
       "Lokmanya Tilak Wada",

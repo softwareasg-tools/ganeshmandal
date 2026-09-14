@@ -23,7 +23,7 @@ class FestivalApp {
     this.mandals = [];
     this.selectedMandal = null;
     this.heatmapVisible = true;
-    this.filters = { quickOnly: false, famousOnly: false, search: '' };
+    this.filters = { quickOnly: false, famousOnly: false, manacheOnly: false, search: '' };
     this.map = null;
     this.markerLayerGroup = null;
     this.heatLayer = null;
@@ -67,6 +67,7 @@ class FestivalApp {
     this.initMap();
     this.bindEvents();
     this.bindMobileNavigation();
+    this.bindPullToRefresh();
     this.bindPOVControls();
     this.bindAdminControls();
     this.bindSuggestControls();
@@ -201,12 +202,29 @@ class FestivalApp {
     }
   }
 
+  isManacheMandal(m) {
+    if (!m) return false;
+    if (m.is_manache === true || m.is_manache_5 === true) return true;
+    const manacheIds = [
+      'mandal_pune_kasba',
+      'mandal_pune_tambdi',
+      'mandal_pune_guruji',
+      'mandal_pune_tulshibaug',
+      'mandal_pune_kesariwada'
+    ];
+    if (manacheIds.includes(m.id)) return true;
+    if (Array.isArray(m.tags) && m.tags.some((t) => /manache/i.test(t))) return true;
+    if (m.name && /manache/i.test(m.name)) return true;
+    return false;
+  }
+
   renderMapMarkers() {
     this.markerLayerGroup.clearLayers();
 
     const filtered = this.mandals.filter((m) => {
       if (this.filters.quickOnly && (m.estimated_wait_minutes || 25) > 20) return false;
       if (this.filters.famousOnly && !m.is_famous) return false;
+      if (this.filters.manacheOnly && !this.isManacheMandal(m)) return false;
       if (this.filters.search) {
         const query = this.filters.search.toLowerCase();
         return (
@@ -217,6 +235,14 @@ class FestivalApp {
       }
       return true;
     });
+
+    // Auto-fit bounds if filtering specifically to Manache 5 so all 5 are in view
+    if (this.filters.manacheOnly && filtered.length > 0 && this.map) {
+      try {
+        const bounds = L.latLngBounds(filtered.map((m) => [m.latitude, m.longitude]));
+        this.map.fitBounds(bounds.pad(0.35), { maxZoom: 16 });
+      } catch (_) {}
+    }
 
     filtered.forEach((mandal) => {
       const density = mandal.crowd_density ?? 15;
@@ -323,8 +349,10 @@ class FestivalApp {
     const peekCountEl = document.getElementById('sheet-peek-count');
 
     if (cityNameEl) cityNameEl.textContent = this.currentCity === 'pune' ? 'Pune' : 'Mumbai';
-    if (totalEl) totalEl.textContent = this.mandals.length;
-    if (peekCountEl) peekCountEl.textContent = `${this.mandals.length} Mandals`;
+    if (totalEl) totalEl.textContent = filtered.length;
+    if (peekCountEl) peekCountEl.textContent = `${filtered.length} Mandals`;
+
+    this.renderMobileMapCarousel(null, filtered);
 
     if (this.mandals.length && avgDensityEl) {
       const avg = Math.round(this.mandals.reduce((sum, m) => sum + (m.crowd_density || 0), 0) / this.mandals.length);
@@ -360,6 +388,7 @@ class FestivalApp {
       .filter((m) => {
         if (this.filters.quickOnly && (m.estimated_wait_minutes || 25) > 20) return false;
         if (this.filters.famousOnly && !m.is_famous) return false;
+        if (this.filters.manacheOnly && !this.isManacheMandal(m)) return false;
         if (!query) return true;
         return (
           m.name.toLowerCase().includes(query) ||
@@ -368,6 +397,23 @@ class FestivalApp {
         );
       })
       .sort((a, b) => (a.current_rank || 999) - (b.current_rank || 999));
+
+    if (sorted.length === 0) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'leaderboard-empty-state';
+      emptyDiv.style.cssText = 'text-align:center; padding:36px 16px; color:var(--text-muted);';
+      emptyDiv.innerHTML = `
+        <div style="font-size:36px; margin-bottom:10px;">🕉️</div>
+        <div style="font-weight:700; color:var(--text-cream); font-size:15px; margin-bottom:6px;">No Mandals Match Selected Filter</div>
+        <div style="font-size:12.5px; line-height:1.5; color:var(--text-dim); max-width:320px; margin:0 auto;">
+          ${this.filters.manacheOnly && this.currentCity === 'mumbai'
+            ? 'The historic <strong>"Manache 5 Ganpati"</strong> are situated in Pune (Kasba, Tambdi Jogeshwari, Guruji Talim, Tulshibaug, Kesariwada). Switch city to Pune to view them!'
+            : 'Try selecting "All Mandals" or clearing your search filter.'}
+        </div>
+      `;
+      container.appendChild(emptyDiv);
+      return;
+    }
 
     sorted.forEach((mandal, index) => {
       const card = document.createElement('div');
@@ -405,6 +451,7 @@ class FestivalApp {
           <div class="mandal-card-info">
             <div class="card-title-row">
               <div class="mandal-card-name" title="${mandal.name}">${mandal.name}</div>
+              ${this.isManacheMandal(mandal) ? '<span class="brand-tag" style="background:rgba(245,158,11,0.22); color:var(--accent-gold); border-color:var(--accent-gold); font-size:9.5px; padding:1px 6px;">MANACHE</span>' : ''}
               <span class="quality-badge quality-VERIFIED">VERIFIED</span>
             </div>
             <div class="mandal-card-meta">
@@ -430,7 +477,7 @@ class FestivalApp {
             <span>👁️ Stand in Front</span>
           </button>
           <button class="btn-card-action card-wa-share-btn" type="button" title="Share live queue on WhatsApp" aria-label="Share status on WhatsApp">
-            <span>📲 Share</span>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M17.507 14.307l-.009.075c-.238-.12-1.406-.694-1.624-.774-.219-.08-.378-.12-.538.12-.16.24-.617.774-.757.934-.14.16-.279.18-.518.06-.239-.12-1.01-.372-1.925-1.188-.711-.635-1.191-1.42-1.33-1.66-.14-.24-.015-.37.105-.489.108-.107.24-.279.36-.419.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.538-1.298-.738-1.778-.195-.468-.393-.404-.54-.412l-.46-.008c-.16 0-.418.06-.637.3-.219.24-.837.818-.837 1.996 0 1.177.857 2.315.977 2.475.12.16 1.687 2.576 4.088 3.612.57.247 1.016.395 1.363.506.573.182 1.094.156 1.506.095.46-.069 1.406-.575 1.605-1.13.199-.556.199-1.032.14-1.132-.06-.1-.22-.16-.46-.28zm-5.495 5.998c-1.545 0-3.056-.416-4.373-1.203l-.314-.187-3.25.852.868-3.167-.205-.327c-.864-1.376-1.32-2.98-1.32-4.633 0-4.62 3.759-8.379 8.38-8.379 4.62 0 8.379 3.759 8.379 8.379 0 4.62-3.759 8.38-8.38 8.38zm0-18.303c-5.508 0-9.985 4.477-9.985 9.985 0 1.76.459 3.477 1.333 4.992L2 22.002l5.17-1.356c1.464.798 3.116 1.22 4.842 1.22 5.508 0 9.985-4.477 9.985-9.985 0-5.508-4.477-9.985-9.985-9.985z"/></svg>
           </button>
           <button class="btn-card-action card-map-btn" type="button" title="View mandal on live map">
             <span>🗺️ Map</span>
@@ -632,11 +679,23 @@ class FestivalApp {
   switchToMobileTab(tabName, targetMandal = null) {
     const navButtons = document.querySelectorAll('.mobile-nav-btn');
     navButtons.forEach((b) => {
-      b.classList.toggle('active', b.dataset.tab === tabName);
+      const isActive = b.dataset.tab === tabName;
+      b.classList.toggle('active', isActive);
+      if (isActive) {
+        b.style.transform = 'scale(0.95)';
+        setTimeout(() => { b.style.transform = ''; }, 180);
+      }
     });
+
+    const recModal = document.getElementById('recommendations-modal');
+    const guideModal = document.getElementById('modal-devotee-guide');
+    const mandalModal = document.getElementById('mandal-modal');
 
     if (tabName === 'map') {
       document.body.classList.add('mobile-view-map');
+      if (recModal) recModal.classList.remove('open');
+      if (guideModal) guideModal.classList.remove('open');
+      if (mandalModal) mandalModal.classList.remove('open');
       if (this.map) {
         setTimeout(() => {
           this.map.invalidateSize();
@@ -651,17 +710,25 @@ class FestivalApp {
       this.renderMobileMapCarousel(targetMandal ? targetMandal.id : null);
     } else if (tabName === 'rankings') {
       document.body.classList.remove('mobile-view-map');
-      const recModal = document.getElementById('recommendations-modal');
-      const guideModal = document.getElementById('modal-devotee-guide');
       if (recModal) recModal.classList.remove('open');
       if (guideModal) guideModal.classList.remove('open');
+      if (mandalModal) mandalModal.classList.remove('open');
+      const leaderboard = document.getElementById('leaderboard-container');
+      if (leaderboard && leaderboard.scrollTop > 50) {
+        leaderboard.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } else if (tabName === 'best') {
+      document.body.classList.remove('mobile-view-map');
+      if (guideModal) guideModal.classList.remove('open');
+      if (mandalModal) mandalModal.classList.remove('open');
       this.openRecommendations('best_experience');
       if (!window._isPopStateHandling) {
         history.pushState({ modal: 'recommendations' }, '', '#best_mandals');
       }
     } else if (tabName === 'guide') {
-      const guideModal = document.getElementById('modal-devotee-guide');
+      document.body.classList.remove('mobile-view-map');
+      if (recModal) recModal.classList.remove('open');
+      if (mandalModal) mandalModal.classList.remove('open');
       if (guideModal) {
         guideModal.classList.add('open');
         if (!window._isPopStateHandling) {
@@ -671,12 +738,25 @@ class FestivalApp {
     }
   }
 
-  renderMobileMapCarousel(activeMandalId = null) {
+  renderMobileMapCarousel(activeMandalId = null, customList = null) {
     const carousel = document.getElementById('mobile-map-carousel');
     if (!carousel) return;
     carousel.innerHTML = '';
 
-    const mandalsToShow = this.mandals || [];
+    let mandalsToShow = customList || this.mandals || [];
+    if (!customList) {
+      if (this.filters.quickOnly) mandalsToShow = mandalsToShow.filter((m) => (m.estimated_wait_minutes || 25) <= 20);
+      if (this.filters.famousOnly) mandalsToShow = mandalsToShow.filter((m) => m.is_famous);
+      if (this.filters.manacheOnly) mandalsToShow = mandalsToShow.filter((m) => this.isManacheMandal(m));
+      if (this.filters.search) {
+        const query = this.filters.search.toLowerCase();
+        mandalsToShow = mandalsToShow.filter((m) =>
+          m.name.toLowerCase().includes(query) ||
+          m.address.toLowerCase().includes(query) ||
+          (m.tags && m.tags.some((t) => t.toLowerCase().includes(query)))
+        );
+      }
+    }
     mandalsToShow.forEach((mandal, idx) => {
       const density = mandal.crowd_density ?? 10;
       const waitMins = mandal.estimated_wait_minutes ?? 2;
@@ -799,6 +879,9 @@ class FestivalApp {
           this.filters.quickOnly = false;
           this.filters.famousOnly = false;
           this.filters.manacheOnly = true;
+          if (this.currentCity === 'mumbai') {
+            this.showToast('Note: The 5 Manache Ganpatis are located in Pune.');
+          }
         } else if (filterType === 'khali') {
           this.filters.quickOnly = true;
           this.filters.famousOnly = false;
@@ -808,6 +891,14 @@ class FestivalApp {
           this.filters.famousOnly = true;
           this.filters.manacheOnly = false;
         }
+
+        const btnManache = document.getElementById('btn-filter-manache');
+        if (btnManache) btnManache.classList.toggle('active', this.filters.manacheOnly);
+        const btnQuick = document.getElementById('btn-filter-quick');
+        if (btnQuick) btnQuick.classList.toggle('active', this.filters.quickOnly);
+        const btnFamous = document.getElementById('btn-filter-famous');
+        if (btnFamous) btnFamous.classList.toggle('active', this.filters.famousOnly);
+
         this.renderLeaderboard();
         this.renderMapMarkers();
       });
@@ -869,6 +960,126 @@ class FestivalApp {
 
       window._isPopStateHandling = false;
     });
+  }
+
+  // -------------------------------------------------------------
+  // Mobile Pull Down to Refresh (Smooth Tactile Experience)
+  // -------------------------------------------------------------
+  bindPullToRefresh() {
+    const rankingPanel = document.getElementById('ranking-panel');
+    const indicator = document.getElementById('pull-refresh-indicator');
+    const textEl = document.getElementById('pull-refresh-text');
+    const spinner = indicator ? indicator.querySelector('.pull-refresh-spinner') : null;
+    const leaderboard = document.getElementById('leaderboard-container');
+    if (!rankingPanel || !indicator || !textEl) return;
+
+    let startY = 0;
+    let currentY = 0;
+    let isPulling = false;
+    let isRefreshing = false;
+    const TRIGGER_THRESHOLD = 55; // px pull required
+    const MAX_PULL = 85;
+
+    const isAtTop = () => {
+      const scrollPos = leaderboard ? leaderboard.scrollTop : 0;
+      return scrollPos <= 0 && window.scrollY <= 0;
+    };
+
+    rankingPanel.addEventListener('touchstart', (e) => {
+      if (isRefreshing) return;
+      if (isAtTop() && e.touches.length === 1) {
+        startY = e.touches[0].clientY;
+        isPulling = true;
+        indicator.classList.add('pulling');
+      } else {
+        isPulling = false;
+      }
+    }, { passive: true });
+
+    rankingPanel.addEventListener('touchmove', (e) => {
+      if (!isPulling || isRefreshing) return;
+      currentY = e.touches[0].clientY;
+      const diffY = currentY - startY;
+
+      if (diffY > 0 && isAtTop()) {
+        if (e.cancelable && diffY > 8) e.preventDefault();
+
+        const pullDistance = Math.min(diffY * 0.45, MAX_PULL);
+        indicator.style.height = `${pullDistance}px`;
+        indicator.style.maxHeight = `${pullDistance}px`;
+        indicator.style.opacity = `${Math.min(pullDistance / 35, 1)}`;
+
+        if (spinner) {
+          spinner.style.transform = `rotate(${diffY * 3.5}deg) scale(${1 + pullDistance / 200})`;
+        }
+
+        if (pullDistance >= TRIGGER_THRESHOLD) {
+          textEl.textContent = 'Release to refresh Bappa darshan! 🪔';
+          indicator.classList.add('ready');
+        } else {
+          textEl.textContent = 'Pull down to refresh Bappa darshan... ⬇️';
+          indicator.classList.remove('ready');
+        }
+      } else if (diffY < -5) {
+        isPulling = false;
+        indicator.style.height = '0px';
+        indicator.style.maxHeight = '0px';
+        indicator.style.opacity = '0';
+      }
+    }, { passive: false });
+
+    const handleTouchEnd = async () => {
+      if (!isPulling || isRefreshing) return;
+      isPulling = false;
+      indicator.classList.remove('pulling');
+
+      const currentHeight = parseFloat(indicator.style.height || '0');
+      if (currentHeight >= TRIGGER_THRESHOLD) {
+        isRefreshing = true;
+        indicator.classList.add('refreshing');
+        indicator.style.transition = 'all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)';
+        indicator.style.height = '52px';
+        indicator.style.maxHeight = '52px';
+        indicator.style.opacity = '1';
+        textEl.textContent = 'Refreshing live crowd & road rush... ⏳';
+
+        if (navigator.vibrate) {
+          try { navigator.vibrate([15, 30, 15]); } catch (_) {}
+        }
+
+        try {
+          await this.syncFeeds();
+          textEl.textContent = '✨ Live Bappa Darshan & Roads Updated!';
+        } catch (err) {
+          console.warn('[PullRefresh] Failed to sync:', err);
+          textEl.textContent = '⚠️ Could not update live feeds';
+        } finally {
+          setTimeout(() => {
+            indicator.style.transition = 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+            indicator.style.height = '0px';
+            indicator.style.maxHeight = '0px';
+            indicator.style.opacity = '0';
+            setTimeout(() => {
+              indicator.classList.remove('refreshing', 'ready');
+              indicator.style.transition = '';
+              isRefreshing = false;
+            }, 350);
+          }, 800);
+        }
+      } else {
+        indicator.style.transition = 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+        indicator.style.height = '0px';
+        indicator.style.maxHeight = '0px';
+        indicator.style.opacity = '0';
+        setTimeout(() => {
+          indicator.style.transition = '';
+          indicator.classList.remove('ready');
+        }, 250);
+      }
+    };
+
+    rankingPanel.addEventListener('touchend', handleTouchEnd);
+    rankingPanel.addEventListener('touchcancel', handleTouchEnd);
   }
 
   // -------------------------------------------------------------
@@ -1894,6 +2105,25 @@ class FestivalApp {
       });
     }
 
+    // Manache 5 Filter on Map
+    const btnManache = document.getElementById('btn-filter-manache');
+    if (btnManache) {
+      btnManache.addEventListener('click', () => {
+        this.filters.manacheOnly = !this.filters.manacheOnly;
+        btnManache.classList.toggle('active', this.filters.manacheOnly);
+        // Sync with quick chips in ranking panel
+        const quickChips = document.querySelectorAll('.rank-filter-chip:not(.chip-map-jump)');
+        quickChips.forEach((c) => {
+          c.classList.toggle('active', c.dataset.filter === (this.filters.manacheOnly ? 'manache' : 'all'));
+        });
+        if (this.filters.manacheOnly && this.currentCity === 'mumbai') {
+          this.showToast('Note: The 5 Manache Ganpatis are located in Pune.');
+        }
+        this.renderMapMarkers();
+        this.renderLeaderboard();
+      });
+    }
+
     // Search Input
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
@@ -1915,6 +2145,7 @@ class FestivalApp {
     if (btnCloseRec) {
       btnCloseRec.addEventListener('click', () => {
         document.getElementById('recommendations-modal').classList.remove('open');
+        this.switchToMobileTab('rankings');
       });
     }
 
@@ -1969,7 +2200,10 @@ class FestivalApp {
       btnOpenGuide.addEventListener('click', () => modalGuide.classList.add('open'));
     }
     if (btnCloseGuide && modalGuide) {
-      btnCloseGuide.addEventListener('click', () => modalGuide.classList.remove('open'));
+      btnCloseGuide.addEventListener('click', () => {
+        modalGuide.classList.remove('open');
+        this.switchToMobileTab('rankings');
+      });
     }
 
     // Devotee Guide Navigation Tabs

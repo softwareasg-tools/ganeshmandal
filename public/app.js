@@ -854,6 +854,7 @@ class FestivalApp {
         rushText = 'Thoda Rush';
         rushBg = 'rgba(245,158,11,0.2)';
         rushColor = '#f59e0b';
+      }
       const roads = mandal.top_roads || [];
       const entryRoad = roads[0];
       const roadSpeed = entryRoad?.avg_speed || (mandal.avg_speed_kmh ? `${mandal.avg_speed_kmh} km/h` : '24 km/h');

@@ -45,7 +45,10 @@ export function renderMandalPage(mandalId, req) {
   const host = req.get('host') || 'ganeshmandal.in';
   const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
   const canonicalUrl = `${protocol}://${host}/mandal/${mandal.id}`;
-  const ogImageUrl = `${protocol}://${host}/api/og/mandal/${mandal.id}`;
+  const murtiUrl = mandal.image_url
+    ? `${protocol}://${host}${mandal.image_url}`
+    : `${protocol}://${host}/images/mandals/dagdusheth_idol.jpg`;
+  const imageType = mandal.image_url?.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
   const title = `${mandal.name} Live Crowd Status (${density}% Rush, ~${waitMins}m Wait) — GaneshMandal.in`;
   const description = `Live queue wait time (~${waitMins} mins), real-time crowd rush (${density}%), fastest approach road (${fastestRoad}) and direct street darshan for ${mandal.name} in ${cityName}. Verified live festival telemetry.`;
@@ -72,7 +75,7 @@ export function renderMandalPage(mandalId, req) {
         },
         "isAccessibleForFree": true,
         "openingHours": "Mo-Su 05:00-23:59",
-        "image": mandal.image_url ? `${protocol}://${host}${mandal.image_url}` : ogImageUrl
+        "image": murtiUrl
       },
       {
         "@type": "Event",
@@ -130,15 +133,17 @@ export function renderMandalPage(mandalId, req) {
   <meta name="description" content="${escapeHtml(description)}">
   <link rel="canonical" href="${canonicalUrl}">
 
-  <!-- OpenGraph / Facebook / WhatsApp -->
-  <meta property="og:type" content="website">
+  <!-- OpenGraph / Facebook / WhatsApp (Sacred Bappa Murti Preview) -->
+  <meta property="og:type" content="article">
   <meta property="og:url" content="${canonicalUrl}">
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
-  <meta property="og:image" content="${ogImageUrl}">
-  <meta property="og:image:type" content="image/svg+xml">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image" content="${murtiUrl}">
+  <meta property="og:image:secure_url" content="${murtiUrl}">
+  <meta property="og:image:type" content="${imageType}">
+  <meta property="og:image:width" content="1000">
+  <meta property="og:image:height" content="1000">
+  <meta property="og:image:alt" content="${escapeHtml(mandal.name)} Bappa Murti Darshan">
   <meta property="og:site_name" content="GaneshMandal.in">
 
   <!-- Twitter / X -->
@@ -146,7 +151,7 @@ export function renderMandalPage(mandalId, req) {
   <meta name="twitter:url" content="${canonicalUrl}">
   <meta name="twitter:title" content="${escapeHtml(title)}">
   <meta name="twitter:description" content="${escapeHtml(description)}">
-  <meta name="twitter:image" content="${ogImageUrl}">
+  <meta name="twitter:image" content="${murtiUrl}">
 
   <!-- JSON-LD Structured Data Schema -->
   <script type="application/ld+json">
@@ -159,8 +164,11 @@ ${JSON.stringify(schemaJsonLd, null, 2)}
   </script>
   `;
 
-  // Replace default title and inject tags
-  let modifiedHtml = template.replace(/<title>.*?<\/title>/i, '');
+  // Cleanly replace default title, OpenGraph & Twitter tags to prevent duplicate meta tag conflicts
+  let modifiedHtml = template
+    .replace(/<title>.*?<\/title>/i, '')
+    .replace(/<meta\s+property=["']og:[^"']+["'][^>]*>/gi, '')
+    .replace(/<meta\s+name=["']twitter:[^"']+["'][^>]*>/gi, '');
   modifiedHtml = modifiedHtml.replace('</head>', `${headInjections}\n</head>`);
 
   return modifiedHtml;

@@ -1320,7 +1320,7 @@ class FestivalApp {
     }
   }
 
-  shareToWhatsApp(mandal) {
+  async shareToWhatsApp(mandal) {
     if (!mandal) mandal = this.povMandal || (this.mandals && this.mandals[0]);
     if (!mandal) return;
 
@@ -1347,6 +1347,35 @@ class FestivalApp {
       `\n*(दर्शन रांगेत जाण्यापूर्वी मित्र आणि सोसायटी ग्रुपवर नक्की शेअर करा)*`
     ].join('\n');
 
+    // 1. Mobile Web Share API with real Bappa Murti image file attachment
+    // On phones (Android & iOS), this attaches the actual sacred idol photo with the message as caption
+    if (navigator.share && mandal.image_url) {
+      try {
+        const imgRes = await fetch(mandal.image_url);
+        if (imgRes.ok) {
+          const blob = await imgRes.blob();
+          const ext = mandal.image_url.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+          const file = new File([blob], `${mandal.slug || 'bappa_murti'}.${ext}`, {
+            type: blob.type || 'image/jpeg'
+          });
+
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              files: [file],
+              title: `${mandal.name} - Bappa Live Darshan`,
+              text: text
+            });
+            return;
+          }
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.warn('[Share] File sharing fallback:', err);
+      }
+    }
+
+    // 2. Direct WhatsApp Web / Scheme fallback
+    // WhatsApp crawler automatically unfurls the OpenGraph og:image (Bappa's sacred idol photo) from the link
     const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(waUrl, '_blank');
   }

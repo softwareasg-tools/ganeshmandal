@@ -14,6 +14,10 @@
 import { db } from './db.js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Specific official broadcast channels for famous mandals
 const OFFICIAL_CHANNELS = {
@@ -304,9 +308,11 @@ export class SocialAggregator {
     // Attempt to load dynamic live feeds fetched via agent-reach architecture
     let liveFeeds = null;
     try {
-      const dataPath = path.resolve('./data/live_feeds.json');
+      const dataPath = path.join(__dirname, '..', 'data', 'live_feeds.json');
       if (fs.existsSync(dataPath)) {
         liveFeeds = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+      } else {
+        console.error('[SocialAggregator] live_feeds.json not found at:', dataPath);
       }
     } catch (e) {
       console.error('[SocialAggregator] Error loading live feeds:', e.message);

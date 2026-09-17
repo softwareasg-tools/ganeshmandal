@@ -2,23 +2,28 @@ import os
 import json
 import time
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Path for the cached feeds output
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 OUT_FILE = os.path.join(DATA_DIR, 'live_feeds.json')
+MANDALS_FILE = os.path.join(DATA_DIR, 'mandals.json')
 
-MANDALS_TO_TRACK = [
-    {"id": "mandal_pune_dagdusheth", "query": "Dagdusheth Halwai Ganpati live 2026"},
-    {"id": "mandal_mumbai_lalbaug", "query": "Lalbaugcha Raja live aarti 2026"},
-    {"id": "mandal_mumbai_ganesh_galli", "query": "Mumbaicha Raja Ganesh Galli live 2026"},
-    {"id": "mandal_pune_kasba", "query": "Kasba Ganpati live aarti 2026"},
-    {"id": "mandal_mumbai_chinchpokli", "query": "Chinchpokli Chintamani live 2026"}
-]
+def load_mandals():
+    try:
+        with open(MANDALS_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Handle if the root is an array or an object containing an array
+            return data if isinstance(data, list) else data.get('mandals', [])
+    except Exception as e:
+        print(f"Error loading mandals.json: {e}")
+        return []
 
-def ensure_dir():
-    if not os.path.exists(DATA_DIR):
-        os.makedirs(DATA_DIR)
+def get_mandal_query(mandal):
+    name = mandal.get('name', 'Ganpati')
+    city = 'Mumbai' if 'mumbai' in (mandal.get('city_id', '')).lower() else 'Pune'
+    return f"{name} {city} live aarti 2026"
+
 
 def fetch_youtube_feed(query):
     """
@@ -49,18 +54,27 @@ def fetch_youtube_feed(query):
     return None
 
 def main():
-    ensure_dir()
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR)
     
     live_feeds = {
-        "updated_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
         "mandals": {}
     }
 
-    for mandal in MANDALS_TO_TRACK:
-        print(f"Processing {mandal['id']}...")
+    all_mandals = load_mandals()
+    print(f"Loaded {len(all_mandals)} mandals to track.")
+
+    for mandal in all_mandals:
+        mandal_id = mandal.get("id")
+        if not mandal_id:
+            continue
+            
+        query = get_mandal_query(mandal)
+        print(f"Processing {mandal_id}...")
         
         # 1. Fetch YouTube Live Stream or Latest Video
-        yt_data = fetch_youtube_feed(mandal["query"])
+        yt_data = fetch_youtube_feed(query)
         
         # In a full deployment, we could also call agent-reach Twitter or Instagram tools here:
         # result = subprocess.run(['twitter', 'search', mandal["query"], '-n', '1'], capture_output=True)

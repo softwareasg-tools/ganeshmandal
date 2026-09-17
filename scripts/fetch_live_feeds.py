@@ -39,10 +39,22 @@ def fetch_youtube_feed(query):
     If yt-dlp is not available, it returns a graceful fallback.
     """
     try:
-        # Search for top 3 results matching the query to populate all 3 social cards
-        print(f"Fetching YouTube feed for: {query}")
+        # Search for top 1 result across 3 different query types to guarantee variety (Live, Shorts, Vlog)
+        city = 'Mumbai' if 'mumbai' in query.lower() else 'Pune'
+        base_name = query.replace(' live aarti 2026', '')
+        if base_name.endswith(city):
+            base_name = base_name[:-len(city)].strip()
+            
+        queries = [
+            f'ytsearch1:{base_name} {city} live aarti 2026',
+            f'ytsearch1:{base_name} {city} ganpati shorts 2026',
+            f'ytsearch1:{base_name} {city} public darshan vlog 2026'
+        ]
+        print(f"Fetching YouTube feed for: {base_name} {city}")
+        
+        args = ['yt-dlp'] + queries + ['--flat-playlist', '--dump-json', '--default-search', 'ytsearch', '--no-playlist']
         result = subprocess.run(
-            ['yt-dlp', f'ytsearch3:{query}', '--flat-playlist', '--dump-json', '--default-search', 'ytsearch', '--no-playlist'],
+            args,
             capture_output=True,
             text=True,
             timeout=45

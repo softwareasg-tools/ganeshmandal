@@ -12,6 +12,8 @@
  */
 
 import { db } from './db.js';
+import fs from 'fs';
+import path from 'path';
 
 // Specific official broadcast channels for famous mandals
 const OFFICIAL_CHANNELS = {
@@ -299,7 +301,19 @@ export class SocialAggregator {
       return this.getFallbackFeed(mandalId);
     }
 
+    // Attempt to load dynamic live feeds fetched via agent-reach architecture
+    let liveFeeds = null;
+    try {
+      const dataPath = path.join(process.cwd(), 'data', 'live_feeds.json');
+      if (fs.existsSync(dataPath)) {
+        liveFeeds = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+      }
+    } catch (e) {
+      // Gracefully ignore loading errors
+    }
+
     const isMumbai = (mandal.city_id || '').includes('mumbai') || (mandal.address || '').toLowerCase().includes('mumbai');
+
     const cityKey = isMumbai ? 'mumbai' : 'pune';
     const cityName = isMumbai ? 'Mumbai' : 'Pune';
     const custom = MANDAL_CUSTOM_MEDIA[mandal.id] || {};
@@ -393,31 +407,35 @@ export class SocialAggregator {
         id: `post_${mandal.id}_3`,
         platform: 'youtube',
         author_handle: `@${handleBase}_live`,
-        author_name: `${mandal.name} ${hasLiveStream ? 'Live Webcast' : 'Darshan & Seva'}`,
+        author_name: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? liveFeeds.mandals[mandal.id].youtube.uploader : `${mandal.name} ${hasLiveStream ? 'Live Webcast' : 'Darshan & Seva'}`,
         contributor_name: 'Official Temple Trust Stream',
         contributor_handle: `@${handleBase}_broadcast`,
         verified: true,
-        time_ago: '38 mins ago',
+        time_ago: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? 'Just now (Live fetch)' : '38 mins ago',
         timestamp: now - 38 * 60 * 1000,
-        image_url: liveImg,
-        post_url: hasLiveStream 
-          ? officialInfo.official_channel_url 
-          : `https://www.youtube.com/results?search_query=${encodeURIComponent(mandal.name + ' ganpati live darshan aarti')}`,
-        embed_url: hasLiveStream ? officialInfo.official_stream_embed : null,
-        platform_action: hasLiveStream ? 'Watch Live Stream on YouTube' : 'Search Live on YouTube',
-        source_label: hasLiveStream ? officialInfo.stream_title : liveLabel,
-        caption: hasLiveStream
-          ? (verifiedAarti
-              ? `🔴 LIVE STREAM: 24x7 Sacred Darshan & Aarti Webcast of ${mandal.name}. Evening Aarti scheduled at ${verifiedAarti.split('•').pop().trim()}. Approach road: ${approachRoad} flowing smoothly. 🥁🪔🚩`
-              : `🔴 LIVE STREAM: 24x7 Sacred Darshan & Evening Aarti Webcast of ${mandal.name}. Real-time approach road: ${approachRoad} with active police bandobast. Devotees chanting Bappa Morya! 🥁🪔🚩`)
-          : (verifiedAarti
-              ? `॥ मंगलमूर्ती मोरया ॥ Sacred Aarti & Darshan coverage for ${mandal.name}. Official Aarti Timings: ${verifiedAarti}. Devotees moving through ${approachRoad}. Search YouTube for active devotee webcasts.`
-              : `॥ मंगलमूर्ती मोरया ॥ Sacred Aarti & Darshan coverage for ${mandal.name}. Devotees arriving via ${approachRoad}. Search YouTube for active devotee streams and recent celebrations.`),
+        image_url: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube && liveFeeds.mandals[mandal.id].youtube.thumbnail) ? liveFeeds.mandals[mandal.id].youtube.thumbnail : liveImg,
+        post_url: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube)
+          ? liveFeeds.mandals[mandal.id].youtube.url
+          : (hasLiveStream ? officialInfo.official_channel_url : `https://www.youtube.com/results?search_query=${encodeURIComponent(mandal.name + ' ganpati live darshan aarti')}`),
+        embed_url: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube && liveFeeds.mandals[mandal.id].youtube.embed_url)
+          ? liveFeeds.mandals[mandal.id].youtube.embed_url
+          : (hasLiveStream ? officialInfo.official_stream_embed : null),
+        platform_action: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube && liveFeeds.mandals[mandal.id].youtube.is_live) ? 'Watch Live Stream on YouTube' : (hasLiveStream ? 'Watch Live Stream on YouTube' : 'Search Live on YouTube'),
+        source_label: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? liveFeeds.mandals[mandal.id].youtube.title : (hasLiveStream ? officialInfo.stream_title : liveLabel),
+        caption: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube)
+          ? `🔴 LIVE/RECENT FETCH: ${liveFeeds.mandals[mandal.id].youtube.title}. Flowing via approach road: ${approachRoad}. 🥁🪔🚩`
+          : (hasLiveStream
+              ? (verifiedAarti
+                  ? `🔴 LIVE STREAM: 24x7 Sacred Darshan & Aarti Webcast of ${mandal.name}. Evening Aarti scheduled at ${verifiedAarti.split('•').pop().trim()}. Approach road: ${approachRoad} flowing smoothly. 🥁🪔🚩`
+                  : `🔴 LIVE STREAM: 24x7 Sacred Darshan & Evening Aarti Webcast of ${mandal.name}. Real-time approach road: ${approachRoad} with active police bandobast. Devotees chanting Bappa Morya! 🥁🪔🚩`)
+              : (verifiedAarti
+                  ? `॥ मंगलमूर्ती मोरया ॥ Sacred Aarti & Darshan coverage for ${mandal.name}. Official Aarti Timings: ${verifiedAarti}. Devotees moving through ${approachRoad}. Search YouTube for active devotee webcasts.`
+                  : `॥ मंगलमूर्ती मोरया ॥ Sacred Aarti & Darshan coverage for ${mandal.name}. Devotees arriving via ${approachRoad}. Search YouTube for active devotee streams and recent celebrations.`)),
         likes_count: '34.2k',
         comments_count: '820',
         tags: [`#${words[0] || 'Bappa'}Live`, '#AartiWebcast', '#Ganeshotsav2026'],
-        is_video: hasLiveStream,
-        is_embeddable: hasLiveStream,
+        is_video: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? true : hasLiveStream,
+        is_embeddable: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? true : hasLiveStream,
       },
     ];
 

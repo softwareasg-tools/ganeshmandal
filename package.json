@@ -43,10 +43,12 @@
     "test": "node scripts/run-unit-tests.mjs",
     "test:festival": "node --test tests/*.test.mjs",
     "test:track": "node scripts/track-regression.mjs",
-    "qa:map-source-tray": "node scripts/qa-map-source-tray.mjs"
+    "qa:map-source-tray": "node scripts/qa-map-source-tray.mjs",
+    "update-feeds": "python3 scripts/fetch_live_feeds.py"
   },
   "dependencies": {
     "@mapbox/vector-tile": "^3.0.0",
+    "agent-reach": "^0.3.4",
     "cesium": "^1.124.0",
     "cors": "^2.8.6",
     "egm96-universal": "^1.1.1",

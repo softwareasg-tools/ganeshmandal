@@ -7,17 +7,25 @@ from datetime import datetime, timezone
 # Path for the cached feeds output
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data')
 OUT_FILE = os.path.join(DATA_DIR, 'live_feeds.json')
-MANDALS_FILE = os.path.join(DATA_DIR, 'mandals.json')
-
 def load_mandals():
     try:
-        with open(MANDALS_FILE, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-            # Handle if the root is an array or an object containing an array
+        # Ask the Node backend for the authoritative list of mandals
+        node_script = '''
+import('./server/seedData.js').then(m => {
+    import('./server/db.js').then(dbMod => {
+        const db = dbMod.db;
+        m.initializeSeedData(db);
+        console.log(JSON.stringify(db.getAllMandals()));
+    });
+});
+'''
+        result = subprocess.run(['node', '-e', node_script], capture_output=True, text=True, cwd=os.path.dirname(DATA_DIR))
+        if result.returncode == 0 and result.stdout:
+            data = json.loads(result.stdout.strip())
             return data if isinstance(data, list) else data.get('mandals', [])
     except Exception as e:
-        print(f"Error loading mandals.json: {e}")
-        return []
+        print(f"Error loading mandals from Node: {e}")
+    return []
 
 def get_mandal_query(mandal):
     name = mandal.get('name', 'Ganpati')

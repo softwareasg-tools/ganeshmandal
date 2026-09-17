@@ -31,27 +31,31 @@ def fetch_youtube_feed(query):
     If yt-dlp is not available, it returns a graceful fallback.
     """
     try:
-        # Search for the top 1 result matching the query
+        # Search for top 3 results matching the query to populate all 3 social cards
         print(f"Fetching YouTube feed for: {query}")
         result = subprocess.run(
-            ['yt-dlp', f'ytsearch1:{query}', '--dump-json', '--default-search', 'ytsearch', '--no-playlist'],
+            ['yt-dlp', f'ytsearch3:{query}', '--dump-json', '--default-search', 'ytsearch', '--no-playlist'],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=45
         )
         if result.returncode == 0 and result.stdout:
-            data = json.loads(result.stdout.strip().split('\n')[0])
-            return {
-                "title": data.get("title", ""),
-                "url": data.get("webpage_url", ""),
-                "thumbnail": data.get("thumbnail", ""),
-                "uploader": data.get("uploader", ""),
-                "is_live": data.get("is_live", False),
-                "embed_url": f"https://www.youtube-nocookie.com/embed/{data.get('id')}?autoplay=1&mute=0&rel=0&playsinline=1"
-            }
+            videos = []
+            for line in result.stdout.strip().split('\n'):
+                if not line.strip(): continue
+                data = json.loads(line)
+                videos.append({
+                    "title": data.get("title", ""),
+                    "url": data.get("webpage_url", ""),
+                    "thumbnail": data.get("thumbnail", ""),
+                    "uploader": data.get("uploader", ""),
+                    "is_live": data.get("is_live", False),
+                    "embed_url": f"https://www.youtube-nocookie.com/embed/{data.get('id')}?autoplay=1&mute=0&rel=0&playsinline=1"
+                })
+            return videos
     except Exception as e:
         print(f"Error fetching YouTube feed for '{query}': {e}")
-    return None
+    return []
 
 def main():
     if not os.path.exists(DATA_DIR):

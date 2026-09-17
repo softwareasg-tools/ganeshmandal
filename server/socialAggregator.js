@@ -352,78 +352,89 @@ export class SocialAggregator {
     const liveImg = custom.live || pickedAarti.url;
     const liveLabel = custom.live_label || `${pickedAarti.label} — ${mandal.name}`;
 
+    const ytFeeds = (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? liveFeeds.mandals[mandal.id].youtube : [];
+    const yt1 = Array.isArray(ytFeeds) && ytFeeds.length > 0 ? ytFeeds[0] : (ytFeeds && !Array.isArray(ytFeeds) ? ytFeeds : null);
+    const yt2 = Array.isArray(ytFeeds) && ytFeeds.length > 1 ? ytFeeds[1] : yt1;
+    const yt3 = Array.isArray(ytFeeds) && ytFeeds.length > 2 ? ytFeeds[2] : yt1;
+
     // Build strictly 3 authentic, engaging, multi-platform embed-ready feeds
     const posts = [
-      // Post 1: Sacred Murti Darshan from Official Mandal Trust (INSTAGRAM EMBED)
+      // Post 1: Sacred Murti Darshan from Official Mandal Trust (INSTAGRAM EMBED fallback, or YouTube)
       {
         id: `post_${mandal.id}_1`,
-        platform: 'instagram',
-        author_handle: `@${handleBase}_official`,
-        author_name: `${mandal.name} Trust`,
-        contributor_name: `${contributor1.name} (${contributor1.city})`,
-        contributor_handle: `@${contributor1.handle}`,
+        platform: yt1 ? 'youtube' : 'instagram',
+        author_handle: yt1 ? `@${yt1.uploader.replace(/\s+/g, '')}` : `@${handleBase}_official`,
+        author_name: yt1 ? yt1.uploader : `${mandal.name} Trust`,
+        contributor_name: yt1 ? 'YouTube Creator' : `${contributor1.name} (${contributor1.city})`,
+        contributor_handle: yt1 ? '@yt_creator' : `@${contributor1.handle}`,
         verified: true,
-        time_ago: '4 mins ago',
+        time_ago: yt1 ? 'Just now (Live fetch)' : '4 mins ago',
         timestamp: now - 4 * 60 * 1000,
-        image_url: idolImg,
-        post_url: `https://www.instagram.com/explore/tags/${words[0] || 'ganpati'}bappa/`,
-        platform_action: 'View Reel on Instagram',
-        source_label: `Verified Sacred Murti — ${mandal.name}`,
-        caption: verifiedAarti
-          ? `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Official Aarti Timings: 🪔 ${verifiedAarti}. Mangalmurti Morya! 🙏👑✨ (Captured by devotee ${contributor1.name})`
-          : `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Daily Sarvajanik Darshan Window: 06:00 AM – 11:30 PM continuous. Mangalmurti Morya! 🙏👑✨ (Captured by devotee ${contributor1.name})`,
+        image_url: yt1 ? yt1.thumbnail : idolImg,
+        post_url: yt1 ? yt1.url : `https://www.instagram.com/explore/tags/${words[0] || 'ganpati'}bappa/`,
+        embed_url: yt1 ? yt1.embed_url : null,
+        platform_action: yt1 ? 'Watch on YouTube' : 'View Reel on Instagram',
+        source_label: yt1 ? yt1.title : `Verified Sacred Murti — ${mandal.name}`,
+        caption: yt1 
+          ? `🎬 LATEST FETCH: ${yt1.title}. Trending now for ${mandal.name}! 🪔✨`
+          : (verifiedAarti
+            ? `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Official Aarti Timings: 🪔 ${verifiedAarti}. Mangalmurti Morya! 🙏👑✨ (Captured by devotee ${contributor1.name})`
+            : `॥ श्री गणेशाय नमः ॥ Divine Darshan of ${mandal.name} (${locality})! Daily Sarvajanik Darshan Window: 06:00 AM – 11:30 PM continuous. Mangalmurti Morya! 🙏👑✨ (Captured by devotee ${contributor1.name})`),
         likes_count: '28.5k',
         comments_count: '640',
         tags: [`#${words[0] || 'Bappa'}`, '#SacredDarshan', '#Mangalmurti'],
-        is_video: false,
-        is_embeddable: true,
+        is_video: yt1 ? true : false,
+        is_embeddable: yt1 ? true : true,
       },
 
-      // Post 2: Mandal Pandal Architecture & Dekhava (FACEBOOK / PINTEREST EMBED)
+      // Post 2: Mandal Pandal Architecture & Dekhava (FACEBOOK / PINTEREST EMBED fallback, or YouTube)
       {
         id: `post_${mandal.id}_2`,
-        platform: 'facebook',
-        author_handle: `@seva_${handleBase}`,
-        author_name: `${mandal.organizer || mandal.name}`,
-        contributor_name: `${contributor2.name} (${contributor2.city})`,
-        contributor_handle: `@${contributor2.handle}`,
+        platform: yt2 ? 'youtube' : 'facebook',
+        author_handle: yt2 ? `@${yt2.uploader.replace(/\s+/g, '')}` : `@seva_${handleBase}`,
+        author_name: yt2 ? yt2.uploader : `${mandal.organizer || mandal.name}`,
+        contributor_name: yt2 ? 'YouTube Creator' : `${contributor2.name} (${contributor2.city})`,
+        contributor_handle: yt2 ? '@yt_creator' : `@${contributor2.handle}`,
         verified: true,
-        time_ago: '22 mins ago',
+        time_ago: yt2 ? 'Just now (Live fetch)' : '22 mins ago',
         timestamp: now - 22 * 60 * 1000,
-        image_url: dekhavaImg,
-        post_url: `https://www.facebook.com/search/posts?q=${encodeURIComponent(mandal.name)}`,
-        platform_action: 'Explore Pandal on Facebook',
-        source_label: dekhavaLabel,
-        caption: `Spectacular pandal craftsmanship & lighting at ${mandal.name}, ${locality}: Approach road queue moving systematically along ${approachRoad}. Dedicated volunteer prasad counters active. Senior citizen and family assistance available. Ganpati Bappa Morya! 🥥🚩🙏 (Shared by ${contributor2.name})`,
+        image_url: yt2 ? yt2.thumbnail : dekhavaImg,
+        post_url: yt2 ? yt2.url : `https://www.facebook.com/search/posts?q=${encodeURIComponent(mandal.name)}`,
+        embed_url: yt2 ? yt2.embed_url : null,
+        platform_action: yt2 ? 'Watch on YouTube' : 'Explore Pandal on Facebook',
+        source_label: yt2 ? yt2.title : dekhavaLabel,
+        caption: yt2 
+          ? `🎬 LATEST FETCH: ${yt2.title}. Exploring the amazing pandal atmosphere! 🌺🔥`
+          : `Spectacular pandal craftsmanship & lighting at ${mandal.name}, ${locality}: Approach road queue moving systematically along ${approachRoad}. Dedicated volunteer prasad counters active. Senior citizen and family assistance available. Ganpati Bappa Morya! 🥥🚩🙏 (Shared by ${contributor2.name})`,
         likes_count: '16.8k',
         comments_count: '342',
         tags: [`#${words[0] || 'Bappa'}Pandal`, '#MandalDecor', '#DarshanQueue'],
-        is_video: false,
-        is_embeddable: true,
+        is_video: yt2 ? true : false,
+        is_embeddable: yt2 ? true : true,
       },
 
-      // Post 3: Live Darshan & Aarti Webcast (YOUTUBE: Embedded ONLY if genuine active stream exists)
+      // Post 3: Live Darshan & Aarti Webcast (YOUTUBE)
       {
         id: `post_${mandal.id}_3`,
         platform: 'youtube',
         author_handle: `@${handleBase}_live`,
-        author_name: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? liveFeeds.mandals[mandal.id].youtube.uploader : `${mandal.name} ${hasLiveStream ? 'Live Webcast' : 'Darshan & Seva'}`,
+        author_name: yt3 ? yt3.uploader : `${mandal.name} ${hasLiveStream ? 'Live Webcast' : 'Darshan & Seva'}`,
         contributor_name: 'Official Temple Trust Stream',
         contributor_handle: `@${handleBase}_broadcast`,
         verified: true,
-        time_ago: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? 'Just now (Live fetch)' : '38 mins ago',
+        time_ago: yt3 ? 'Just now (Live fetch)' : '38 mins ago',
         timestamp: now - 38 * 60 * 1000,
-        image_url: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube && liveFeeds.mandals[mandal.id].youtube.thumbnail) ? liveFeeds.mandals[mandal.id].youtube.thumbnail : liveImg,
-        post_url: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube)
-          ? liveFeeds.mandals[mandal.id].youtube.url
+        image_url: yt3 ? yt3.thumbnail : liveImg,
+        post_url: yt3
+          ? yt3.url
           : (hasLiveStream ? officialInfo.official_channel_url : `https://www.youtube.com/results?search_query=${encodeURIComponent(mandal.name + ' ganpati live darshan aarti')}`),
-        embed_url: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube && liveFeeds.mandals[mandal.id].youtube.embed_url)
-          ? liveFeeds.mandals[mandal.id].youtube.embed_url
+        embed_url: yt3
+          ? yt3.embed_url
           : (hasLiveStream ? officialInfo.official_stream_embed : null),
-        platform_action: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube && liveFeeds.mandals[mandal.id].youtube.is_live) ? 'Watch Live Stream on YouTube' : (hasLiveStream ? 'Watch Live Stream on YouTube' : 'Search Live on YouTube'),
-        source_label: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? liveFeeds.mandals[mandal.id].youtube.title : (hasLiveStream ? officialInfo.stream_title : liveLabel),
-        caption: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube)
-          ? `🔴 LIVE/RECENT FETCH: ${liveFeeds.mandals[mandal.id].youtube.title}. Flowing via approach road: ${approachRoad}. 🥁🪔🚩`
+        platform_action: (yt3 && yt3.is_live) ? 'Watch Live Stream on YouTube' : (hasLiveStream ? 'Watch Live Stream on YouTube' : 'Search Live on YouTube'),
+        source_label: yt3 ? yt3.title : (hasLiveStream ? officialInfo.stream_title : liveLabel),
+        caption: yt3
+          ? `🔴 LIVE/RECENT FETCH: ${yt3.title}. Flowing via approach road: ${approachRoad}. 🥁🪔🚩`
           : (hasLiveStream
               ? (verifiedAarti
                   ? `🔴 LIVE STREAM: 24x7 Sacred Darshan & Aarti Webcast of ${mandal.name}. Evening Aarti scheduled at ${verifiedAarti.split('•').pop().trim()}. Approach road: ${approachRoad} flowing smoothly. 🥁🪔🚩`
@@ -434,8 +445,8 @@ export class SocialAggregator {
         likes_count: '34.2k',
         comments_count: '820',
         tags: [`#${words[0] || 'Bappa'}Live`, '#AartiWebcast', '#Ganeshotsav2026'],
-        is_video: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? true : hasLiveStream,
-        is_embeddable: (liveFeeds && liveFeeds.mandals[mandal.id] && liveFeeds.mandals[mandal.id].youtube) ? true : hasLiveStream,
+        is_video: yt3 ? true : hasLiveStream,
+        is_embeddable: yt3 ? true : hasLiveStream,
       },
     ];
 

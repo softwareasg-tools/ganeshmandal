@@ -47,23 +47,45 @@ def fetch_youtube_feed(query):
             text=True,
             timeout=45
         )
-        if result.returncode == 0 and result.stdout:
-            videos = []
+        # yt-dlp can return non-zero exit code if some results are age-restricted or unavailable, 
+        # but it still outputs valid JSON for the successful ones!
+        videos = []
+        if result.stdout:
             for line in result.stdout.strip().split('\n'):
                 if not line.strip(): continue
-                data = json.loads(line)
-                videos.append({
-                    "title": data.get("title", ""),
-                    "url": data.get("webpage_url", ""),
-                    "thumbnail": data.get("thumbnail", ""),
-                    "uploader": data.get("uploader", ""),
-                    "is_live": data.get("is_live", False),
-                    "embed_url": f"https://www.youtube-nocookie.com/embed/{data.get('id')}?autoplay=1&mute=0&rel=0&playsinline=1"
-                })
-            return videos
+                try:
+                    data = json.loads(line)
+                    videos.append({
+                        "title": data.get("title", ""),
+                        "url": data.get("webpage_url", ""),
+                        "thumbnail": data.get("thumbnail", ""),
+                        "uploader": data.get("uploader", ""),
+                        "is_live": data.get("is_live", False),
+                        "embed_url": f"https://www.youtube-nocookie.com/embed/{data.get('id')}?autoplay=1&mute=0&rel=0&playsinline=1"
+                    })
+                except json.JSONDecodeError:
+                    print(f"Warning: yt-dlp output not valid JSON: {line[:50]}")
+        
+        if not videos and result.returncode != 0:
+            print(f"yt-dlp failed with code {result.returncode}: {result.stderr}")
+            
+        return videos
     except Exception as e:
         print(f"Error fetching YouTube feed for '{query}': {e}")
     return []
+
+import concurrent.futures
+
+def process_mandal(mandal):
+    mandal_id = mandal.get("id")
+    if not mandal_id:
+        return None
+        
+    query = get_mandal_query(mandal)
+    print(f"Processing {mandal_id}...")
+    yt_data = fetch_youtube_feed(query)
+    
+    return mandal_id, yt_data
 
 def main():
     if not os.path.exists(DATA_DIR):
@@ -77,31 +99,18 @@ def main():
     all_mandals = load_mandals()
     print(f"Loaded {len(all_mandals)} mandals to track.")
 
-    for mandal in all_mandals:
-        mandal_id = mandal.get("id")
-        if not mandal_id:
-            continue
-            
-        query = get_mandal_query(mandal)
-        print(f"Processing {mandal_id}...")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        results = executor.map(process_mandal, all_mandals)
         
-        # 1. Fetch YouTube Live Stream or Latest Video
-        yt_data = fetch_youtube_feed(query)
-        
-        # In a full deployment, we could also call agent-reach Twitter or Instagram tools here:
-        # result = subprocess.run(['twitter', 'search', mandal["query"], '-n', '1'], capture_output=True)
-        # But for zero-auth safety on the VPS, we rely on YouTube which is highly visual and authentic for Mandals.
-        
-        live_feeds["mandals"][mandal["id"]] = {
-            "youtube": yt_data
-        }
-        
-        # Be polite to APIs
-        time.sleep(2)
+        for result in results:
+            if result:
+                mandal_id, yt_data = result
+                live_feeds["mandals"][mandal_id] = {
+                    "youtube": yt_data
+                }
 
     with open(OUT_FILE, 'w', encoding='utf-8') as f:
         json.dump(live_feeds, f, indent=2, ensure_ascii=False)
-        
     print(f"Successfully updated live feeds at {OUT_FILE}")
 
 if __name__ == "__main__":

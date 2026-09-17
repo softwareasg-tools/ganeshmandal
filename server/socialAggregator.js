@@ -304,12 +304,12 @@ export class SocialAggregator {
     // Attempt to load dynamic live feeds fetched via agent-reach architecture
     let liveFeeds = null;
     try {
-      const dataPath = path.join(process.cwd(), 'data', 'live_feeds.json');
+      const dataPath = path.resolve('./data/live_feeds.json');
       if (fs.existsSync(dataPath)) {
         liveFeeds = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
       }
     } catch (e) {
-      // Gracefully ignore loading errors
+      console.error('[SocialAggregator] Error loading live feeds:', e.message);
     }
 
     const isMumbai = (mandal.city_id || '').includes('mumbai') || (mandal.address || '').toLowerCase().includes('mumbai');

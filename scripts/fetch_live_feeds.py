@@ -42,7 +42,7 @@ def fetch_youtube_feed(query):
         # Search for top 3 results matching the query to populate all 3 social cards
         print(f"Fetching YouTube feed for: {query}")
         result = subprocess.run(
-            ['yt-dlp', f'ytsearch3:{query}', '--dump-json', '--default-search', 'ytsearch', '--no-playlist'],
+            ['yt-dlp', f'ytsearch3:{query}', '--flat-playlist', '--dump-json', '--default-search', 'ytsearch', '--no-playlist'],
             capture_output=True,
             text=True,
             timeout=45
@@ -55,12 +55,19 @@ def fetch_youtube_feed(query):
                 if not line.strip(): continue
                 try:
                     data = json.loads(line)
+                    # Extract best thumbnail from flat-playlist output
+                    thumb_url = data.get("thumbnail", "")
+                    if not thumb_url and data.get("thumbnails"):
+                        thumb_url = data["thumbnails"][-1].get("url", "")
+                    
+                    is_live = data.get("live_status") == "is_live" or data.get("is_live") is True
+                    
                     videos.append({
                         "title": data.get("title", ""),
-                        "url": data.get("webpage_url", ""),
-                        "thumbnail": data.get("thumbnail", ""),
+                        "url": data.get("webpage_url") or data.get("url", ""),
+                        "thumbnail": thumb_url,
                         "uploader": data.get("uploader", ""),
-                        "is_live": data.get("is_live", False),
+                        "is_live": is_live,
                         "embed_url": f"https://www.youtube-nocookie.com/embed/{data.get('id')}?autoplay=1&mute=0&rel=0&playsinline=1"
                     })
                 except json.JSONDecodeError:
